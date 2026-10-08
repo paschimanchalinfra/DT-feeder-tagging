@@ -4,24 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DT Tagging Energy Calculation</title>
+    <!-- CSS & JS for Modals -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        :root { --main-bg: #f4f6f9; --primary-color: #0d233a; --accent-color: #ff9900; }
+        :root { --main-bg: #f4f6f9; --primary-color: #0d233a; --accent-color: #e65c00; --qc-header: #fdf3e8; }
         body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .hidden { display: none !important; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
         
         /* Navbar Branding */
         .navbar { background-color: var(--primary-color) !important; border-bottom: 3px solid var(--accent-color); }
         .navbar-brand img { background: white; padding: 2px; border-radius: 4px; }
         
-        /* Table Styles */
+        /* General Table */
         .table-responsive { max-height: 65vh; overflow-y: auto; }
-        th { position: sticky; top: 0; background-color: #e9ecef !important; z-index: 10; font-size: 13px; white-space: nowrap; }
+        th { position: sticky; top: 0; z-index: 10; font-size: 13px; white-space: nowrap; }
         td { font-size: 13px; white-space: nowrap; vertical-align: middle; }
         .card-header { background-color: var(--primary-color); color: white; }
+
+        /* QC Dashboard Specific Styles */
+        .qc-title { color: var(--accent-color); font-weight: bold; font-size: 1.4rem; }
+        .qc-table thead th { background-color: var(--qc-header) !important; color: var(--accent-color) !important; border-bottom: 2px solid #ddd; }
+        .qc-table tbody tr { border-bottom: 1px solid #eee; }
+        .btn-review { background-color: #ffc107; color: #000; border-radius: 20px; font-weight: bold; padding: 4px 16px; border: none; }
+        .btn-review:hover { background-color: #e0a800; }
         
-        /* Mobile Form Overrides */
         @media (max-width: 768px) {
             .btn { width: 100% !important; margin-bottom: 8px; }
             .nav-actions { flex-direction: column; width: 100%; }
@@ -51,7 +59,7 @@
                         <label class="form-label text-muted small">Password</label>
                         <input type="password" id="loginPassword" class="form-control form-control-lg" required>
                     </div>
-                    <button type="submit" class="btn btn-lg w-100 text-white" style="background-color: var(--primary-color);">Login System</button>
+                    <button type="submit" class="btn btn-lg w-100 text-white" style="background-color: var(--primary-color);">Login</button>
                 </form>
             </div>
         </div>
@@ -74,11 +82,10 @@
                     <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
                         <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
                         
-                        <!-- Role Based Nav Buttons -->
+                        <!-- Role Based Nav Buttons (Admin Button is Removed) -->
                         <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
                         <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
                         <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" onclick="switchView('viewReport'); loadReportPortal();">Report Portal</button>
-                        <button id="navAdmin" class="btn btn-sm btn-danger me-2 fw-bold hidden" onclick="switchView('viewAdmin'); loadAdmin();">Admin UI</button>
                         
                         <button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button>
                     </div>
@@ -150,30 +157,68 @@
                 </div>
             </div>
 
-            <!-- 2. QC VIEW -->
-            <div id="viewQC" class="hidden">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold">QC Validation Workspace</h5>
-                        <button class="btn btn-dark btn-sm" onclick="loadQC()">Refresh Data</button>
-                    </div>
+            <!-- 2. QC VIEW (Matching Screenshot Style) -->
+            <div id="viewQC" class="container hidden" style="max-width: 1200px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="qc-title mb-0">🛡️ QC Dashboard</h4>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="loadQC()">⟳ Refresh Data</button>
+                </div>
+                
+                <div class="card shadow-sm border-0 bg-white">
                     <div class="card-body">
-                        
                         <!-- QC Filters -->
-                        <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded">
-                            <div class="col-6 col-md-2"><label class="small text-muted">Zone</label><select id="qc_zone" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Circle</label><select id="qc_circle" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Division</label><select id="qc_division" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Sub Div</label><select id="qc_subdiv" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-3"><label class="small text-muted">Substation</label><select id="qc_subname" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-1 d-flex align-items-end"><button class="btn btn-sm btn-primary w-100" onclick="renderQCTable()">Filter</button></div>
+                        <div class="row g-2 mb-4">
+                            <div class="col-6 col-md-3"><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
+                            <div class="col-6 col-md-3"><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
+                            <div class="col-6 col-md-3"><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
+                            <div class="col-6 col-md-3"><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
+                            
+                            <div class="col-12 col-md-6">
+                                <input type="text" id="qc_search" class="form-control" placeholder="Search Feeder, Name or Code...">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <input type="date" id="qc_dateFrom" class="form-control" placeholder="From dd/mm/yyyy">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <input type="date" id="qc_dateTo" class="form-control" placeholder="To dd/mm/yyyy">
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <button class="btn w-100 text-white" style="background-color: var(--accent-color);" onclick="renderQCTable()">Filter</button>
+                            </div>
                         </div>
 
-                        <div class="table-responsive border rounded">
-                            <table class="table table-bordered table-hover mb-0">
-                                <thead><tr><th>Action</th><th>UID</th><th>Zone</th><th>Division</th><th>Feeder</th><th>Meter Type</th><th>Capacity</th><th>Meter No</th><th>Status</th><th>Images</th></tr></thead>
+                        <div class="table-responsive">
+                            <table class="table table-borderless qc-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Feeder Info</th>
+                                        <th>Submitted By</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="qcTableBody"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QC Review Modal -->
+            <div class="modal fade" id="qcModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
+                            <h5 class="modal-title fw-bold">Review Submission Details</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-light" id="qcModalContent">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="modal-footer" style="background-color: #f1f3f5;">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-danger px-4" id="btnRejectQC">Reject</button>
+                            <button type="button" class="btn btn-success px-4" id="btnApproveQC">Approve</button>
                         </div>
                     </div>
                 </div>
@@ -187,7 +232,6 @@
                         <div><button class="btn btn-dark btn-sm me-2 fw-bold" onclick="renderReportTable()">VIEW / APPLY</button><button class="btn btn-success btn-sm fw-bold shadow" onclick="exportReportCSV()">EXPORT CSV</button></div>
                     </div>
                     <div class="card-body">
-                        <!-- Report Filters directly driven from Dropdown Sheet -->
                         <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded">
                             <div class="col-6 col-md-2"><label class="small text-muted">Zone</label><select id="rpt_zone" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
                             <div class="col-6 col-md-2"><label class="small text-muted">Circle</label><select id="rpt_circle" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
@@ -198,7 +242,7 @@
 
                         <div class="table-responsive border rounded">
                             <table class="table table-striped table-hover mb-0">
-                                <thead>
+                                <thead style="background-color: #e9ecef !important;">
                                     <tr>
                                         <th>Date</th><th>Unique ID</th><th>Surveyor</th>
                                         <th>Zone</th><th>Circle</th><th>Division</th><th>Sub Div</th><th>Substation</th>
@@ -214,29 +258,30 @@
                 </div>
             </div>
 
-            <!-- 4. ADMIN USER UI (No other system features) -->
-            <div id="viewAdmin" class="container hidden" style="max-width: 900px;">
+            <!-- 4. ADMIN USER UI -->
+            <div id="viewAdmin" class="container hidden" style="max-width: 1000px;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">System Admin - User Management</h5>
-                        <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Toggle Add User</button>
+                        <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
                     </div>
                     <div class="card-body">
                         
                         <div id="adminFormContainer" class="hidden mb-4 p-3 bg-light border rounded">
                             <h6 class="fw-bold mb-3">Add New User</h6>
                             <div class="row g-2">
-                                <div class="col-md-3"><input type="text" id="a_name" class="form-control form-control-sm" placeholder="Full Name"></div>
-                                <div class="col-md-3"><input type="text" id="a_empcode" class="form-control form-control-sm" placeholder="Emp Code (Login ID)"></div>
+                                <div class="col-md-2"><input type="text" id="a_name" class="form-control form-control-sm" placeholder="Full Name"></div>
+                                <div class="col-md-2"><input type="text" id="a_empcode" class="form-control form-control-sm" placeholder="Emp Code (Login ID)"></div>
                                 <div class="col-md-2"><input type="text" id="a_mobile" class="form-control form-control-sm" placeholder="Mobile"></div>
                                 <div class="col-md-2"><select id="a_role" class="form-select form-select-sm"><option value="User">User</option><option value="QC">QC</option><option value="ReportPortal">Report Portal</option><option value="Admin">Admin</option></select></div>
+                                <div class="col-md-2"><input type="text" id="a_zones" class="form-control form-control-sm" placeholder="Zones (e.g. All, Zone1)"></div>
                                 <div class="col-md-2"><button class="btn btn-success btn-sm w-100 fw-bold" onclick="adminCreateUser()">Create</button></div>
                             </div>
                         </div>
 
                         <div class="table-responsive border rounded">
                             <table class="table table-bordered table-sm mb-0 text-center">
-                                <thead class="table-secondary"><tr><th>Name</th><th>Emp Code</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                                <thead class="table-secondary"><tr><th>Name</th><th>Emp Code</th><th>Role</th><th>Zones</th><th>Status</th><th>Actions</th></tr></thead>
                                 <tbody id="adminUsersBody"></tbody>
                             </table>
                         </div>
@@ -255,6 +300,7 @@ let currentUser = null;
 let masterDropdownData = []; 
 let rawQCData = []; 
 let fullReportData = []; 
+let activeQCRowIdx = null; // Used for modal review
 
 // --- CORE UTILITIES ---
 function showLoader(text="Processing...") { document.getElementById('loader-text').innerText=text; document.getElementById('loader').classList.remove('hidden'); }
@@ -273,46 +319,69 @@ async function apiCall(payload) {
     } catch(err) { alert("Error: " + err.message); throw err; }
 }
 
-// --- AUTHENTICATION & ROUTING ---
+// --- AUTO LOGIN & AUTHENTICATION ---
+window.onload = () => {
+    const savedCreds = localStorage.getItem('dt_creds');
+    if (savedCreds) {
+        const creds = JSON.parse(savedCreds);
+        document.getElementById('loginEmpCode').value = creds.e;
+        document.getElementById('loginPassword').value = creds.p;
+        // Auto-trigger submit
+        document.getElementById('loginForm').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
+};
+
 document.getElementById('loginForm').onsubmit = async (e) => {
     e.preventDefault();
     showLoader("Authenticating...");
     try {
-        const user = await apiCall({ action: 'login', empCode: document.getElementById('loginEmpCode').value, password: document.getElementById('loginPassword').value });
+        const eCode = document.getElementById('loginEmpCode').value;
+        const pWord = document.getElementById('loginPassword').value;
+        const user = await apiCall({ action: 'login', empCode: eCode, password: pWord });
+        
         currentUser = user;
+        // Save to browser
+        localStorage.setItem('dt_creds', JSON.stringify({ e: eCode, p: pWord }));
+        
         document.getElementById('loginView').classList.add('hidden');
         document.getElementById('appView').classList.remove('hidden');
-        document.getElementById('userDisplay').innerText = `👤 ${user.name} | ${user.role}`;
+        document.getElementById('userDisplay').innerText = `Logged in as: ${user.name}`;
         
         const r = user.role.toLowerCase();
         
         // Strict Role Routing
         if(r === 'admin') {
-            document.getElementById('navAdmin').classList.remove('hidden');
             switchView('viewAdmin'); loadAdmin();
         } else if(r === 'reportportal') {
             switchView('viewReport'); loadReportPortal();
         } else if(r === 'qc') {
             document.getElementById('navQC').classList.remove('hidden');
-            document.getElementById('navReport').classList.remove('hidden'); // Optional QC access to reports
+            document.getElementById('navReport').classList.remove('hidden'); 
             switchView('viewQC'); loadQC();
         } else {
+            // User Role - Must load hierarchy first
             document.getElementById('navUser').classList.remove('hidden');
-            switchView('viewUser'); initializeApp();
+            showLoader("Loading Hierarchy Data...");
+            await initializeApp(); 
+            switchView('viewUser');
         }
-    } catch(err) {}
+    } catch(err) {
+        // If login fails, clear broken saved creds
+        localStorage.removeItem('dt_creds');
+    }
     hideLoader();
 };
 
-function logout() { location.reload(); }
+function logout() { 
+    localStorage.removeItem('dt_creds'); 
+    location.reload(); 
+}
 
 // --- DATA & CASCADING MODULE ---
 async function fetchMasterData() {
     if(masterDropdownData.length > 0) return;
-    showLoader("Syncing Cloud Data...");
     const data = await apiCall({ action: 'getAppData' });
     masterDropdownData = data.dropdownData;
-    hideLoader();
 }
 
 function getUnique(data, colIndex, filterFn = () => true) {
@@ -322,15 +391,14 @@ function getUnique(data, colIndex, filterFn = () => true) {
 }
 
 function populateDropdown(id, list, addAll=false) {
-    document.getElementById(id).innerHTML = (addAll ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>') + list.map(v => `<option value="${v}">${v}</option>`).join('');
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = (addAll ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>') + list.map(v => `<option value="${v}">${v}</option>`).join('');
 }
 
-// Reusable Cascade Setup for ANY Module (Form, Report, QC)
 function setupCascading(prefix, includeAllOption) {
     const triggers = ['zone', 'circle', 'division', 'subdiv', 'subname'];
-    if (prefix === 'f_') triggers.push('feedername'); // Form has one extra level
+    if (prefix === 'f_') triggers.push('feedername'); 
 
-    // Initialize Root Node (Zone)
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
@@ -348,7 +416,6 @@ function setupCascading(prefix, includeAllOption) {
                 return match;
             };
 
-            // Update subsequent child dropdowns
             if (idx + 1 < triggers.length) {
                 for(let i=idx+1; i<triggers.length; i++) {
                     const child = document.getElementById(`${prefix}_${triggers[i]}`);
@@ -361,7 +428,6 @@ function setupCascading(prefix, includeAllOption) {
                 }
             }
 
-            // FORM SPECIFIC AUTOFILLS (Fix 4: Deep Lookup)
             if(prefix === 'f_') {
                 if(key === 'subname') {
                     const row = masterDropdownData.find(rowFilter);
@@ -386,7 +452,6 @@ async function initializeApp() {
     setupCascading('f_', false);
 }
 
-// Meter Type Logic (Fix 4)
 document.getElementById('f_metertype').addEventListener('change', function() {
     const val = this.value.toLowerCase();
     const isFeeder = val === 'feeder';
@@ -460,13 +525,12 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     hideLoader();
 };
 
-// --- QC MODULE (Fix 1: Full data show & Filters) ---
+// --- QC MODULE (Styled per Request) ---
 async function loadQC() {
-    await fetchMasterData(); // Ensure dropdown data available for filters
-    setupCascading('qc_', true); // Initialize dropdown filters for QC
-    
     showLoader("Fetching Pending QC...");
     try {
+        await fetchMasterData(); 
+        setupCascading('qc_', true); 
         rawQCData = await apiCall({ action: 'getQCData', empCode: currentUser.empCode });
         renderQCTable();
     } catch(err){}
@@ -478,8 +542,12 @@ function renderQCTable() {
     const fC = document.getElementById('qc_circle').value;
     const fD = document.getElementById('qc_division').value;
     const fSD = document.getElementById('qc_subdiv').value;
-    const fSN = document.getElementById('qc_subname').value;
+    const fSearch = document.getElementById('qc_search').value.toLowerCase();
     
+    // Simplistic Date parsing for filter (YYYY-MM-DD from input vs Date string)
+    const dtFrom = document.getElementById('qc_dateFrom').value ? new Date(document.getElementById('qc_dateFrom').value).getTime() : 0;
+    const dtTo = document.getElementById('qc_dateTo').value ? new Date(document.getElementById('qc_dateTo').value).setHours(23,59,59) : Infinity;
+
     const tbody = document.getElementById('qcTableBody'); 
     tbody.innerHTML = '';
     
@@ -489,50 +557,107 @@ function renderQCTable() {
         if(fC !== 'ALL' && i.details.circle !== fC) match = false;
         if(fD !== 'ALL' && i.details.division !== fD) match = false;
         if(fSD !== 'ALL' && i.details.subdiv !== fSD) match = false;
-        if(fSN !== 'ALL' && i.details.subName !== fSN) match = false;
+        
+        // Search Feeder Info
+        if(fSearch && !(i.details.feederName?.toLowerCase().includes(fSearch) || i.details.subName?.toLowerCase().includes(fSearch))) match = false;
+        
+        // Date Logic
+        const rowTime = new Date(i.date).getTime();
+        if(rowTime < dtFrom || rowTime > dtTo) match = false;
+
         return match;
     });
 
-    if(!filtered.length) return tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4">All caught up! No pending records.</td></tr>';
+    if(!filtered.length) return tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4">No pending records found matching criteria.</td></tr>';
     
     filtered.forEach(i => {
         tbody.innerHTML += `<tr>
-            <td style="min-width: 120px;">
-                <button class="btn btn-sm btn-success mb-1 w-100 fw-bold" onclick="processQC(${i.rowIdx}, 'Approved')">✔ Approve</button>
-                <button class="btn btn-sm btn-danger w-100 fw-bold" onclick="processQC(${i.rowIdx}, 'Rejected')">✖ Reject</button>
+            <td>
+                <div class="fw-bold text-dark">${i.details.subName || 'N/A'}</div>
+                <div class="small text-muted">${i.details.division || ''}</div>
             </td>
-            <td class="text-primary fw-bold">${i.uid}</td>
-            <td>${i.details.zone || ''}</td>
-            <td>${i.details.division || ''}</td>
-            <td><b>${i.details.feederName || ''}</b><br><small class="text-muted">${i.details.subName || ''}</small></td>
-            <td>${i.details.meterType || ''}</td>
-            <td>${i.details.dtrCapacity || ''}</td>
-            <td>${i.details.meterNumber || ''}</td>
-            <td>${i.details.installStatus || ''}</td>
-            <td><a href="${i.meterImg}" target="_blank" class="btn btn-sm btn-outline-primary py-0">Img1</a> 
-                <a href="${i.meterDtImg}" target="_blank" class="btn btn-sm btn-outline-info py-0">Img2</a></td>
+            <td>
+                <div class="text-dark">${i.surveyor}</div>
+                <div class="small text-muted">${i.empCode}</div>
+            </td>
+            <td>${i.date.substring(0,10)}</td>
+            <td>
+                <button class="btn btn-review" onclick="openQCReview(${i.rowIdx})">Review</button>
+            </td>
         </tr>`;
     });
 }
 
-async function processQC(rowIdx, status) {
-    if(!confirm(`Finalize as ${status}?`)) return;
+function openQCReview(rowIdx) {
+    const item = rawQCData.find(i => i.rowIdx === rowIdx);
+    if(!item) return;
+    
+    activeQCRowIdx = rowIdx;
+    const mc = document.getElementById('qcModalContent');
+    
+    mc.innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <h6 class="text-primary border-bottom pb-1">Hierarchy Details</h6>
+                <ul class="list-unstyled small">
+                    <li><b>Zone:</b> ${item.details.zone}</li>
+                    <li><b>Circle:</b> ${item.details.circle}</li>
+                    <li><b>Division:</b> ${item.details.division}</li>
+                    <li><b>Substation:</b> ${item.details.subName} (${item.details.subCode})</li>
+                    <li><b>Feeder:</b> ${item.details.feederName} (${item.details.feederCode})</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-primary border-bottom pb-1">Meter & Asset</h6>
+                <ul class="list-unstyled small">
+                    <li><b>QR Code:</b> ${item.details.qrCode}</li>
+                    <li><b>Type:</b> ${item.details.meterType}</li>
+                    <li><b>Capacity:</b> ${item.details.dtrCapacity}</li>
+                    <li><b>New Meter No:</b> <span class="fw-bold bg-warning px-1">${item.details.meterNumber}</span></li>
+                    <li><b>Status:</b> ${item.details.installStatus}</li>
+                    <li><b>GPS:</b> <a href="https://maps.google.com/?q=${item.latLong}" target="_blank">${item.latLong}</a></li>
+                </ul>
+            </div>
+            <div class="col-12 mt-3">
+                <h6 class="text-primary border-bottom pb-1">Attachments</h6>
+                <div class="d-flex gap-2">
+                    <a href="${item.meterImg}" target="_blank" class="btn btn-outline-primary btn-sm">Open Meter Image</a>
+                    <a href="${item.meterDtImg}" target="_blank" class="btn btn-outline-info btn-sm">Open DT Image</a>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const modal = new bootstrap.Modal(document.getElementById('qcModal'));
+    modal.show();
+}
+
+// Attach Action Listeners to Modal Buttons
+document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
+document.getElementById('btnRejectQC').onclick = () => submitQCAction('Rejected');
+
+async function submitQCAction(status) {
+    if(!activeQCRowIdx || !confirm(`Confirm mark as ${status}?`)) return;
+    const modalEl = document.getElementById('qcModal');
+    const modalInst = bootstrap.Modal.getInstance(modalEl);
+    modalInst.hide();
+    
     showLoader("Updating Ledger...");
     try { 
-        await apiCall({ action: 'submitQC', qcCode: currentUser.empCode, qcName: currentUser.name, rowIdx: rowIdx, status: status }); 
+        await apiCall({ action: 'submitQC', qcCode: currentUser.empCode, qcName: currentUser.name, rowIdx: activeQCRowIdx, status: status }); 
         loadQC(); 
     } catch(err){ hideLoader(); }
 }
 
-// --- REPORT PORTAL (Fix 3 & 4) ---
+
+// --- REPORT PORTAL ---
 async function loadReportPortal() {
-    await fetchMasterData(); // Pull backend sheet for exact cascading logic
-    setupCascading('rpt_', true); // Setup cascading filters strictly from Dropdown sheet
-    
     showLoader("Generating Analytics...");
     try {
+        await fetchMasterData(); 
+        setupCascading('rpt_', true); 
         fullReportData = await apiCall({ action: 'getReportData', empCode: currentUser.empCode });
-        renderReportTable(); // Render unfiltered initially
+        renderReportTable(); 
     } catch(err){}
     hideLoader();
 }
@@ -591,16 +716,22 @@ function exportReportCSV() {
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `DT_Export_${Date.now()}.csv`; link.click();
 }
 
-// --- ADMIN MODULE (Fix 2: Isolated) ---
+// --- ADMIN MODULE ---
 async function loadAdmin() {
     showLoader("Loading Users...");
     try {
         const data = await apiCall({ action: 'getUsers', adminCode: currentUser.empCode });
         const tbody = document.getElementById('adminUsersBody');
         tbody.innerHTML = data.users.map(u => `<tr>
-            <td>${u.name}</td><td>${u.empCode}</td><td><b>${u.role}</b></td>
+            <td>${u.name}</td><td>${u.empCode}</td>
+            <td><b>${u.role}</b></td>
+            <td><small>${u.zones}</small></td>
             <td><span class="badge bg-${u.status==='Active'?'success':'danger'}">${u.status}</span></td>
             <td>
+                <!-- Action Buttons -->
+                <button class="btn btn-sm btn-outline-primary py-0" onclick="editRole('${u.empCode}', '${u.role}')">Role</button>
+                <button class="btn btn-sm btn-outline-info py-0" onclick="editZones('${u.empCode}', '${u.zones}')">Zones</button>
+                <button class="btn btn-sm btn-outline-warning py-0" onclick="resetPass('${u.empCode}')">Reset Pass</button>
                 <button class="btn btn-sm ${u.status==='Active'?'btn-outline-danger':'btn-outline-success'} py-0" 
                     onclick="toggleUserStatus('${u.empCode}', '${u.status}')">${u.status==='Active'?'Disable':'Enable'}</button>
             </td>
@@ -615,9 +746,10 @@ async function adminCreateUser() {
         await apiCall({
             action: 'createUser', adminCode: currentUser.empCode,
             name: document.getElementById('a_name').value, empCode: document.getElementById('a_empcode').value,
-            mobile: document.getElementById('a_mobile').value, designation: 'Staff', role: document.getElementById('a_role').value
+            mobile: document.getElementById('a_mobile').value, designation: 'Staff', 
+            role: document.getElementById('a_role').value, zones: document.getElementById('a_zones').value || 'All'
         });
-        document.getElementById('a_name').value=''; document.getElementById('a_empcode').value=''; document.getElementById('a_mobile').value='';
+        ['a_name','a_empcode','a_mobile','a_zones'].forEach(id => document.getElementById(id).value = '');
         alert("Created Successfully (Default Pass: Pass@123)"); loadAdmin();
     } catch(err){}
     hideLoader();
@@ -627,6 +759,31 @@ async function toggleUserStatus(code, currentStatus) {
     if(!confirm('Change access for ' + code + '?')) return;
     showLoader();
     try { await apiCall({ action: 'updateUserStatus', adminCode: currentUser.empCode, empCode: code, status: currentStatus === 'Active' ? 'Inactive' : 'Active' }); loadAdmin(); } catch(err){}
+    hideLoader();
+}
+
+async function editRole(code, currentRole) {
+    const newRole = prompt(`Enter new role for ${code} (User, QC, ReportPortal, Admin):`, currentRole);
+    if(newRole && newRole !== currentRole) {
+        showLoader();
+        try { await apiCall({ action: 'updateUserRole', adminCode: currentUser.empCode, empCode: code, role: newRole }); loadAdmin(); } catch(err){}
+        hideLoader();
+    }
+}
+
+async function editZones(code, currentZones) {
+    const newZones = prompt(`Enter assigned zones for ${code} (e.g. All, or Zone1,Zone2):`, currentZones);
+    if(newZones && newZones !== currentZones) {
+        showLoader();
+        try { await apiCall({ action: 'updateUserZones', adminCode: currentUser.empCode, empCode: code, zones: newZones }); loadAdmin(); } catch(err){}
+        hideLoader();
+    }
+}
+
+async function resetPass(code) {
+    if(!confirm(`Reset password for ${code} to Pass@123?`)) return;
+    showLoader();
+    try { await apiCall({ action: 'adminResetPassword', adminCode: currentUser.empCode, empCode: code }); alert('Reset successful.'); } catch(err){}
     hideLoader();
 }
 </script>
