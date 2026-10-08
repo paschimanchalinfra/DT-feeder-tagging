@@ -41,14 +41,15 @@
     <!-- Global Loader -->
     <div id="loader" class="loading-overlay hidden">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--accent-color);" role="status"></div>
-        <h5 id="loader-text">Processing...</h5>
+        <h5 id="loader-text" class="fw-bold">Processing...</h5>
     </div>
 
     <!-- Login Screen -->
     <div id="loginView" class="container" style="max-width: 400px; margin-top: 10vh;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-5 text-center">
-                <img src="https://drive.google.com/uc?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq" alt="Company Logo" class="img-fluid mb-4" style="max-height: 70px;">
+                <!-- FIXED LOGO URL using thumbnail API to bypass third-party cookie blocking -->
+                <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" onerror="this.style.display='none'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 70px;">
                 <h4 class="mb-4 text-dark fw-bold">DT Tagging System</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
@@ -72,7 +73,8 @@
         <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-                    <img src="https://drive.google.com/uc?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq" height="35" class="me-2" alt="Logo">
+                    <!-- FIXED LOGO URL using thumbnail API -->
+                    <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" onerror="this.style.display='none'" height="35" class="me-2" alt="Logo">
                     DT System
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -300,7 +302,7 @@ let currentUser = null;
 let masterDropdownData = []; 
 let rawQCData = []; 
 let fullReportData = []; 
-let activeQCRowIdx = null; // Used for modal review
+let activeQCRowIdx = null; 
 
 // --- CORE UTILITIES ---
 function showLoader(text="Processing...") { document.getElementById('loader-text').innerText=text; document.getElementById('loader').classList.remove('hidden'); }
@@ -326,7 +328,6 @@ window.onload = () => {
         const creds = JSON.parse(savedCreds);
         document.getElementById('loginEmpCode').value = creds.e;
         document.getElementById('loginPassword').value = creds.p;
-        // Auto-trigger submit
         document.getElementById('loginForm').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
     }
 };
@@ -340,7 +341,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
         const user = await apiCall({ action: 'login', empCode: eCode, password: pWord });
         
         currentUser = user;
-        // Save to browser
         localStorage.setItem('dt_creds', JSON.stringify({ e: eCode, p: pWord }));
         
         document.getElementById('loginView').classList.add('hidden');
@@ -349,7 +349,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
         
         const r = user.role.toLowerCase();
         
-        // Strict Role Routing
         if(r === 'admin') {
             switchView('viewAdmin'); loadAdmin();
         } else if(r === 'reportportal') {
@@ -359,14 +358,12 @@ document.getElementById('loginForm').onsubmit = async (e) => {
             document.getElementById('navReport').classList.remove('hidden'); 
             switchView('viewQC'); loadQC();
         } else {
-            // User Role - Must load hierarchy first
             document.getElementById('navUser').classList.remove('hidden');
             showLoader("Loading Hierarchy Data...");
             await initializeApp(); 
             switchView('viewUser');
         }
     } catch(err) {
-        // If login fails, clear broken saved creds
         localStorage.removeItem('dt_creds');
     }
     hideLoader();
@@ -381,10 +378,15 @@ function logout() {
 async function fetchMasterData() {
     if(masterDropdownData.length > 0) return;
     const data = await apiCall({ action: 'getAppData' });
-    masterDropdownData = data.dropdownData;
+    masterDropdownData = data.dropdownData || [];
+    if(masterDropdownData.length === 0) {
+        console.warn("Dropdown sheet missing or empty. Please check Google Sheet tabs.");
+    }
 }
 
+// FIXED: Bug when data is undefined causing freezing
 function getUnique(data, colIndex, filterFn = () => true) {
+    if (!data || !Array.isArray(data) || data.length === 0) return [];
     const set = new Set();
     data.filter(filterFn).forEach(row => { if(row[colIndex]) set.add(row[colIndex]); });
     return Array.from(set).sort();
@@ -525,7 +527,7 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     hideLoader();
 };
 
-// --- QC MODULE (Styled per Request) ---
+// --- QC MODULE ---
 async function loadQC() {
     showLoader("Fetching Pending QC...");
     try {
@@ -544,7 +546,6 @@ function renderQCTable() {
     const fSD = document.getElementById('qc_subdiv').value;
     const fSearch = document.getElementById('qc_search').value.toLowerCase();
     
-    // Simplistic Date parsing for filter (YYYY-MM-DD from input vs Date string)
     const dtFrom = document.getElementById('qc_dateFrom').value ? new Date(document.getElementById('qc_dateFrom').value).getTime() : 0;
     const dtTo = document.getElementById('qc_dateTo').value ? new Date(document.getElementById('qc_dateTo').value).setHours(23,59,59) : Infinity;
 
@@ -558,10 +559,8 @@ function renderQCTable() {
         if(fD !== 'ALL' && i.details.division !== fD) match = false;
         if(fSD !== 'ALL' && i.details.subdiv !== fSD) match = false;
         
-        // Search Feeder Info
         if(fSearch && !(i.details.feederName?.toLowerCase().includes(fSearch) || i.details.subName?.toLowerCase().includes(fSearch))) match = false;
         
-        // Date Logic
         const rowTime = new Date(i.date).getTime();
         if(rowTime < dtFrom || rowTime > dtTo) match = false;
 
@@ -632,7 +631,6 @@ function openQCReview(rowIdx) {
     modal.show();
 }
 
-// Attach Action Listeners to Modal Buttons
 document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
 document.getElementById('btnRejectQC').onclick = () => submitQCAction('Rejected');
 
@@ -648,7 +646,6 @@ async function submitQCAction(status) {
         loadQC(); 
     } catch(err){ hideLoader(); }
 }
-
 
 // --- REPORT PORTAL ---
 async function loadReportPortal() {
@@ -728,7 +725,6 @@ async function loadAdmin() {
             <td><small>${u.zones}</small></td>
             <td><span class="badge bg-${u.status==='Active'?'success':'danger'}">${u.status}</span></td>
             <td>
-                <!-- Action Buttons -->
                 <button class="btn btn-sm btn-outline-primary py-0" onclick="editRole('${u.empCode}', '${u.role}')">Role</button>
                 <button class="btn btn-sm btn-outline-info py-0" onclick="editZones('${u.empCode}', '${u.zones}')">Zones</button>
                 <button class="btn btn-sm btn-outline-warning py-0" onclick="resetPass('${u.empCode}')">Reset Pass</button>
