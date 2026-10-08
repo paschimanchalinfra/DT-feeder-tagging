@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DT Tagging Energy Calculation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden { display: none !important; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
+        .report-header { background: #eef2f7; border-bottom: 2px solid #dee2e6; }
+        .table-responsive { max-height: 600px; overflow-y: auto; }
+        th { position: sticky; top: 0; background: #d3e0ea !important; z-index: 10; font-size: 13px; }
+        td { font-size: 13px; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div id="loader" class="loading-overlay hidden">
+        <div class="spinner-border mb-3" role="status"></div>
+        <h4 id="loader-text">Loading...</h4>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginView" class="container mt-5" style="max-width: 400px;">
+        <div class="card shadow">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">DT System Login</h3>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label>Employee Code</label>
+                        <input type="text" id="loginEmpCode" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="appView" class="hidden">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">DT System</a>
+                <div class="d-flex">
+                    <span class="navbar-text me-3" id="userDisplay"></span>
+                    <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden">Form Entry</button>
+                    <button id="navQC" class="btn btn-sm btn-outline-warning me-2 hidden">QC Panel</button>
+                    <button id="navReport" class="btn btn-sm btn-outline-info me-2 hidden">Report Portal</button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid px-4 pb-5">
+            
+            <!-- User Form View -->
+            <div id="viewUser" class="container hidden">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">New DT / Feeder Entry</h5>
+                        <button class="btn btn-light btn-sm" onclick="loadSavedHierarchy()">Load Last Uploaded Hierarchy</button>
+                    </div>
+                    <div class="card-body">
+                        <form id="dtForm">
+                            <div class="row">
+                                <div class="col-md-3 mb-3"><label>Zone</label><select id="f_zone" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-3 mb-3"><label>Circle</label><select id="f_circle" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-3 mb-3"><label>Division</label><select id="f_division" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-3 mb-3"><label>Sub Division</label><select id="f_subdiv" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-6 mb-3"><label>Substation Name</label><select id="f_subname" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-6 mb-3"><label>Substation Code</label><input type="text" id="f_subcode" class="form-control" readonly></div>
+                                <div class="col-md-4 mb-3"><label>Feeder Name</label><select id="f_feedername" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-md-4 mb-3"><label>Feeder Code</label><input type="text" id="f_feedercode" class="form-control" readonly></div>
+                                <div class="col-md-4 mb-3"><label>New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control" readonly></div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4 mb-3"><label>Meter Type</label><select id="f_metertype" class="form-select" required><option value="">Select</option></select></div>
+                                <div class="col-md-4 mb-3"><label>DTR Capacity (KVA)</label><select id="f_capacity" class="form-select" required><option value="">Select</option></select></div>
+                                <div class="col-md-4 mb-3"><label>Installation Status</label><select id="f_status" class="form-select" required><option value="">Select</option></select></div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label>New Meter Number</label>
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}\$" title="2 Letters followed by 7 to 9 Numbers. No spaces/symbols." required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>GPS Location</label>
+                                    <div class="input-group">
+                                        <input type="text" id="f_latlong" class="form-control" readonly required>
+                                        <button type="button" class="btn btn-secondary" onclick="getLocation()">Get GPS</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><label>Meter Image <span class="text-danger">*</span></label><input type="file" id="f_meterImg" class="form-control" accept="image/*" required></div>
+                                <div class="col-md-6 mb-3"><label>Meter with DT Image <span class="text-danger">*</span></label><input type="file" id="f_meterDtImg" class="form-control" accept="image/*" required></div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 mt-3">Submit Survey</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QC View -->
+            <div id="viewQC" class="container hidden">
+                <div class="card shadow">
+                    <div class="card-header bg-warning"><h5>QC Validation Panel</h5></div>
+                    <div class="card-body">
+                        <button class="btn btn-secondary mb-3" onclick="loadQC()">Refresh Pending QC</button>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead><tr><th>UID</th><th>Location Details</th><th>Meter No</th><th>Status</th><th>Images</th><th>Action</th></tr></thead>
+                                <tbody id="qcTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Portal View -->
+            <div id="viewReport" class="hidden">
+                <div class="card shadow">
+                    <div class="card-header report-header d-flex justify-content-between align-items-center py-3">
+                        <h4 class="mb-0 text-dark">DT Meter Installation Report</h4>
+                        <div>
+                            <button class="btn btn-primary me-2" onclick="applyReportFilters()">VIEW</button>
+                            <button class="btn btn-success" onclick="exportReportCSV()">EXPORT CSV</button>
+                        </div>
+                    </div>
+                    <div class="card-body bg-white">
+                        <!-- Filters -->
+                        <div class="row mb-3">
+                            <div class="col-md-2"><label class="small text-muted">Zone</label><select id="flt_zone" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
+                            <div class="col-md-2"><label class="small text-muted">Circle</label><select id="flt_circle" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
+                            <div class="col-md-2"><label class="small text-muted">Division</label><select id="flt_division" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
+                            <div class="col-md-2"><label class="small text-muted">Sub Division</label><select id="flt_subdiv" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
+                            <div class="col-md-2"><label class="small text-muted">Substation Name</label><select id="flt_subname" class="form-select form-select-sm"><option value="ALL">ALL</option></select></div>
+                        </div>
+
+                        <!-- Data Table -->
+                        <div class="table-responsive border">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th><th>Unique ID</th><th>Surveyor</th>
+                                        <th>Zone</th><th>Circle</th><th>Division</th><th>Sub Div</th><th>Substation</th>
+                                        <th>Feeder Name</th><th>Meter Type</th><th>Capacity</th><th>Meter No.</th>
+                                        <th>Install Status</th><th>QC Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="mt-2 text-muted small" id="reportCount"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+// --- CONFIGURATION ---
+const API_URL = 'https://script.google.com/macros/s/AKfycbxMWpuMr1cbob1qPcl69cuJ9ezEbXLzkWoeuAsZu2e8sLP8p39D3mgP5UwXpchyZx7GTA/exec'; // <--- PASTE WEB APP URL HERE
+let currentUser = null;
+let masterDropdownData = [];
+let fullReportData = []; // Stores raw backend data
+let parsedReportData = []; // Stores data with unpacked JSON
+let filteredReportData = []; // Final array for table/CSV
+
+function showLoader(text="Processing...") { document.getElementById('loader-text').innerText=text; document.getElementById('loader').classList.remove('hidden'); }
+function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
+function switchView(viewId) {
+    ['viewUser', 'viewQC', 'viewReport'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    document.getElementById(viewId).classList.remove('hidden');
+}
+
+async function apiCall(payload) {
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        if(json.status !== 'success') throw new Error(json.message);
+        return json.data;
+    } catch(err) { alert("Error: " + err.message); throw err; }
+}
+
+// --- AUTHENTICATION ---
+document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    showLoader("Logging in...");
+    try {
+        const user = await apiCall({
+            action: 'login',
+            empCode: document.getElementById('loginEmpCode').value,
+            password: document.getElementById('loginPassword').value
+        });
+        currentUser = user;
+        document.getElementById('loginView').classList.add('hidden');
+        document.getElementById('appView').classList.remove('hidden');
+        document.getElementById('userDisplay').innerText = `Logged in: ${user.name} (${user.role})`;
+        
+        const role = user.role.toLowerCase();
+        if(role === 'admin') {
+            document.getElementById('navUser').classList.remove('hidden');
+            document.getElementById('navQC').classList.remove('hidden');
+            document.getElementById('navReport').classList.remove('hidden');
+            switchView('viewReport'); loadReportPortal();
+        } else if(role === 'reportportal') {
+            document.getElementById('navReport').classList.remove('hidden');
+            switchView('viewReport'); loadReportPortal();
+        } else if(role === 'qc') {
+            document.getElementById('navQC').classList.remove('hidden');
+            switchView('viewQC'); loadQC();
+        } else {
+            document.getElementById('navUser').classList.remove('hidden');
+            switchView('viewUser'); initializeApp();
+        }
+    } catch(err) {}
+    hideLoader();
+};
+
+function logout() { location.reload(); }
+
+document.getElementById('navUser').onclick = () => switchView('viewUser');
+document.getElementById('navQC').onclick = () => { switchView('viewQC'); loadQC(); };
+document.getElementById('navReport').onclick = () => { switchView('viewReport'); loadReportPortal(); };
+
+// --- USER FORM CASCADING ---
+async function initializeApp() {
+    if(masterDropdownData.length > 0) return;
+    showLoader("Loading Hierarchy...");
+    try {
+        const data = await apiCall({ action: 'getAppData' });
+        masterDropdownData = data.dropdownData;
+        populateDropdown('f_zone', getUnique(masterDropdownData, 0));
+        populateDropdown('f_metertype', getUnique(masterDropdownData, 9));
+        populateDropdown('f_capacity', getUnique(masterDropdownData, 10));
+        populateDropdown('f_status', getUnique(masterDropdownData, 11));
+        setupCascading();
+    } catch(err){}
+    hideLoader();
+}
+
+function getUnique(data, colIndex, filterFn = () => true) {
+    const set = new Set();
+    data.filter(filterFn).forEach(row => { if(row[colIndex]) set.add(row[colIndex]); });
+    return Array.from(set).sort();
+}
+function populateDropdown(id, list, addAll=false) {
+    const el = document.getElementById(id);
+    el.innerHTML = (addAll ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>') + list.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+function setupCascading() {
+    const triggers = ['f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_feedername'];
+    triggers.forEach((id, idx) => {
+        document.getElementById(id).addEventListener('change', () => {
+            const rowFilter = (r) => {
+                let match = true;
+                for(let i=0; i<=idx; i++) {
+                    const elVal = document.getElementById(triggers[i]).value;
+                    if(elVal && String(r[i]) !== String(elVal)) match = false;
+                }
+                return match;
+            };
+            if (idx + 1 < triggers.length) {
+                for(let i=idx+1; i<triggers.length; i++) document.getElementById(triggers[i]).innerHTML = '<option value="">Select</option>';
+                const sheetCol = idx === 4 ? 4 : (idx === 5 ? 6 : idx + 1); 
+                populateDropdown(triggers[idx+1], getUnique(masterDropdownData, sheetCol, rowFilter));
+            }
+            if(id === 'f_subname') {
+                const row = masterDropdownData.find(rowFilter);
+                document.getElementById('f_subcode').value = row ? row[5] : '';
+            }
+            if(id === 'f_feedername') {
+                const row = masterDropdownData.find(rowFilter);
+                document.getElementById('f_feedercode').value = row ? row[7] : '';
+                document.getElementById('f_qrcode').value = row ? row[8] : '';
+            }
+        });
+    });
+}
+
+function saveHierarchyToStorage() {
+    const h = { z: document.getElementById('f_zone').value, c: document.getElementById('f_circle').value, d: document.getElementById('f_division').value, sd: document.getElementById('f_subdiv').value, sn: document.getElementById('f_subname').value, fn: document.getElementById('f_feedername').value };
+    localStorage.setItem('dt_hierarchy', JSON.stringify(h));
+}
+function loadSavedHierarchy() {
+    const saved = localStorage.getItem('dt_hierarchy');
+    if(!saved) return alert("No previous hierarchy found.");
+    const h = JSON.parse(saved);
+    const trig = (id, val) => { document.getElementById(id).value = val; document.getElementById(id).dispatchEvent(new Event('change')); };
+    trig('f_zone', h.z);
+    setTimeout(() => { trig('f_circle', h.c);
+        setTimeout(() => { trig('f_division', h.d);
+            setTimeout(() => { trig('f_subdiv', h.sd);
+                setTimeout(() => { trig('f_subname', h.sn);
+                    setTimeout(() => { trig('f_feedername', h.fn); }, 50);
+                }, 50);
+            }, 50);
+        }, 50);
+    }, 50);
+}
+
+function getLocation() {
+    if (navigator.geolocation) {
+        document.getElementById('f_latlong').value = "Locating...";
+        navigator.geolocation.getCurrentPosition(
+            pos => document.getElementById('f_latlong').value = `${pos.coords.latitude}, ${pos.coords.longitude}`,
+            () => document.getElementById('f_latlong').value = "Denied"
+        );
+    }
+}
+
+const fileToBase64 = file => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(file); r.onload = () => res(r.result); r.onerror = e => rej(e); });
+
+document.getElementById('dtForm').onsubmit = async (e) => {
+    e.preventDefault();
+    showLoader("Uploading Images & Saving Data...");
+    try {
+        const payload = {
+            action: 'submit', empCode: currentUser.empCode, surveyorName: currentUser.name,
+            zone: document.getElementById('f_zone').value, circle: document.getElementById('f_circle').value,
+            division: document.getElementById('f_division').value, subdiv: document.getElementById('f_subdiv').value,
+            subName: document.getElementById('f_subname').value, subCode: document.getElementById('f_subcode').value,
+            feederName: document.getElementById('f_feedername').value, feederCode: document.getElementById('f_feedercode').value,
+            qrCode: document.getElementById('f_qrcode').value, meterType: document.getElementById('f_metertype').value,
+            dtrCapacity: document.getElementById('f_capacity').value, meterNumber: document.getElementById('f_meternumber').value.toUpperCase(),
+            installStatus: document.getElementById('f_status').value, latLong: document.getElementById('f_latlong').value,
+            meterImageBase64: await fileToBase64(document.getElementById('f_meterImg').files[0]),
+            meterDtImageBase64: await fileToBase64(document.getElementById('f_meterDtImg').files[0])
+        };
+        const result = await apiCall(payload);
+        saveHierarchyToStorage(); alert(result); document.getElementById('dtForm').reset();
+    } catch(err){}
+    hideLoader();
+};
+
+// --- QC MODULE ---
+async function loadQC() {
+    showLoader("Fetching Pending QC...");
+    try {
+        const data = await apiCall({ action: 'getQCData', empCode: currentUser.empCode });
+        const tbody = document.getElementById('qcTableBody'); tbody.innerHTML = '';
+        if(!data.length) return tbody.innerHTML = '<tr><td colspan="6" class="text-center">No pending records found.</td></tr>';
+        data.forEach(i => {
+            tbody.innerHTML += `<tr><td>${i.uid}</td>
+                <td><small><b>Zone:</b> ${i.details.zone}<br><b>Feeder:</b> ${i.details.feederName}</small></td>
+                <td>${i.details.meterNumber}</td><td>${i.details.installStatus}</td>
+                <td><a href="${i.meterImg}" target="_blank">Img 1</a> | <a href="${i.meterDtImg}" target="_blank">Img 2</a></td>
+                <td><button class="btn btn-sm btn-success mb-1 w-100" onclick="processQC(${i.rowIdx}, 'Approved')">Approve</button>
+                <button class="btn btn-sm btn-danger w-100" onclick="processQC(${i.rowIdx}, 'Rejected')">Reject</button></td></tr>`;
+        });
+    } catch(err){}
+    hideLoader();
+}
+async function processQC(rowIdx, status) {
+    if(!confirm(`Mark as ${status}?`)) return;
+    showLoader("Updating...");
+    try { await apiCall({ action: 'submitQC', qcCode: currentUser.empCode, qcName: currentUser.name, rowIdx: rowIdx, status: status }); loadQC(); } catch(err){}
+    hideLoader();
+}
+
+// --- REPORT PORTAL MODULE ---
+async function loadReportPortal() {
+    showLoader("Fetching Master Report...");
+    try {
+        fullReportData = await apiCall({ action: 'getReportData', empCode: currentUser.empCode });
+        
+        // Unpack JSON for easier filtering and rendering
+        parsedReportData = fullReportData.map(row => {
+            let details = {};
+            try { details = JSON.parse(row.detailsJson || "{}"); } catch(e){}
+            return { ...row, ...details }; 
+        });
+
+        // Setup dynamic filter dropdowns based on actual data
+        const getFilterVals = (key) => ['ALL', ...Array.from(new Set(parsedReportData.map(item => item[key]).filter(v => v))).sort()];
+        
+        populateDropdown('flt_zone', getFilterVals('zone').filter(v => v!=='ALL'), true);
+        populateDropdown('flt_circle', getFilterVals('circle').filter(v => v!=='ALL'), true);
+        populateDropdown('flt_division', getFilterVals('division').filter(v => v!=='ALL'), true);
+        populateDropdown('flt_subdiv', getFilterVals('subdiv').filter(v => v!=='ALL'), true);
+        populateDropdown('flt_subname', getFilterVals('subName').filter(v => v!=='ALL'), true);
+
+        applyReportFilters(); // Initial render
+    } catch(err){}
+    hideLoader();
+}
+
+function applyReportFilters() {
+    const f_z = document.getElementById('flt_zone').value;
+    const f_c = document.getElementById('flt_circle').value;
+    const f_d = document.getElementById('flt_division').value;
+    const f_sd = document.getElementById('flt_subdiv').value;
+    const f_sn = document.getElementById('flt_subname').value;
+
+    filteredReportData = parsedReportData.filter(row => {
+        return (f_z === 'ALL' || row.zone === f_z) &&
+               (f_c === 'ALL' || row.circle === f_c) &&
+               (f_d === 'ALL' || row.division === f_d) &&
+               (f_sd === 'ALL' || row.subdiv === f_sd) &&
+               (f_sn === 'ALL' || row.subName === f_sn);
+    });
+
+    renderReportTable();
+}
+
+function renderReportTable() {
+    const tbody = document.getElementById('reportTableBody');
+    tbody.innerHTML = '';
+    
+    // Limit DOM rendering to first 100 for browser performance (export has all)
+    const renderLimit = Math.min(filteredReportData.length, 100);
+    
+    for(let i=0; i<renderLimit; i++) {
+        const d = filteredReportData[i];
+        tbody.innerHTML += `
+            <tr>
+                <td>${d.date.substring(0,16)}</td>
+                <td>${d.uid}</td>
+                <td>${d.surveyor}</td>
+                <td>${d.zone}</td>
+                <td>${d.circle}</td>
+                <td>${d.division}</td>
+                <td>${d.subdiv}</td>
+                <td>${d.subName}</td>
+                <td>${d.feederName}</td>
+                <td>${d.meterType}</td>
+                <td>${d.dtrCapacity}</td>
+                <td>${d.meterNumber}</td>
+                <td>${d.installStatus}</td>
+                <td><span class="badge bg-${d.qcStatus==='Approved'?'success':(d.qcStatus==='Rejected'?'danger':'warning')}">${d.qcStatus}</span></td>
+            </tr>
+        `;
+    }
+    
+    let info = `Showing ${renderLimit} of ${filteredReportData.length} records.`;
+    if(filteredReportData.length > 100) info += " (Export CSV to view all)";
+    document.getElementById('reportCount').innerText = info;
+}
+
+function exportReportCSV() {
+    if(!filteredReportData.length) return alert("No data to export");
+    
+    // Define Headers
+    let csvContent = "Timestamp,Unique ID,Emp Code,Surveyor Name,Zone,Circle,Division,Sub Division,Substation Name,Substation Code,Feeder Name,Feeder Code,QR Code,Meter Type,DTR Capacity (KVA),Meter Number,Install Status,Lat/Long,Meter Image Link,Meter DT Image Link,QC Status,QC By,QC Date\n";
+
+    filteredReportData.forEach(row => {
+        let rowData = [
+            row.date, row.uid, String(row.empCode).replace(/'/g, ''), row.surveyor,
+            row.zone, row.circle, row.division, row.subdiv, row.subName, row.subCode,
+            row.feederName, row.feederCode, row.qrCode, row.meterType, row.dtrCapacity,
+            row.meterNumber, row.installStatus, row.latLong, row.img1, row.img2,
+            row.qcStatus, row.qcBy, row.qcDate
+        ];
+        
+        // Escape CSV values
+        let cleanRow = rowData.map(v => {
+            let s = String(v || "").replace(/"/g, '""');
+            return s.includes(",") || s.includes("\n") ? `"${s}"` : s;
+        });
+        csvContent += cleanRow.join(",") + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "DT_Report_" + new Date().toISOString().slice(0,10) + ".csv";
+    link.click();
+}
+</script>
+</body>
+</html>
