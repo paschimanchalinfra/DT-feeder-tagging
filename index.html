@@ -1130,4 +1130,12 @@ async function adminCreateUser() {
             mobile: document.getElementById('a_mobile').value, role: document.getElementById('a_role').value, 
             zones: document.getElementById('a_zones').value || 'All'
         });
-        ['a_name','a_empcode','a_mobile','a_zones'].forEach(id
+        ['a_name','a_empcode','a_mobile','a_zones'].forEach(id => document.getElementById(id).value = '');
+        showToast("Created Successfully (Default Pass: Pass@123)"); 
+        loadAdmin();
+    } catch(err){}
+    hideLoader();
+}
+</script>
+</body>
+</html>
