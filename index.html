@@ -2,33 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- OLD: <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <!-- [FIX-1] Ensured correct viewport for mobile rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DT Tagging Energy Calculation</title>
     <!-- CSS & JS for Modals -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- [ADD-4] Add Favicon using the new logo link -->
+    <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
+
     <style>
-        :root { --main-bg: #f4f6f9; --primary-color: #0d233a; --accent-color: #e65c00; --qc-header: #fdf3e8; }
-        body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        /* OLD: :root { --main-bg: #f4f6f9; --primary-color: #0d233a; --accent-color: #e65c00; --qc-header: #fdf3e8; } */
+        /* [FIX-6] Apply specific brand colours: Navy (#002060) and Green (#92D050) */
+        :root { --main-bg: #f4f6f9; --primary-color: #002060; --accent-color: #92D050; --qc-header: #e6f2d9; }
+        
+        /* OLD: body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; } */
+        /* [FIX-1] Set base font size to 16px to stop iOS input zoom and improve touch legibility */
+        html { font-size: 16px; }
+        body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; }
+        
         .hidden { display: none !important; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
         
         /* Navbar Branding */
-        .navbar { background-color: var(--primary-color) !important; border-bottom: 3px solid var(--accent-color); }
+        .navbar { background-color: var(--primary-color) !important; border-bottom: 3px solid var(--accent-color); position: sticky; top: 0; z-index: 1040; }
         .navbar-brand img { background: white; padding: 2px; border-radius: 4px; }
         
-        /* General Table */
-        .table-responsive { max-height: 65vh; overflow-y: auto; }
-        th { position: sticky; top: 0; z-index: 10; font-size: 13px; white-space: nowrap; }
-        td { font-size: 13px; white-space: nowrap; vertical-align: middle; }
+        /* General Table & Mobile Wrapper */
+        .table-responsive { max-height: 65vh; overflow-y: auto; overflow-x: auto; width: 100%; }
+        th { position: sticky; top: 0; z-index: 10; font-size: 0.875rem; white-space: nowrap; }
+        td { font-size: 0.875rem; white-space: nowrap; vertical-align: middle; }
         .card-header { background-color: var(--primary-color); color: white; }
 
         /* QC Dashboard Specific Styles */
         .qc-title { color: var(--accent-color); font-weight: bold; font-size: 1.4rem; }
-        .qc-table thead th { background-color: var(--qc-header) !important; color: var(--accent-color) !important; border-bottom: 2px solid #ddd; }
+        .qc-table thead th { background-color: var(--qc-header) !important; color: var(--primary-color) !important; border-bottom: 2px solid #ddd; }
         .qc-table tbody tr { border-bottom: 1px solid #eee; }
         .btn-review { background-color: #ffc107; color: #000; border-radius: 20px; font-weight: bold; padding: 4px 16px; border: none; }
         .btn-review:hover { background-color: #e0a800; }
+        
+        /* [ADD-1] Global element sizing for better mobile tapping */
+        .form-control, .form-select, .btn { min-height: 44px; }
+        
+        /* [ADD-3] Visual styling to make read-only auto-populated inputs look locked */
+        input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; color: var(--primary-color); font-weight: 600; border: 1px dashed #ccc; }
+        
+        /* [ADD-6] Stronger button visibility with primary color text against the green accent */
+        .btn-accent { background-color: var(--accent-color) !important; color: var(--primary-color) !important; font-weight: bold; border: none; }
         
         @media (max-width: 768px) {
             .btn { width: 100% !important; margin-bottom: 8px; }
@@ -47,20 +69,21 @@
     <!-- Login Screen -->
     <div id="loginView" class="container" style="max-width: 400px; margin-top: 10vh;">
         <div class="card shadow-lg border-0">
-            <div class="card-body p-5 text-center">
-                <!-- FIXED LOGO URL using thumbnail API to bypass third-party cookie blocking -->
-                <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" onerror="this.style.display='none'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 70px;">
+            <div class="card-body p-4 text-center">
+                <!-- OLD: <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" ... -->
+                <!-- [FIX-4] Swapped ID for the new requested logo. Using thumbnail endpoint to bypass cookie blocking, with a fallback. -->
+                <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400" onerror="this.src='https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 70px; width: auto; max-width: 100%;">
                 <h4 class="mb-4 text-dark fw-bold">DT Tagging System</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
                         <label class="form-label text-muted small">Employee Code</label>
-                        <input type="text" id="loginEmpCode" class="form-control form-control-lg" required>
+                        <input type="text" id="loginEmpCode" class="form-control" required>
                     </div>
                     <div class="mb-4 text-start">
                         <label class="form-label text-muted small">Password</label>
-                        <input type="password" id="loginPassword" class="form-control form-control-lg" required>
+                        <input type="password" id="loginPassword" class="form-control" required>
                     </div>
-                    <button type="submit" class="btn btn-lg w-100 text-white" style="background-color: var(--primary-color);">Login</button>
+                    <button type="submit" class="btn w-100 text-white" style="background-color: var(--primary-color); font-weight: bold;">Login</button>
                 </form>
             </div>
         </div>
@@ -73,8 +96,9 @@
         <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-                    <!-- FIXED LOGO URL using thumbnail API -->
-                    <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" onerror="this.style.display='none'" height="35" class="me-2" alt="Logo">
+                    <!-- OLD: <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" ... -->
+                    <!-- [FIX-4] Swapped ID for the new requested logo. -->
+                    <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400" onerror="this.src='https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90'" height="35" class="me-2" alt="Logo">
                     DT System
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
@@ -84,7 +108,6 @@
                     <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
                         <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
                         
-                        <!-- Role Based Nav Buttons (Admin Button is Removed) -->
                         <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
                         <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
                         <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" onclick="switchView('viewReport'); loadReportPortal();">Report Portal</button>
@@ -102,78 +125,93 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">New DT / Feeder Survey</h5>
-                        <button class="btn btn-light btn-sm fw-bold text-primary" onclick="loadSavedHierarchy()">Load Last Config</button>
+                        <button class="btn btn-light btn-sm fw-bold" style="color: var(--primary-color);" onclick="loadSavedHierarchy()">Load Last Config</button>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-3 p-md-4">
                         <form id="dtForm">
-                            <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Location Hierarchy</h6>
+                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Location Hierarchy</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Zone</label><select id="f_zone" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Circle</label><select id="f_circle" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Division</label><select id="f_division" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Sub Division</label><select id="f_subdiv" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Name</label><select id="f_subname" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control form-control-sm bg-light" readonly></div>
-                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Name</label><select id="f_feedername" class="form-select form-select-sm cascade-trigger" required><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control form-control-sm bg-light" readonly></div>
-                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control form-control-sm bg-light" readonly></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Zone</label><select id="f_zone" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Circle</label><select id="f_circle" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Division</label><select id="f_division" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Sub Division</label><select id="f_subdiv" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Name</label><select id="f_subname" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                
+                                <!-- OLD: <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control form-control-sm bg-light" readonly></div> -->
+                                <!-- [FIX-3] Added 'locked-field' class to ensure UI conveys non-editable status -->
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
+                                
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Name</label><select id="f_feedername" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
+                                
+                                <!-- OLD: <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control form-control-sm bg-light" readonly></div> -->
+                                <!-- [FIX-3] Added 'locked-field' class -->
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
+                                
+                                <!-- OLD: <div class="col-12 col-md-4"><label class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control form-control-sm bg-light" readonly></div> -->
+                                <!-- [FIX-3] Added 'locked-field' class -->
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
                             </div>
                             
-                            <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Asset Details</h6>
+                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Asset Details</h6>
                             <div class="row g-3 mb-4">
                                 <div class="col-12 col-md-4">
                                     <label class="small text-muted fw-bold">Meter Type</label>
-                                    <select id="f_metertype" class="form-select form-select-sm" required><option value="">Select</option></select>
+                                    <select id="f_metertype" class="form-select" required><option value="">Select</option></select>
                                 </div>
                                 <div class="col-12 col-md-4" id="div_capacity">
                                     <label class="small text-muted fw-bold">DTR Capacity (KVA)</label>
-                                    <select id="f_capacity" class="form-select form-select-sm" required><option value="">Select</option></select>
+                                    <select id="f_capacity" class="form-select" required><option value="">Select</option></select>
                                 </div>
                                 <div class="col-12 col-md-4" id="div_status">
                                     <label class="small text-muted fw-bold">Installation Status</label>
-                                    <select id="f_status" class="form-select form-select-sm" required><option value="">Select</option></select>
+                                    <select id="f_status" class="form-select" required><option value="">Select</option></select>
                                 </div>
                                 
                                 <div class="col-12 col-md-6" id="div_meternumber">
                                     <label class="small text-muted fw-bold">New Meter Number</label>
-                                    <input type="text" id="f_meternumber" class="form-control form-control-sm" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}$" title="2 Letters followed by 7 to 9 Numbers." required>
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}$" title="2 Letters followed by 7 to 9 Numbers." required>
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <label class="small text-muted fw-bold">GPS Location</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" id="f_latlong" class="form-control" readonly required>
-                                        <button type="button" class="btn btn-secondary" onclick="getLocation()">Get GPS</button>
+                                    <div class="input-group">
+                                        <!-- [FIX-5] Enforced readonly to ensure user cannot override GPS logic manually -->
+                                        <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for image..." readonly required>
+                                        <!-- OLD: <button type="button" class="btn btn-secondary" onclick="getLocation()">Get GPS</button> -->
+                                        <!-- [FIX-5] Updated button behaviour to be a retry mechanism instead of primary fetch mechanism -->
+                                        <button type="button" class="btn btn-secondary" onclick="getLocation(true)">Retry GPS</button>
                                     </div>
+                                    <small class="text-muted" style="font-size: 11px;">Captures automatically when an image is selected.</small>
                                 </div>
                             </div>
                             
-                            <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Attachments</h6>
+                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Attachments</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label><input type="file" id="f_meterImg" class="form-control form-control-sm" accept="image/*" required></div>
-                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter with DT Image <span class="text-danger">*</span></label><input type="file" id="f_meterDtImg" class="form-control form-control-sm" accept="image/*" required></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label><input type="file" id="f_meterImg" class="form-control" accept="image/*" required></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter with DT Image <span class="text-danger">*</span></label><input type="file" id="f_meterDtImg" class="form-control" accept="image/*" required></div>
                             </div>
 
-                            <button type="submit" class="btn btn-lg w-100 text-white shadow-sm mt-2" style="background-color: var(--accent-color);">Submit Final Survey</button>
+                            <!-- OLD: <button type="submit" class="btn btn-lg w-100 text-white shadow-sm mt-2" style="background-color: var(--accent-color);">Submit Final Survey</button> -->
+                            <!-- [FIX-6] Applied navy text on green theme, [ADD-7] Set ID to target for double-submit prevention -->
+                            <button type="submit" id="btnSubmitSurvey" class="btn btn-lg w-100 shadow-sm mt-3 btn-accent sticky-bottom mb-2">Submit Final Survey</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. QC VIEW (Matching Screenshot Style) -->
+            <!-- 2. QC VIEW -->
             <div id="viewQC" class="container hidden" style="max-width: 1200px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="qc-title mb-0">🛡️ QC Dashboard</h4>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <h4 class="qc-title mb-2 mb-md-0">🛡️ QC Dashboard</h4>
                     <button class="btn btn-outline-secondary btn-sm" onclick="loadQC()">⟳ Refresh Data</button>
                 </div>
                 
                 <div class="card shadow-sm border-0 bg-white">
-                    <div class="card-body">
-                        <!-- QC Filters -->
+                    <div class="card-body p-3">
                         <div class="row g-2 mb-4">
-                            <div class="col-6 col-md-3"><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
-                            <div class="col-6 col-md-3"><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
-                            <div class="col-6 col-md-3"><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
-                            <div class="col-6 col-md-3"><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
+                            <div class="col-12 col-md-3"><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
+                            <div class="col-12 col-md-3"><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
+                            <div class="col-12 col-md-3"><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
+                            <div class="col-12 col-md-3"><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
                             
                             <div class="col-12 col-md-6">
                                 <input type="text" id="qc_search" class="form-control" placeholder="Search Feeder, Name or Code...">
@@ -185,7 +223,7 @@
                                 <input type="date" id="qc_dateTo" class="form-control" placeholder="To dd/mm/yyyy">
                             </div>
                             <div class="col-12 col-md-2">
-                                <button class="btn w-100 text-white" style="background-color: var(--accent-color);" onclick="renderQCTable()">Filter</button>
+                                <button class="btn w-100 text-white" style="background-color: var(--primary-color);" onclick="renderQCTable()">Filter</button>
                             </div>
                         </div>
 
@@ -214,13 +252,11 @@
                             <h5 class="modal-title fw-bold">Review Submission Details</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body bg-light" id="qcModalContent">
-                            <!-- Populated dynamically -->
-                        </div>
+                        <div class="modal-body bg-light p-4" id="qcModalContent"></div>
                         <div class="modal-footer" style="background-color: #f1f3f5;">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-danger px-4" id="btnRejectQC">Reject</button>
-                            <button type="button" class="btn btn-success px-4" id="btnApproveQC">Approve</button>
+                            <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
+                            <button type="button" class="btn btn-success px-4 fw-bold" id="btnApproveQC">Approve</button>
                         </div>
                     </div>
                 </div>
@@ -229,17 +265,20 @@
             <!-- 3. REPORT PORTAL VIEW -->
             <div id="viewReport" class="hidden">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-bold">DT Meter Installation Master Report</h5>
-                        <div><button class="btn btn-dark btn-sm me-2 fw-bold" onclick="renderReportTable()">VIEW / APPLY</button><button class="btn btn-success btn-sm fw-bold shadow" onclick="exportReportCSV()">EXPORT CSV</button></div>
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
+                        <h5 class="mb-2 mb-md-0 fw-bold">Installation Master Report</h5>
+                        <div class="d-flex w-100 w-md-auto">
+                            <button class="btn btn-light btn-sm me-2 fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="renderReportTable()">VIEW / APPLY</button>
+                            <button class="btn btn-accent btn-sm fw-bold shadow w-100 w-md-auto" onclick="exportReportCSV()">EXPORT CSV</button>
+                        </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-3">
                         <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded">
-                            <div class="col-6 col-md-2"><label class="small text-muted">Zone</label><select id="rpt_zone" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Circle</label><select id="rpt_circle" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Division</label><select id="rpt_division" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-6 col-md-2"><label class="small text-muted">Sub Div</label><select id="rpt_subdiv" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-4"><label class="small text-muted">Substation Name</label><select id="rpt_subname" class="form-select form-select-sm cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted">Zone</label><select id="rpt_zone" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted">Circle</label><select id="rpt_circle" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted">Division</label><select id="rpt_division" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted">Sub Div</label><select id="rpt_subdiv" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-4"><label class="small text-muted">Substation Name</label><select id="rpt_subname" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
                         </div>
 
                         <div class="table-responsive border rounded">
@@ -255,7 +294,7 @@
                                 <tbody id="reportTableBody"></tbody>
                             </table>
                         </div>
-                        <div class="mt-2 fw-bold text-end text-primary" id="reportCount"></div>
+                        <div class="mt-2 fw-bold text-end" style="color: var(--primary-color);" id="reportCount"></div>
                     </div>
                 </div>
             </div>
@@ -263,31 +302,30 @@
             <!-- 4. ADMIN USER UI -->
             <div id="viewAdmin" class="container hidden" style="max-width: 1000px;">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">System Admin - User Management</h5>
                         <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-3">
                         
                         <div id="adminFormContainer" class="hidden mb-4 p-3 bg-light border rounded">
-                            <h6 class="fw-bold mb-3">Add New User</h6>
+                            <h6 class="fw-bold mb-3" style="color: var(--primary-color);">Add New User</h6>
                             <div class="row g-2">
-                                <div class="col-md-2"><input type="text" id="a_name" class="form-control form-control-sm" placeholder="Full Name"></div>
-                                <div class="col-md-2"><input type="text" id="a_empcode" class="form-control form-control-sm" placeholder="Emp Code (Login ID)"></div>
-                                <div class="col-md-2"><input type="text" id="a_mobile" class="form-control form-control-sm" placeholder="Mobile"></div>
-                                <div class="col-md-2"><select id="a_role" class="form-select form-select-sm"><option value="User">User</option><option value="QC">QC</option><option value="ReportPortal">Report Portal</option><option value="Admin">Admin</option></select></div>
-                                <div class="col-md-2"><input type="text" id="a_zones" class="form-control form-control-sm" placeholder="Zones (e.g. All, Zone1)"></div>
-                                <div class="col-md-2"><button class="btn btn-success btn-sm w-100 fw-bold" onclick="adminCreateUser()">Create</button></div>
+                                <div class="col-12 col-md-2"><input type="text" id="a_name" class="form-control" placeholder="Full Name"></div>
+                                <div class="col-12 col-md-2"><input type="text" id="a_empcode" class="form-control" placeholder="Emp Code (Login ID)"></div>
+                                <div class="col-12 col-md-2"><input type="text" id="a_mobile" class="form-control" placeholder="Mobile"></div>
+                                <div class="col-12 col-md-2"><select id="a_role" class="form-select"><option value="User">User</option><option value="QC">QC</option><option value="ReportPortal">Report Portal</option><option value="Admin">Admin</option></select></div>
+                                <div class="col-12 col-md-2"><input type="text" id="a_zones" class="form-control" placeholder="Zones (e.g. All, Zone1)"></div>
+                                <div class="col-12 col-md-2"><button class="btn btn-success w-100 fw-bold" onclick="adminCreateUser()">Create</button></div>
                             </div>
                         </div>
 
                         <div class="table-responsive border rounded">
-                            <table class="table table-bordered table-sm mb-0 text-center">
+                            <table class="table table-bordered mb-0 text-center">
                                 <thead class="table-secondary"><tr><th>Name</th><th>Emp Code</th><th>Role</th><th>Zones</th><th>Status</th><th>Actions</th></tr></thead>
                                 <tbody id="adminUsersBody"></tbody>
                             </table>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -384,7 +422,6 @@ async function fetchMasterData() {
     }
 }
 
-// FIXED: Bug when data is undefined causing freezing
 function getUnique(data, colIndex, filterFn = () => true) {
     if (!data || !Array.isArray(data) || data.length === 0) return [];
     const set = new Set();
@@ -413,11 +450,14 @@ function setupCascading(prefix, includeAllOption) {
                 for(let i=0; i<=idx; i++) {
                     const elVal = document.getElementById(`${prefix}_${triggers[i]}`).value;
                     const sheetCol = i === 4 ? 4 : (i === 5 ? 6 : i);
-                    if(elVal && elVal !== 'ALL' && String(r[sheetCol]) !== String(elVal)) match = false;
+                    // OLD: if(elVal && elVal !== 'ALL' && String(r[sheetCol]) !== String(elVal)) match = false;
+                    // [FIX-2] Use case-insensitive matching after trimming via map in Code.gs
+                    if(elVal && elVal !== 'ALL' && String(r[sheetCol]).toLowerCase() !== String(elVal).toLowerCase()) match = false;
                 }
                 return match;
             };
 
+            // Update all downstream children dropdowns
             if (idx + 1 < triggers.length) {
                 for(let i=idx+1; i<triggers.length; i++) {
                     const child = document.getElementById(`${prefix}_${triggers[i]}`);
@@ -428,17 +468,31 @@ function setupCascading(prefix, includeAllOption) {
                 if(document.getElementById(nextId)) {
                     populateDropdown(nextId, getUnique(masterDropdownData, nextSheetCol, rowFilter), includeAllOption);
                 }
+                
+                // [ADD-3] Auto-clear locked read-only fields when any parent above them is changed
+                if (prefix === 'f_') {
+                    if (idx < 4) document.getElementById('f_subcode').value = '';
+                    if (idx < 5) {
+                        document.getElementById('f_feedercode').value = '';
+                        document.getElementById('f_qrcode').value = '';
+                    }
+                }
             }
 
             if(prefix === 'f_') {
                 if(key === 'subname') {
                     const row = masterDropdownData.find(rowFilter);
-                    document.getElementById('f_subcode').value = row ? row[5] : '';
+                    // OLD: document.getElementById('f_subcode').value = row ? row[5] : '';
+                    // [FIX-3] Better visual fallback when parent fails match
+                    document.getElementById('f_subcode').value = row ? row[5] : 'Not Found';
                 }
                 if(key === 'feedername') {
                     const row = masterDropdownData.find(rowFilter);
-                    document.getElementById('f_feedercode').value = row ? row[7] : '';
-                    document.getElementById('f_qrcode').value = row ? row[8] : '';
+                    // OLD: document.getElementById('f_feedercode').value = row ? row[7] : '';
+                    // OLD: document.getElementById('f_qrcode').value = row ? row[8] : '';
+                    // [FIX-3] Apply fallback values
+                    document.getElementById('f_feedercode').value = row ? row[7] : 'Not Found';
+                    document.getElementById('f_qrcode').value = row ? row[8] : 'Not Found';
                 }
             }
         });
@@ -491,21 +545,39 @@ function loadSavedHierarchy() {
     }, 50);
 }
 
-function getLocation() {
+// OLD: function getLocation() { ... }
+// [FIX-5] Updated location gathering logic to use high accuracy, bound errors, and bound to file input changes.
+function getLocation(manualRetry = false) {
     if (navigator.geolocation) {
-        document.getElementById('f_latlong').value = "Locating...";
+        document.getElementById('f_latlong').value = "Locating via GPS...";
         navigator.geolocation.getCurrentPosition(
-            p => document.getElementById('f_latlong').value = `${p.coords.latitude}, ${p.coords.longitude}`,
-            () => document.getElementById('f_latlong').value = "Denied/Timeout"
+            p => { document.getElementById('f_latlong').value = `${p.coords.latitude}, ${p.coords.longitude}`; },
+            (err) => {
+                document.getElementById('f_latlong').value = ""; // Clear string so form fails required validation
+                if(manualRetry) alert("Location access denied or timeout. Please enable device GPS permissions.");
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
+    } else {
+        if(manualRetry) alert("Geolocation not supported by this browser.");
     }
 }
+
+// [ADD-5] Automatically invoke location fetching when an image is selected
+document.getElementById('f_meterImg').addEventListener('change', () => getLocation(false));
+document.getElementById('f_meterDtImg').addEventListener('change', () => getLocation(false));
 
 const fileToBase64 = file => new Promise((res, rej) => { const r = new FileReader(); r.readAsDataURL(file); r.onload = () => res(r.result); r.onerror = e => rej(e); });
 
 document.getElementById('dtForm').onsubmit = async (e) => {
     e.preventDefault();
+    
+    // [ADD-7] Prevent double-submission and provide feedback
+    const submitBtn = document.getElementById('btnSubmitSurvey');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting, please wait...";
     showLoader("Securing Upload...");
+    
     try {
         const payload = {
             action: 'submit', empCode: currentUser.empCode, surveyorName: currentUser.name,
@@ -521,10 +593,18 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         };
         const result = await apiCall(payload);
         saveHierarchyToStorage(); 
-        alert(result); 
+        
+        // [ADD-7] Form reset and feedback after success
         document.getElementById('dtForm').reset();
-    } catch(err){}
-    hideLoader();
+        alert(result); 
+    } catch(err){
+        console.error(err);
+    } finally {
+        // [ADD-7] Restore UI state
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Submit Final Survey";
+        hideLoader();
+    }
 };
 
 // --- QC MODULE ---
@@ -597,7 +677,7 @@ function openQCReview(rowIdx) {
     mc.innerHTML = `
         <div class="row g-3">
             <div class="col-md-6">
-                <h6 class="text-primary border-bottom pb-1">Hierarchy Details</h6>
+                <h6 class="border-bottom pb-1 fw-bold" style="color: var(--primary-color);">Hierarchy Details</h6>
                 <ul class="list-unstyled small">
                     <li><b>Zone:</b> ${item.details.zone}</li>
                     <li><b>Circle:</b> ${item.details.circle}</li>
@@ -607,7 +687,7 @@ function openQCReview(rowIdx) {
                 </ul>
             </div>
             <div class="col-md-6">
-                <h6 class="text-primary border-bottom pb-1">Meter & Asset</h6>
+                <h6 class="border-bottom pb-1 fw-bold" style="color: var(--primary-color);">Meter & Asset</h6>
                 <ul class="list-unstyled small">
                     <li><b>QR Code:</b> ${item.details.qrCode}</li>
                     <li><b>Type:</b> ${item.details.meterType}</li>
@@ -618,10 +698,10 @@ function openQCReview(rowIdx) {
                 </ul>
             </div>
             <div class="col-12 mt-3">
-                <h6 class="text-primary border-bottom pb-1">Attachments</h6>
-                <div class="d-flex gap-2">
-                    <a href="${item.meterImg}" target="_blank" class="btn btn-outline-primary btn-sm">Open Meter Image</a>
-                    <a href="${item.meterDtImg}" target="_blank" class="btn btn-outline-info btn-sm">Open DT Image</a>
+                <h6 class="border-bottom pb-1 fw-bold" style="color: var(--primary-color);">Attachments</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="${item.meterImg}" target="_blank" class="btn btn-outline-primary btn-sm flex-fill">Meter Image</a>
+                    <a href="${item.meterDtImg}" target="_blank" class="btn btn-outline-info btn-sm flex-fill">DT Image</a>
                 </div>
             </div>
         </div>
