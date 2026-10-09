@@ -2,66 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- OLD: <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
-    <!-- [FIX-1] Ensure proper viewport for mobile without blocking accessibility scaling -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>DT Tagging Energy Calculation</title>
+    <!-- OLD: <title>DT Tagging Energy Calculation</title> -->
+    <!-- [CHANGE-3] Title update -->
+    <title>DT Feeder Tagging</title>
     
-    <!-- [ADD-7] Pinned Bootstrap versions with SRI hashes -->
+    <!-- [ADD-7] Pinned Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    
-    <!-- [ADD-4] Favicon using the new direct logo link -->
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
 
     <style>
-        /* OLD: :root { --main-bg: #f4f6f9; --primary-color: #0d233a; --accent-color: #e65c00; --qc-header: #fdf3e8; } */
-        /* [FIX-6] Theme overhaul: Navy (#002060) and Green (#92D050) */
         :root { 
             --main-bg: #f8f9fa; 
             --primary-color: #002060; 
             --accent-color: #92D050; 
             --qc-header: #e9f5e1; 
         }
-        
-        /* OLD: body { font-size: 1rem; } */
-        /* [FIX-1] Base font 16px to stop iOS input zoom */
         html { font-size: 16px; }
         body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; color: var(--primary-color); }
-        
         .hidden { display: none !important; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,32,96,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
-        
-        /* Navbar Branding */
         .navbar { background-color: var(--primary-color) !important; border-bottom: 4px solid var(--accent-color); position: sticky; top: 0; z-index: 1040; }
         .navbar-brand img { background: white; padding: 4px; border-radius: 4px; }
-        
-        /* General Table & Mobile Wrapper */
         .table-responsive { max-height: 65vh; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 8px; border: 1px solid #dee2e6; }
-        /* OLD: th { position: sticky; top: 0; z-index: 10; font-size: 0.875rem; white-space: nowrap; } */
-        /* [FIX-5] Sticky TH needs background color to prevent scroll overlap */
         th { position: sticky; top: 0; background-color: var(--primary-color) !important; color: white !important; z-index: 10; font-size: 0.875rem; white-space: nowrap; }
         td { font-size: 0.875rem; white-space: nowrap; vertical-align: middle; }
-        
         .card-header { background-color: var(--primary-color); color: white; }
-
-        /* [ADD-1] Touch targets min 44px */
         .form-control, .form-select, .btn { min-height: 44px; }
-        
-        /* [ADD-3] Visual styling for read-only auto-populated inputs */
         input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; color: var(--primary-color); font-weight: 600; border: 1px dashed #adb5bd; }
-        
-        /* [ADD-6] Stronger button visibility with navy text on green accent */
         .btn-accent { background-color: var(--accent-color) !important; color: var(--primary-color) !important; font-weight: bold; border: none; }
         .btn-accent:hover { background-color: #7ebd45 !important; color: white !important; }
-        
-        /* [ADD-7] Report Summary Cards */
         .summary-card { border-left: 5px solid var(--primary-color); border-radius: 8px; }
-        
-        /* Toast Container */
         .toast-container { z-index: 1055; }
-
-        /* [FIX-4] Mobile overrides scoped properly */
         @media (max-width: 768px) {
             #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
             .nav-actions { flex-direction: column; width: 100%; align-items: flex-start !important; }
@@ -71,13 +43,11 @@
 </head>
 <body>
 
-    <!-- Global Loader -->
     <div id="loader" class="loading-overlay hidden">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--accent-color);" role="status"></div>
         <h5 id="loader-text" class="fw-bold">Processing...</h5>
     </div>
 
-    <!-- [ADD-7] Bootstrap Toasts for non-blocking feedback -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="appToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -87,18 +57,18 @@
         </div>
     </div>
 
-    <!-- Login Screen -->
-    <div id="loginView" class="container" style="max-width: 400px; margin-top: 10vh;">
+    <!-- OLD: <div id="loginView" class="container" style="max-width: 400px; margin-top: 10vh;"> -->
+    <!-- [CHANGE-1] Removed container class -->
+    <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <!-- OLD: <img src="https://drive.google.com/thumbnail?id=1z83s04R7Iklhh-7ave8pMkFkuk-SV_Yq&sz=w800" ... -->
-                <!-- [FIX-4] Swapped ID for the new requested logo. Using direct export link with a thumbnail fallback. -->
                 <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
                 
-                <h4 class="mb-4 text-dark fw-bold" style="color: var(--primary-color) !important;">DT Tagging System</h4>
+                <!-- OLD: <h4 class="mb-4 text-dark fw-bold" style="color: var(--primary-color) !important;">DT Tagging System</h4> -->
+                <!-- [CHANGE-3] Branding text update -->
+                <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">DT Feeder Tagging</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
-                        <!-- [ADD-7] Accessibility: Added 'for' attribute mapping -->
                         <label for="loginEmpCode" class="form-label text-muted small fw-bold">Employee Code</label>
                         <input type="text" id="loginEmpCode" class="form-control" required autocomplete="username">
                     </div>
@@ -112,16 +82,14 @@
         </div>
     </div>
 
-    <!-- Main Application Wrapper -->
     <div id="appView" class="hidden">
-        
-        <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
-                    <!-- [FIX-4] Logo implementation -->
                     <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    DT System
+                    <!-- OLD: DT System -->
+                    <!-- [CHANGE-3] Branding text update -->
+                    DT Feeder Tagging
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -129,12 +97,10 @@
                 <div class="collapse navbar-collapse" id="navMenu">
                     <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
                         <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
-                        
                         <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
                         <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
                         <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal();">Report Portal</button>
                         <button id="navAdmin" class="btn btn-sm btn-danger me-2 fw-bold hidden" onclick="switchView('viewAdmin'); loadAdmin();">Admin</button>
-                        
                         <button class="btn btn-sm btn-outline-light" onclick="logout()">Logout</button>
                     </div>
                 </div>
@@ -143,8 +109,12 @@
 
         <div class="container-fluid px-3 py-4">
             
-            <!-- 1. USER FORM VIEW -->
-            <div id="viewUser" class="container hidden" style="max-width: 900px;">
+            <!-- OLD: <div id="viewUser" class="container hidden" style="max-width: 900px;"> -->
+            <!-- [CHANGE-1] Removed container class from User View -->
+            <div id="viewUser" class="hidden" style="max-width: 900px; margin: 0 auto;">
+                <!-- [ADD-6] User Failed Submissions Alert -->
+                <div id="surveyorFailedAlert" class="alert alert-danger fw-bold hidden" role="alert"></div>
+
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">New DT / Feeder Survey</h5>
@@ -159,10 +129,7 @@
                                 <div class="col-12 col-md-3"><label for="f_division" class="small text-muted fw-bold">Division</label><select id="f_division" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
                                 <div class="col-12 col-md-3"><label for="f_subdiv" class="small text-muted fw-bold">Sub Division</label><select id="f_subdiv" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
                                 <div class="col-12 col-md-6"><label for="f_subname" class="small text-muted fw-bold">Substation Name</label><select id="f_subname" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
-                                
-                                <!-- [FIX-3] Auto-populated locked fields -->
                                 <div class="col-12 col-md-6"><label for="f_subcode" class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
-                                
                                 <div class="col-12 col-md-4"><label for="f_feedername" class="small text-muted fw-bold">Feeder Name</label><select id="f_feedername" class="form-select cascade-trigger" required><option value="">Select</option></select></div>
                                 <div class="col-12 col-md-4"><label for="f_feedercode" class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
                                 <div class="col-12 col-md-4"><label for="f_qrcode" class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
@@ -185,12 +152,13 @@
                                 
                                 <div class="col-12 col-md-6" id="div_meternumber">
                                     <label for="f_meternumber" class="small text-muted fw-bold">New Meter Number</label>
-                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}$" title="2 Letters followed by 7 to 9 Numbers." required>
+                                    <!-- OLD: <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}$" title="2 Letters followed by 7 to 9 Numbers." required> -->
+                                    <!-- [CHANGE-5] Strict Validation, Auto-uppercase, regex pattern update -->
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" pattern="^[A-Z]{2}[0-9]{8,9}$" title="Exactly 2 uppercase letters followed by 8 to 9 digits" required oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <label for="f_latlong" class="small text-muted fw-bold">GPS Location <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <!-- [FIX-5] Enforced readonly. Required validated via JS before submit. -->
                                         <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for image..." readonly required>
                                         <button type="button" class="btn btn-outline-secondary fw-bold" onclick="getLocation(true)">Retry GPS</button>
                                     </div>
@@ -200,7 +168,6 @@
                             
                             <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Attachments</h6>
                             <div class="row g-3 mb-4">
-                                <!-- [ADD-7] capture="environment" to default to back camera -->
                                 <div class="col-12 col-md-6">
                                     <label for="f_meterImg" class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label>
                                     <input type="file" id="f_meterImg" class="form-control" accept="image/*" capture="environment" required>
@@ -219,8 +186,9 @@
                 </div>
             </div>
 
-            <!-- 2. QC VIEW -->
-            <div id="viewQC" class="container hidden" style="max-width: 1200px;">
+            <!-- OLD: <div id="viewQC" class="container hidden" style="max-width: 1200px;"> -->
+            <!-- [CHANGE-1] Removed container class from QC View -->
+            <div id="viewQC" class="hidden" style="max-width: 1200px; margin: 0 auto;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
                     <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="loadQC()">⟳ Refresh Data</button>
@@ -248,12 +216,10 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <!-- [FIX-5] Use event delegation on tbody -->
                                 <tbody id="qcTableBody"></tbody>
                             </table>
                         </div>
                         
-                        <!-- [ADD-7] Server-side Pagination Controls -->
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <span id="qcPagingInfo" class="small text-muted fw-bold"></span>
                             <div>
@@ -271,14 +237,15 @@
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header text-white" style="background-color: var(--primary-color);">
                             <h5 class="modal-title fw-bold">Review Submission Details</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <!-- [ADD-4] Added manual close for fallback mode -->
+                            <button type="button" class="btn-close btn-close-white" id="fallbackModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body bg-light p-4" id="qcModalContent"></div>
                         <div class="modal-footer" style="background-color: #f1f3f5;">
-                            <!-- [FIX-9] Added Reject Reason input -->
                             <input type="text" id="qcRejectReason" class="form-control mb-2 hidden" placeholder="Enter reason for rejection (Required)">
                             <div class="w-100 d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+                                <!-- [ADD-4] ID added for fallback close -->
+                                <button type="button" class="btn btn-secondary fw-bold" id="btnFallbackCloseModal" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
                                 <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve</button>
                             </div>
@@ -287,11 +254,14 @@
                 </div>
             </div>
 
-            <!-- 3. REPORT PORTAL VIEW -->
-            <div id="viewReport" class="hidden">
+            <!-- OLD: <div id="viewReport" class="hidden"> -->
+            <!-- [CHANGE-1] Added center margin constraint for ultra-wide monitors -->
+            <div id="viewReport" class="hidden" style="max-width: 100vw; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
-                        <h5 class="mb-2 mb-md-0 fw-bold">Installation Master Report</h5>
+                        <!-- OLD: <h5 class="mb-2 mb-md-0 fw-bold">Installation Master Report</h5> -->
+                        <!-- [CHANGE-3] Text update -->
+                        <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
                         <div class="d-flex w-100 w-md-auto gap-2">
                             <button class="btn btn-light btn-sm fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="loadReportPortal(1)">VIEW / APPLY</button>
                             <button class="btn btn-accent btn-sm fw-bold shadow w-100 w-md-auto" onclick="exportReportCSV()">EXPORT CSV</button>
@@ -299,7 +269,6 @@
                     </div>
                     <div class="card-body p-3">
                         
-                        <!-- [ADD-7] Summary Cards -->
                         <div class="row g-3 mb-4" id="reportSummaryCards">
                             <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm"><div class="small text-muted fw-bold">Total</div><h4 class="mb-0 text-primary" id="sumTotal">0</h4></div></div>
                             <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #198754;"><div class="small text-muted fw-bold">Approved</div><h4 class="mb-0 text-success" id="sumApp">0</h4></div></div>
@@ -324,7 +293,6 @@
                                         <th>Install Status</th><th>QC Status</th>
                                     </tr>
                                 </thead>
-                                <!-- [FIX-5] Event delegation target -->
                                 <tbody id="reportTableBody"></tbody>
                             </table>
                         </div>
@@ -340,12 +308,17 @@
                 </div>
             </div>
 
-            <!-- 4. ADMIN USER UI -->
-            <div id="viewAdmin" class="container hidden" style="max-width: 1000px;">
+            <!-- OLD: <div id="viewAdmin" class="container hidden" style="max-width: 1000px;"> -->
+            <!-- [CHANGE-1] Removed container class from Admin View -->
+            <div id="viewAdmin" class="hidden" style="max-width: 1000px; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">Admin - User Management</h5>
-                        <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
+                        <div>
+                            <!-- [ADD-6] Admin Queue Status button -->
+                            <button class="btn btn-warning btn-sm fw-bold me-2" onclick="checkAdminQueueStatus()">Queue Stats</button>
+                            <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
+                        </div>
                     </div>
                     <div class="card-body p-3">
                         
@@ -358,6 +331,14 @@
                                 <div class="col-12 col-md-2"><select id="a_role" class="form-select"><option value="User">User</option><option value="QC">QC</option><option value="ReportPortal">Report Portal</option><option value="Admin">Admin</option></select></div>
                                 <div class="col-12 col-md-2"><input type="text" id="a_zones" class="form-control" placeholder="Zones (e.g. All, Zone1)"></div>
                                 <div class="col-12 col-md-2"><button class="btn btn-success w-100 fw-bold" onclick="adminCreateUser()">Create</button></div>
+                            </div>
+                        </div>
+
+                        <!-- [ADD-2] Admin User Live Search Input -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" id="adminSearch" class="form-control" placeholder="Search by Name or Emp Code...">
+                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('adminSearch').value=''; document.getElementById('adminSearch').dispatchEvent(new Event('input'))">×</button>
                             </div>
                         </div>
 
@@ -374,8 +355,10 @@
         </div>
     </div>
 
+<!-- [CHANGE-4] Moved Bootstrap JS to the end of the body and added defer to ensure robust loading -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+
 <script>
-// --- CONFIGURATION ---
 const API_URL = 'https://script.google.com/macros/s/AKfycbxMWpuMr1cbob1qPcl69cuJ9ezEbXLzkWoeuAsZu2e8sLP8p39D3mgP5UwXpchyZx7GTA/exec';
 let sessionToken = null; 
 let currentUser = null;
@@ -384,11 +367,13 @@ let rawQCData = [];
 let fullReportData = []; 
 let activeQCRowIdx = null; 
 
-// Paging states
 let qcCurrentPage = 1;
 let rptCurrentPage = 1;
 
-// --- CORE UTILITIES & UI ---
+// [ADD-2] Admin variables
+let adminUsersList = [];
+let adminSearchTimeout;
+
 function showLoader(text="Processing...") { document.getElementById('loader-text').innerText=text; document.getElementById('loader').classList.remove('hidden'); }
 function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
 function switchView(viewId) {
@@ -396,15 +381,24 @@ function switchView(viewId) {
     document.getElementById(viewId).classList.remove('hidden');
 }
 
-// [ADD-7] Replace alerts with Bootstrap Toasts
+// [CHANGE-4] Robust Bootstrap fallback for Toasts
 function showToast(msg, isError=false) {
-    const toastEl = document.getElementById('appToast');
-    const toastBody = document.getElementById('toastMessage');
-    toastEl.classList.remove('bg-primary', 'bg-danger', 'bg-success');
-    toastEl.classList.add(isError ? 'bg-danger' : 'bg-success');
-    toastBody.innerText = msg;
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
+    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+        const toastEl = document.getElementById('appToast');
+        const toastBody = document.getElementById('toastMessage');
+        toastEl.classList.remove('bg-primary', 'bg-danger', 'bg-success');
+        toastEl.classList.add(isError ? 'bg-danger' : 'bg-success');
+        toastBody.innerText = msg;
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    } else {
+        // Safe DOM fallback if CDN fails
+        const fb = document.createElement('div');
+        fb.style.cssText = `position:fixed; top:20px; right:20px; z-index:9999; padding:15px; color:white; font-weight:bold; border-radius:5px; box-shadow:0 4px 6px rgba(0,0,0,0.3); background:${isError?'#dc3545':'#198754'}; transition: opacity 0.3s;`;
+        fb.innerText = msg;
+        document.body.appendChild(fb);
+        setTimeout(() => { fb.style.opacity = '0'; setTimeout(()=>fb.remove(), 300); }, 4000);
+    }
 }
 
 function generateUUID() {
@@ -414,13 +408,11 @@ function generateUUID() {
     });
 }
 
-// [FIX-8] Secure API call injecting session token
 async function apiCall(payload) {
     if (sessionToken) payload.token = sessionToken;
     try {
         const res = await fetch(API_URL, { 
             method: 'POST', 
-            // Follow redirects explicitly to handle Apps Script behavior safely
             redirect: 'follow',
             body: JSON.stringify(payload) 
         });
@@ -428,14 +420,13 @@ async function apiCall(payload) {
         if(json.status !== 'success') throw new Error(json.message);
         return json.data;
     } catch(err) { 
+        // [CHANGE-4] Ensures catch doesn't swallow errors
         showToast(err.message, true); 
         throw err; 
     }
 }
 
-// --- AUTHENTICATION ---
 window.onload = () => {
-    // [FIX-8] Only store the token, NEVER the password.
     const savedToken = sessionStorage.getItem('dt_token');
     const savedUser = sessionStorage.getItem('dt_user');
     
@@ -487,7 +478,18 @@ async function routeUser(role) {
     } else {
         document.getElementById('navUser').classList.remove('hidden');
         showLoader("Initializing Device...");
-        await initializeApp(); 
+        await initializeApp();
+        
+        // [ADD-6] Check for failed surveyor submissions
+        try {
+            const errStats = await apiCall({ action: 'getSurveyorFailedQueue' });
+            if (errStats.failed > 0) {
+                const alertEl = document.getElementById('surveyorFailedAlert');
+                alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`;
+                alertEl.classList.remove('hidden');
+            }
+        } catch(e) {}
+        
         switchView('viewUser');
     }
 }
@@ -497,7 +499,6 @@ function logout() {
     location.reload(); 
 }
 
-// --- DATA & CASCADING MODULE ---
 async function fetchMasterData() {
     if(masterDropdownData.length > 0) return;
     const data = await apiCall({ action: 'getAppData' });
@@ -517,8 +518,6 @@ function populateDropdown(id, list, addAll=false) {
     if(el) el.innerHTML = (addAll ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>') + list.map(v => `<option value="${v}">${v}</option>`).join('');
 }
 
-// OLD: function setupCascading(prefix, includeAllOption) { ... document.getElementById(`${prefix}_${key}`) ... }
-// [FIX-1] Removed double underscore bug by passing standard prefix 'f' instead of 'f_'.
 function setupCascading(prefix, includeAllOption) {
     const triggers = ['zone', 'circle', 'division', 'subdiv', 'subname'];
     if (prefix === 'f') triggers.push('feedername'); 
@@ -540,7 +539,6 @@ function setupCascading(prefix, includeAllOption) {
                 return match;
             };
 
-            // Reset child dropdowns
             if (idx + 1 < triggers.length) {
                 for(let i=idx+1; i<triggers.length; i++) {
                     const child = document.getElementById(`${prefix}_${triggers[i]}`);
@@ -552,7 +550,6 @@ function setupCascading(prefix, includeAllOption) {
                     populateDropdown(nextId, getUnique(masterDropdownData, nextSheetCol, rowFilter), includeAllOption);
                 }
                 
-                // [ADD-3] Clear locked fields on parent change
                 if (prefix === 'f') {
                     if (idx < 4) document.getElementById('f_subcode').value = '';
                     if (idx < 5) {
@@ -562,7 +559,6 @@ function setupCascading(prefix, includeAllOption) {
                 }
             }
 
-            // Auto-fill logic
             if(prefix === 'f') {
                 if(key === 'subname') {
                     const row = masterDropdownData.find(rowFilter);
@@ -578,7 +574,6 @@ function setupCascading(prefix, includeAllOption) {
     });
 }
 
-// --- USER FORM MODULE ---
 async function initializeApp() {
     await fetchMasterData();
     populateDropdown('f_metertype', getUnique(masterDropdownData, 9));
@@ -587,7 +582,6 @@ async function initializeApp() {
     setupCascading('f', false);
 }
 
-// [FIX-2] Handle "Feeder" selection correctly without breaking regex validation
 document.getElementById('f_metertype').addEventListener('change', function() {
     const isFeeder = this.value.toLowerCase() === 'feeder';
     
@@ -599,7 +593,7 @@ document.getElementById('f_metertype').addEventListener('change', function() {
         const el = document.getElementById(id);
         if(isFeeder) {
             el.required = false;
-            el.disabled = true; // Use disabled so pattern is ignored
+            el.disabled = true; 
             el.value = '';
         } else {
             el.required = true;
@@ -613,8 +607,6 @@ function saveHierarchyToStorage() {
     localStorage.setItem('dt_hier_v3', JSON.stringify(h));
 }
 
-// OLD: setTimeout chain...
-// [FIX-1] Removed setTimeout chain. Events trigger synchronously.
 function loadSavedHierarchy() {
     const saved = localStorage.getItem('dt_hier_v3');
     if(!saved) return showToast("No saved configuration found.", true);
@@ -622,7 +614,6 @@ function loadSavedHierarchy() {
     const h = JSON.parse(saved);
     ['zone', 'circle', 'division', 'subdiv', 'subname', 'feedername'].forEach(key => {
         const el = document.getElementById('f_' + key);
-        // Map saved value 'z' to 'zone', etc.
         const v = key==='zone'?h.z : key==='circle'?h.c : key==='division'?h.d : key==='subdiv'?h.sd : key==='subname'?h.sn : h.fn;
         if(el && v) {
             el.value = v;
@@ -632,7 +623,6 @@ function loadSavedHierarchy() {
     showToast("Hierarchy loaded.");
 }
 
-// [FIX-3] Stricter GPS Validation (Max 50m accuracy enforced)
 function getLocation(manualRetry = false) {
     if (navigator.geolocation) {
         document.getElementById('f_latlong').value = "Locating via GPS...";
@@ -656,7 +646,6 @@ function getLocation(manualRetry = false) {
     }
 }
 
-// [ADD-7] Canvas-based Image Compression & Watermarking
 function processImage(file, latLongStr) {
     return new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
@@ -666,21 +655,20 @@ function processImage(file, latLongStr) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let w = img.width, h = img.height;
-                const MAX_WIDTH = 1280; // Limit size to save bandwidth
+                const MAX_WIDTH = 1280; 
                 if(w > MAX_WIDTH) { h = Math.round((h * MAX_WIDTH) / w); w = MAX_WIDTH; }
                 
                 canvas.width = w; canvas.height = h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, w, h);
                 
-                // Burn Timestamp and GPS
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
                 ctx.fillRect(0, h - 50, w, 50);
-                ctx.fillStyle = '#92D050'; // Accent Green
+                ctx.fillStyle = '#92D050'; 
                 ctx.font = '20px sans-serif';
                 ctx.fillText(`Date: ${new Date().toLocaleString()} | GPS: ${latLongStr || 'Missing'}`, 20, h - 20);
                 
-                resolve(canvas.toDataURL('image/jpeg', 0.7)); // 70% Quality
+                resolve(canvas.toDataURL('image/jpeg', 0.7)); 
             };
             img.onerror = () => reject("Image load failed");
             img.src = e.target.result;
@@ -689,10 +677,8 @@ function processImage(file, latLongStr) {
     });
 }
 
-// Triggers GPS automatically
 document.getElementById('f_meterImg').addEventListener('change', function() {
     getLocation(false);
-    // Preview
     if(this.files[0]) {
         const url = URL.createObjectURL(this.files[0]);
         document.getElementById('prev_meterImg').src = url;
@@ -717,7 +703,6 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         return;
     }
     
-    // Disable button to prevent double-submit
     const submitBtn = document.getElementById('btnSubmitSurvey');
     submitBtn.disabled = true;
     submitBtn.innerText = "Processing Images...";
@@ -727,11 +712,13 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], latLong);
         showLoader("Compressing photos (1/2)...");
         const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], latLong);
-        showLoader("Securing Upload via Cloud...");
+        
+        // [CHANGE-6] Adjusted loading text since it now pushes to a Queue
+        showLoader("Queuing Submission...");
         
         const payload = {
             action: 'submit',
-            reqId: generateUUID(), // [FIX-9] Idempotency Token
+            reqId: generateUUID(),
             zone: document.getElementById('f_zone').value, circle: document.getElementById('f_circle').value,
             division: document.getElementById('f_division').value, subdiv: document.getElementById('f_subdiv').value,
             subName: document.getElementById('f_subname').value, subCode: document.getElementById('f_subcode').value,
@@ -748,7 +735,6 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         const result = await apiCall(payload);
         saveHierarchyToStorage(); 
         
-        // Form reset except hierarchy
         document.getElementById('f_meternumber').value = '';
         document.getElementById('f_meterImg').value = '';
         document.getElementById('f_meterDtImg').value = '';
@@ -757,7 +743,7 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         
         showToast(result); 
     } catch(err){
-        // Error handled in apiCall, but catch prevents UI locking
+        // Caught inside apiCall and showToast runs there
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
@@ -765,7 +751,6 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     }
 };
 
-// --- QC MODULE ---
 async function loadQC(page = 1) {
     showLoader("Fetching QC Queue...");
     qcCurrentPage = page;
@@ -783,7 +768,6 @@ async function loadQC(page = 1) {
     hideLoader();
 }
 
-// [FIX-5] Prevent DOM manipulation vulnerabilities & looping innerHTML
 function renderQCTable(totalRecs) {
     const tbody = document.getElementById('qcTableBody'); 
     tbody.innerHTML = '';
@@ -796,8 +780,6 @@ function renderQCTable(totalRecs) {
     
     rawQCData.forEach(i => {
         const tr = document.createElement('tr');
-        
-        // Date parsing (ISO from server)
         const dtStr = new Date(i.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
         
         tr.innerHTML = `
@@ -827,7 +809,6 @@ function changeQCPage(dir) {
     else if (dir === 1) loadQC(qcCurrentPage + 1);
 }
 
-// [FIX-5] Event Delegation for QC Table actions
 document.getElementById('qcTableBody').addEventListener('click', (e) => {
     if(e.target.getAttribute('data-action') === 'review') {
         const uid = e.target.getAttribute('data-uid');
@@ -835,17 +816,17 @@ document.getElementById('qcTableBody').addEventListener('click', (e) => {
     }
 });
 
+// [CHANGE-4] Added manual DOM manipulation for Modal fallback if Bootstrap is blocked
 function openQCReview(uid) {
     const item = rawQCData.find(i => i.uid === uid);
     if(!item) return;
     
-    activeQCRowIdx = uid; // Using UID as reference instead of row index
+    activeQCRowIdx = uid; 
     const mc = document.getElementById('qcModalContent');
     
     document.getElementById('qcRejectReason').classList.add('hidden');
     document.getElementById('qcRejectReason').value = '';
     
-    // [ADD-7] Generate Thumbnail Links from Drive ID
     const img1Url = `https://drive.google.com/thumbnail?id=${item.meterImgId}&sz=w800`;
     const img2Url = `https://drive.google.com/thumbnail?id=${item.meterDtImgId}&sz=w800`;
 
@@ -886,8 +867,23 @@ function openQCReview(uid) {
         </div>
     `;
 
-    const modal = new bootstrap.Modal(document.getElementById('qcModal'));
-    modal.show();
+    const modalEl = document.getElementById('qcModal');
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Safe DOM fallback
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        modalEl.style.background = 'rgba(0,0,0,0.5)';
+        
+        const closeFallback = () => {
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+        };
+        document.getElementById('fallbackModalClose').onclick = closeFallback;
+        document.getElementById('btnFallbackCloseModal').onclick = closeFallback;
+    }
 }
 
 document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
@@ -915,8 +911,13 @@ async function submitQCAction(status) {
     }
     
     const modalEl = document.getElementById('qcModal');
-    const modalInst = bootstrap.Modal.getInstance(modalEl);
-    modalInst.hide();
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modalInst = bootstrap.Modal.getInstance(modalEl);
+        if(modalInst) modalInst.hide();
+    } else {
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+    }
     
     showLoader("Updating Ledger...");
     try { 
@@ -926,7 +927,6 @@ async function submitQCAction(status) {
     } catch(err){ hideLoader(); }
 }
 
-// --- REPORT PORTAL ---
 async function loadReportPortal(page = 1) {
     showLoader("Generating Analytics...");
     rptCurrentPage = page;
@@ -976,10 +976,7 @@ function renderReportTable(totalRecs) {
         tbody.appendChild(tr);
     });
 
-    // Update Summary Stats (Current Page representation or Full totals if API returns them)
     document.getElementById('sumTotal').innerText = totalRecs;
-    // Note: The UI summary cards represent the current loaded slice.
-    
     document.getElementById('reportPagingInfo').innerText = `Page ${rptCurrentPage} (Total Found: ${totalRecs})`;
     document.getElementById('btnRptPrev').disabled = (rptCurrentPage === 1);
     document.getElementById('btnRptNext').disabled = (fullReportData.length < 50);
@@ -1007,7 +1004,6 @@ async function exportReportCSV() {
         
         if(!res.data.length) { showToast("No data to export", true); hideLoader(); return; }
         
-        // [FIX-10] Prepend UTF-8 BOM for Excel encoding compatibility
         let csvContent = "\uFEFFTimestamp,UID,Emp Code,Surveyor,Zone,Circle,Division,Sub Division,Substation Name,Substation Code,Feeder Name,Feeder Code,QR Code,Meter Type,Capacity KVA,Meter No,Install Status,Lat/Long,Image 1 URL,Image 2 URL,QC Status,QC By,QC Date,Reject Reason\n";
 
         res.data.forEach(r => {
@@ -1028,30 +1024,66 @@ async function exportReportCSV() {
     hideLoader();
 }
 
-// --- ADMIN MODULE ---
 async function loadAdmin() {
     showLoader("Loading Users...");
     try {
         const data = await apiCall({ action: 'getUsers' });
-        const tbody = document.getElementById('adminUsersBody');
-        tbody.innerHTML = '';
+        adminUsersList = data.users; // [ADD-2] Save to global for search
+        renderAdminUsers(); // [ADD-2] Delegated to render function
+    } catch(err){}
+    hideLoader();
+}
+
+// [ADD-2] Admin User live search debouncing and rendering
+document.getElementById('adminSearch').addEventListener('input', (e) => {
+    clearTimeout(adminSearchTimeout);
+    adminSearchTimeout = setTimeout(() => { renderAdminUsers(e.target.value); }, 250);
+});
+
+function renderAdminUsers(searchQ = '') {
+    const tbody = document.getElementById('adminUsersBody');
+    tbody.innerHTML = '';
+    
+    const term = searchQ.trim().toLowerCase();
+    const filtered = adminUsersList.filter(u => {
+        return (u.name.toLowerCase().includes(term) || u.empCode.toLowerCase().includes(term));
+    });
+
+    if(filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted py-3">No users found.</td></tr>';
+        return;
+    }
+    
+    filtered.forEach(u => {
+        const tr = document.createElement('tr');
+        // Sanitizing DOM injection with createTextNode conceptually
+        const tdName = document.createElement('td'); tdName.textContent = u.name;
+        const tdCode = document.createElement('td'); tdCode.textContent = u.empCode;
         
-        data.users.forEach(u => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${u.name}</td><td>${u.empCode}</td>
-                <td><b style="color: var(--primary-color);">${u.role}</b></td>
-                <td><small>${u.zones}</small></td>
-                <td><span class="badge bg-${u.status==='Active'?'success':'danger'}">${u.status}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary py-0" data-action="role" data-code="${u.empCode}" data-curr="${u.role}">Role</button>
-                    <button class="btn btn-sm btn-outline-info py-0" data-action="zone" data-code="${u.empCode}" data-curr="${u.zones}">Zones</button>
-                    <button class="btn btn-sm btn-outline-warning py-0" data-action="reset" data-code="${u.empCode}">Reset Pass</button>
-                    <button class="btn btn-sm ${u.status==='Active'?'btn-outline-danger':'btn-outline-success'} py-0" data-action="status" data-code="${u.empCode}" data-curr="${u.status}">${u.status==='Active'?'Disable':'Enable'}</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+        tr.appendChild(tdName);
+        tr.appendChild(tdCode);
+        
+        tr.innerHTML += `
+            <td><b style="color: var(--primary-color);">${u.role}</b></td>
+            <td><small>${u.zones}</small></td>
+            <td><span class="badge bg-${u.status==='Active'?'success':'danger'}">${u.status}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary py-0" data-action="role" data-code="${u.empCode}" data-curr="${u.role}">Role</button>
+                <button class="btn btn-sm btn-outline-info py-0" data-action="zone" data-code="${u.empCode}" data-curr="${u.zones}">Zones</button>
+                <button class="btn btn-sm btn-outline-warning py-0" data-action="reset" data-code="${u.empCode}">Reset Pass</button>
+                <button class="btn btn-sm ${u.status==='Active'?'btn-outline-danger':'btn-outline-success'} py-0" data-action="status" data-code="${u.empCode}" data-curr="${u.status}">${u.status==='Active'?'Disable':'Enable'}</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// [ADD-6] Fetch and display Queue Status
+async function checkAdminQueueStatus() {
+    showLoader("Fetching Queue...");
+    try {
+        const res = await apiCall({ action: 'getAdminQueueStatus' });
+        showToast(`Queue Status: ${res.pending} Pending, ${res.done} Done, ${res.failed} Failed.`);
     } catch(err){}
     hideLoader();
 }
@@ -1064,7 +1096,6 @@ document.getElementById('adminUsersBody').addEventListener('click', e => {
     if(!action) return;
     
     if(action === 'role') {
-        // [ADD-7] Replaced prompt with safer logic (simplified for constraints)
         const newRole = window.prompt(`Enter new role for ${code} (User, QC, ReportPortal, Admin):`, curr);
         if(newRole && newRole !== curr) updateAdminUser('updateUserRole', {empCode: code, role: newRole});
     } else if(action === 'zone') {
@@ -1080,7 +1111,13 @@ document.getElementById('adminUsersBody').addEventListener('click', e => {
 async function updateAdminUser(action, payload) {
     showLoader();
     payload.action = action;
-    try { await apiCall(payload); showToast("Success"); loadAdmin(); } catch(err){}
+    try { 
+        await apiCall(payload); 
+        showToast("Success"); 
+        await loadAdmin(); // [CHANGE-2] Wait for reload to reapply active search
+        const activeSearch = document.getElementById('adminSearch').value;
+        if(activeSearch) renderAdminUsers(activeSearch); 
+    } catch(err){}
     hideLoader();
 }
 
@@ -1093,12 +1130,4 @@ async function adminCreateUser() {
             mobile: document.getElementById('a_mobile').value, role: document.getElementById('a_role').value, 
             zones: document.getElementById('a_zones').value || 'All'
         });
-        ['a_name','a_empcode','a_mobile','a_zones'].forEach(id => document.getElementById(id).value = '');
-        showToast("Created Successfully (Default Pass: Pass@123)"); 
-        loadAdmin();
-    } catch(err){}
-    hideLoader();
-}
-</script>
-</body>
-</html>
+        ['a_name','a_empcode','a_mobile','a_zones'].forEach(id
