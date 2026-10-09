@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- OLD: <title>DT Tagging Energy Calculation</title> -->
-    <!-- [CHANGE-3] Title update -->
     <title>DT Feeder Tagging</title>
     
-    <!-- [ADD-7] Pinned Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
 
@@ -57,15 +54,11 @@
         </div>
     </div>
 
-    <!-- OLD: <div id="loginView" class="container" style="max-width: 400px; margin-top: 10vh;"> -->
-    <!-- [CHANGE-1] Removed container class -->
     <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
                 <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
                 
-                <!-- OLD: <h4 class="mb-4 text-dark fw-bold" style="color: var(--primary-color) !important;">DT Tagging System</h4> -->
-                <!-- [CHANGE-3] Branding text update -->
                 <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">DT Feeder Tagging</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
@@ -87,8 +80,6 @@
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
                     <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    <!-- OLD: DT System -->
-                    <!-- [CHANGE-3] Branding text update -->
                     DT Feeder Tagging
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
@@ -109,10 +100,7 @@
 
         <div class="container-fluid px-3 py-4">
             
-            <!-- OLD: <div id="viewUser" class="container hidden" style="max-width: 900px;"> -->
-            <!-- [CHANGE-1] Removed container class from User View -->
             <div id="viewUser" class="hidden" style="max-width: 900px; margin: 0 auto;">
-                <!-- [ADD-6] User Failed Submissions Alert -->
                 <div id="surveyorFailedAlert" class="alert alert-danger fw-bold hidden" role="alert"></div>
 
                 <div class="card shadow-sm border-0">
@@ -152,8 +140,6 @@
                                 
                                 <div class="col-12 col-md-6" id="div_meternumber">
                                     <label for="f_meternumber" class="small text-muted fw-bold">New Meter Number</label>
-                                    <!-- OLD: <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB1234567" pattern="^[A-Za-z]{2}\d{7,9}$" title="2 Letters followed by 7 to 9 Numbers." required> -->
-                                    <!-- [CHANGE-5] Strict Validation, Auto-uppercase, regex pattern update -->
                                     <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" pattern="^[A-Z]{2}[0-9]{8,9}$" title="Exactly 2 uppercase letters followed by 8 to 9 digits" required oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -186,9 +172,8 @@
                 </div>
             </div>
 
-            <!-- OLD: <div id="viewQC" class="container hidden" style="max-width: 1200px;"> -->
-            <!-- [CHANGE-1] Removed container class from QC View -->
-            <div id="viewQC" class="hidden" style="max-width: 1200px; margin: 0 auto;">
+            <!-- [CHANGE-1] Removed container constraint for QC view (Full Screen) -->
+            <div id="viewQC" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
                     <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="loadQC()">⟳ Refresh Data</button>
@@ -237,14 +222,12 @@
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header text-white" style="background-color: var(--primary-color);">
                             <h5 class="modal-title fw-bold">Review Submission Details</h5>
-                            <!-- [ADD-4] Added manual close for fallback mode -->
                             <button type="button" class="btn-close btn-close-white" id="fallbackModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body bg-light p-4" id="qcModalContent"></div>
                         <div class="modal-footer" style="background-color: #f1f3f5;">
                             <input type="text" id="qcRejectReason" class="form-control mb-2 hidden" placeholder="Enter reason for rejection (Required)">
                             <div class="w-100 d-flex justify-content-end gap-2">
-                                <!-- [ADD-4] ID added for fallback close -->
                                 <button type="button" class="btn btn-secondary fw-bold" id="btnFallbackCloseModal" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
                                 <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve</button>
@@ -254,13 +237,10 @@
                 </div>
             </div>
 
-            <!-- OLD: <div id="viewReport" class="hidden"> -->
-            <!-- [CHANGE-1] Added center margin constraint for ultra-wide monitors -->
-            <div id="viewReport" class="hidden" style="max-width: 100vw; margin: 0 auto;">
+            <!-- [CHANGE-1] Removed container constraint for Report Portal (Full Screen) -->
+            <div id="viewReport" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
-                        <!-- OLD: <h5 class="mb-2 mb-md-0 fw-bold">Installation Master Report</h5> -->
-                        <!-- [CHANGE-3] Text update -->
                         <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
                         <div class="d-flex w-100 w-md-auto gap-2">
                             <button class="btn btn-light btn-sm fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="loadReportPortal(1)">VIEW / APPLY</button>
@@ -308,14 +288,12 @@
                 </div>
             </div>
 
-            <!-- OLD: <div id="viewAdmin" class="container hidden" style="max-width: 1000px;"> -->
-            <!-- [CHANGE-1] Removed container class from Admin View -->
-            <div id="viewAdmin" class="hidden" style="max-width: 1000px; margin: 0 auto;">
+            <!-- [CHANGE-1] Removed container constraint for Admin view (Full Screen) -->
+            <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">Admin - User Management</h5>
                         <div>
-                            <!-- [ADD-6] Admin Queue Status button -->
                             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="checkAdminQueueStatus()">Queue Stats</button>
                             <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
                         </div>
@@ -334,7 +312,6 @@
                             </div>
                         </div>
 
-                        <!-- [ADD-2] Admin User Live Search Input -->
                         <div class="mb-3">
                             <div class="input-group">
                                 <input type="text" id="adminSearch" class="form-control" placeholder="Search by Name or Emp Code...">
@@ -355,7 +332,6 @@
         </div>
     </div>
 
-<!-- [CHANGE-4] Moved Bootstrap JS to the end of the body and added defer to ensure robust loading -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
 
 <script>
@@ -370,7 +346,6 @@ let activeQCRowIdx = null;
 let qcCurrentPage = 1;
 let rptCurrentPage = 1;
 
-// [ADD-2] Admin variables
 let adminUsersList = [];
 let adminSearchTimeout;
 
@@ -381,7 +356,6 @@ function switchView(viewId) {
     document.getElementById(viewId).classList.remove('hidden');
 }
 
-// [CHANGE-4] Robust Bootstrap fallback for Toasts
 function showToast(msg, isError=false) {
     if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
         const toastEl = document.getElementById('appToast');
@@ -392,7 +366,6 @@ function showToast(msg, isError=false) {
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
     } else {
-        // Safe DOM fallback if CDN fails
         const fb = document.createElement('div');
         fb.style.cssText = `position:fixed; top:20px; right:20px; z-index:9999; padding:15px; color:white; font-weight:bold; border-radius:5px; box-shadow:0 4px 6px rgba(0,0,0,0.3); background:${isError?'#dc3545':'#198754'}; transition: opacity 0.3s;`;
         fb.innerText = msg;
@@ -420,7 +393,6 @@ async function apiCall(payload) {
         if(json.status !== 'success') throw new Error(json.message);
         return json.data;
     } catch(err) { 
-        // [CHANGE-4] Ensures catch doesn't swallow errors
         showToast(err.message, true); 
         throw err; 
     }
@@ -480,7 +452,6 @@ async function routeUser(role) {
         showLoader("Initializing Device...");
         await initializeApp();
         
-        // [ADD-6] Check for failed surveyor submissions
         try {
             const errStats = await apiCall({ action: 'getSurveyorFailedQueue' });
             if (errStats.failed > 0) {
@@ -713,8 +684,7 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         showLoader("Compressing photos (1/2)...");
         const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], latLong);
         
-        // [CHANGE-6] Adjusted loading text since it now pushes to a Queue
-        showLoader("Queuing Submission...");
+        showLoader("Submitting & Processing Entry...");
         
         const payload = {
             action: 'submit',
@@ -743,7 +713,6 @@ document.getElementById('dtForm').onsubmit = async (e) => {
         
         showToast(result); 
     } catch(err){
-        // Caught inside apiCall and showToast runs there
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
@@ -816,7 +785,6 @@ document.getElementById('qcTableBody').addEventListener('click', (e) => {
     }
 });
 
-// [CHANGE-4] Added manual DOM manipulation for Modal fallback if Bootstrap is blocked
 function openQCReview(uid) {
     const item = rawQCData.find(i => i.uid === uid);
     if(!item) return;
@@ -872,7 +840,6 @@ function openQCReview(uid) {
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
     } else {
-        // Safe DOM fallback
         modalEl.classList.add('show');
         modalEl.style.display = 'block';
         modalEl.style.background = 'rgba(0,0,0,0.5)';
@@ -1028,13 +995,12 @@ async function loadAdmin() {
     showLoader("Loading Users...");
     try {
         const data = await apiCall({ action: 'getUsers' });
-        adminUsersList = data.users; // [ADD-2] Save to global for search
-        renderAdminUsers(); // [ADD-2] Delegated to render function
+        adminUsersList = data.users; 
+        renderAdminUsers(); 
     } catch(err){}
     hideLoader();
 }
 
-// [ADD-2] Admin User live search debouncing and rendering
 document.getElementById('adminSearch').addEventListener('input', (e) => {
     clearTimeout(adminSearchTimeout);
     adminSearchTimeout = setTimeout(() => { renderAdminUsers(e.target.value); }, 250);
@@ -1056,7 +1022,6 @@ function renderAdminUsers(searchQ = '') {
     
     filtered.forEach(u => {
         const tr = document.createElement('tr');
-        // Sanitizing DOM injection with createTextNode conceptually
         const tdName = document.createElement('td'); tdName.textContent = u.name;
         const tdCode = document.createElement('td'); tdCode.textContent = u.empCode;
         
@@ -1078,7 +1043,6 @@ function renderAdminUsers(searchQ = '') {
     });
 }
 
-// [ADD-6] Fetch and display Queue Status
 async function checkAdminQueueStatus() {
     showLoader("Fetching Queue...");
     try {
@@ -1114,7 +1078,7 @@ async function updateAdminUser(action, payload) {
     try { 
         await apiCall(payload); 
         showToast("Success"); 
-        await loadAdmin(); // [CHANGE-2] Wait for reload to reapply active search
+        await loadAdmin(); 
         const activeSearch = document.getElementById('adminSearch').value;
         if(activeSearch) renderAdminUsers(activeSearch); 
     } catch(err){}
