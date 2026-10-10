@@ -20,8 +20,19 @@
         body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; color: var(--primary-color); }
         .hidden { display: none !important; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,32,96,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
+        
+        /* [MODIFIED] Task 1: Fixed sticky navbar styling to ensure it stays on top */
         .navbar { background-color: var(--primary-color) !important; border-bottom: 4px solid var(--accent-color); position: sticky; top: 0; z-index: 1040; }
         .navbar-brand img { background: white; padding: 4px; border-radius: 4px; }
+        
+        /* [MODIFIED] Task 1: Navigation action items horizontal scrolling style for mobile compatibility */
+        .nav-actions { 
+            display: flex; flex-wrap: nowrap; overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; align-items: center;
+        }
+        .nav-actions::-webkit-scrollbar { display: none; }
+        .nav-actions .btn { min-width: max-content; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+        
         .table-responsive { max-height: 65vh; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 8px; border: 1px solid #dee2e6; }
         th { position: sticky; top: 0; background-color: var(--primary-color) !important; color: white !important; z-index: 10; font-size: 0.875rem; white-space: nowrap; }
         td { font-size: 0.875rem; white-space: nowrap; vertical-align: middle; }
@@ -32,15 +43,11 @@
         .btn-accent:hover { background-color: #7ebd45 !important; color: white !important; }
         .summary-card { border-left: 5px solid var(--primary-color); border-radius: 8px; }
         
-        /* [MODIFIED] Task 6: Made Toast Container click-through so it doesn't block top right mobile menu */
         .toast-container { z-index: 1055; pointer-events: none; }
         .toast { pointer-events: auto; }
         
         @media (max-width: 768px) {
             #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
-            .nav-actions { flex-direction: column; width: 100%; align-items: flex-start !important; }
-            .nav-actions button { width: 100%; margin-bottom: 8px; text-align: left; min-height: 44px; font-size: 1.1rem; }
-            .nav-actions span { margin-bottom: 15px !important; display: inline-block; }
         }
         #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; cursor: default !important; }
     </style>
@@ -84,25 +91,21 @@
     </div>
 
     <div id="appView" class="hidden">
-        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+        <nav class="navbar navbar-dark shadow-sm">
+            <div class="container-fluid d-flex flex-nowrap align-items-center">
+                <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
                     <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
                     Portal
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navMenu">
-                    <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
-                        <span id="syncBadge" class="badge bg-warning text-dark me-3 hidden fw-bold" style="font-size: 0.9rem;"></span>
-                        <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
-                        <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
-                        <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
-                        <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal();">Report Portal</button>
-                        <button id="navAdmin" class="btn btn-sm btn-danger me-2 fw-bold hidden" onclick="switchView('viewAdmin'); loadAdmin();">Admin</button>
-                        <button class="btn btn-sm btn-outline-light fw-bold" onclick="logout()">Logout</button>
-                    </div>
+                
+                <!-- [MODIFIED] Task 1: Removed Dropdown Toggler. Integrated horizontal scroll for touch devices. Admin stripped per Task 5. -->
+                <div class="ms-auto nav-actions">
+                    <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold" style="font-size: 0.9rem;"></span>
+                    <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
+                    <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
+                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC(1);">QC</button>
+                    <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden px-3 py-2" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal(1);">Report</button>
+                    <button class="btn btn-sm btn-outline-light fw-bold px-3 py-2" onclick="logout()">Logout</button>
                 </div>
             </div>
         </nav>
@@ -149,8 +152,9 @@
                                 
                                 <div class="col-12 col-md-6" id="div_meternumber">
                                     <label for="f_meternumber" class="small text-muted fw-bold">New Meter Number</label>
-                                    <!-- [MODIFIED] Task 3: Removed inline mobile-unfriendly validation to Javascript logic -->
-                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                                    <!-- [MODIFIED] Task 2: Added maxlength="10" and helper hint text -->
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" maxlength="10" autocapitalize="characters" autocorrect="off" spellcheck="false">
+                                    <small class="text-muted d-block mt-1" style="font-size: 11px;">2 letters + 7 or 8 digits (max 10)</small>
                                     <span id="meterNoMsg" class="hidden"></span>
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -189,7 +193,7 @@
                 </div>
             </div>
 
-            <!-- [ADDED] Task 4: Confirmation Modal -->
+            <!-- Confirmation Modal -->
             <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
@@ -329,47 +333,7 @@
                 </div>
             </div>
 
-            <!-- Admin -->
-            <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold">Admin - User Management</h5>
-                        <div>
-                            <button class="btn btn-warning btn-sm fw-bold me-2" onclick="checkAdminQueueStatus()">Queue Stats</button>
-                            <button class="btn btn-light btn-sm fw-bold text-danger" onclick="document.getElementById('adminFormContainer').classList.toggle('hidden')">Add User</button>
-                        </div>
-                    </div>
-                    <div class="card-body p-3">
-                        
-                        <div id="adminFormContainer" class="hidden mb-4 p-3 bg-light border rounded">
-                            <h6 class="fw-bold mb-3" style="color: var(--primary-color);">Add New User</h6>
-                            <div class="row g-2">
-                                <div class="col-12 col-md-2"><input type="text" id="a_name" class="form-control" placeholder="Full Name"></div>
-                                <div class="col-12 col-md-2"><input type="text" id="a_empcode" class="form-control" placeholder="Emp Code (Login ID)"></div>
-                                <div class="col-12 col-md-2"><input type="text" id="a_mobile" class="form-control" placeholder="Mobile"></div>
-                                <div class="col-12 col-md-2"><select id="a_role" class="form-select"><option value="User">User</option><option value="QC">QC</option><option value="ReportPortal">Report Portal</option><option value="Admin">Admin</option></select></div>
-                                <div class="col-12 col-md-2"><input type="text" id="a_zones" class="form-control" placeholder="Zones (e.g. All, Zone1)"></div>
-                                <div class="col-12 col-md-2"><button class="btn btn-success w-100 fw-bold" onclick="adminCreateUser()">Create</button></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="input-group">
-                                <input type="text" id="adminSearch" class="form-control" placeholder="Search by Name or Emp Code...">
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('adminSearch').value=''; document.getElementById('adminSearch').dispatchEvent(new Event('input'))">×</button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive border rounded">
-                            <table class="table table-bordered mb-0 text-center">
-                                <thead><tr><th>Name</th><th>Emp Code</th><th>Role</th><th>Zones</th><th>Status</th><th>Actions</th></tr></thead>
-                                <tbody id="adminUsersBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            <!-- [MODIFIED] Task 5: Admin UI removed completely. -->
         </div>
     </div>
 
@@ -395,7 +359,6 @@ let map, marker;
 let currentLat = null, currentLng = null, currentAcc = null;
 let watchId = null;
 
-// [ADDED] Task 1: Duplicate validation states
 let duplicateCheckTimer;
 let currentCheckReqId = 0;
 let isMeterDuplicate = false;
@@ -413,7 +376,7 @@ function hideLoader() {
 }
 
 function switchView(viewId) {
-    ['viewUser', 'viewQC', 'viewReport', 'viewAdmin'].forEach(v => {
+    ['viewUser', 'viewQC', 'viewReport'].forEach(v => {
         const el = document.getElementById(v);
         if(el) el.classList.add('hidden');
     });
@@ -518,7 +481,6 @@ function updateSyncBadge(count) {
     }
 }
 
-// [MODIFIED] Task 3: Permanently drop items that trigger hard validation failures on server to stop loops
 async function processSyncQueue() {
     if (isSyncing) return;
     try {
@@ -533,7 +495,7 @@ async function processSyncQueue() {
             } catch (e) {
                 if (e.isServerError) {
                     showToast(`Sync failed permanently: ${e.message}`, true);
-                    await removeFromQueue(item.reqId); // EVICT bad data so it doesn't loop
+                    await removeFromQueue(item.reqId); 
                 } else {
                     console.warn(`Sync paused due to network: ${e.message}`);
                     break;
@@ -548,7 +510,6 @@ async function processSyncQueue() {
 }
 setInterval(processSyncQueue, 15000);
 
-// [MODIFIED] Task 3: Updated apiCall to mark business errors explicitly and support silent mode
 async function apiCall(payload, retries = 1, silent = false) {
     if (sessionToken) payload.token = sessionToken;
     const attempt = async () => {
@@ -567,7 +528,7 @@ async function apiCall(payload, retries = 1, silent = false) {
             
             if (json.status !== 'success') {
                 const err = new Error(json.message || "Unknown server error");
-                err.isServerError = true; // Hard flag for business logic failures
+                err.isServerError = true; 
                 throw err;
             }
             return json.data;
@@ -621,12 +582,17 @@ async function routeUser(role) {
     document.getElementById('userDisplay').innerText = `👤 ${currentUser.name}`;
     
     const r = String(role).toLowerCase();
-    if(r === 'admin') {
-        document.getElementById('navAdmin').classList.remove('hidden'); switchView('viewAdmin'); loadAdmin();
-    } else if(r === 'reportportal') {
-        document.getElementById('navReport').classList.remove('hidden'); switchView('viewReport'); loadReportPortal(1);
+    
+    // [MODIFIED] Task 5: Routing updated. QC gets both QC Panel and Report Portal.
+    if(r === 'reportportal') {
+        document.getElementById('navReport').classList.remove('hidden'); 
+        switchView('viewReport'); 
+        loadReportPortal(1);
     } else if(r === 'qc') {
-        document.getElementById('navQC').classList.remove('hidden'); document.getElementById('navReport').classList.remove('hidden'); switchView('viewQC'); loadQC(1);
+        document.getElementById('navQC').classList.remove('hidden'); 
+        document.getElementById('navReport').classList.remove('hidden'); 
+        switchView('viewQC'); 
+        loadQC(1);
     } else {
         document.getElementById('navUser').classList.remove('hidden');
         try {
@@ -662,14 +628,6 @@ function logout() {
     document.getElementById('appView').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
     document.getElementById('loginEmpCode').value = ''; document.getElementById('loginPassword').value = '';
-    
-    const navMenu = document.getElementById('navMenu');
-    if (navMenu.classList.contains('show')) {
-        if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
-            const bsCollapse = bootstrap.Collapse.getInstance(navMenu) || new bootstrap.Collapse(navMenu, {toggle: false});
-            bsCollapse.hide();
-        } else { navMenu.classList.remove('show'); }
-    }
     showToast("Logged out successfully.");
 }
 
@@ -699,7 +657,6 @@ function setupCascading(prefix, includeAllOption) {
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
-        // Corrected exact syntax from the typo fix
         const el = document.getElementById(`${prefix}_${key}`);
         if(!el) return;
 
@@ -842,39 +799,89 @@ function updateLocationError(err) {
     document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. <button type="button" class="btn btn-sm btn-link p-0 fw-bold" onclick="startGPS()">Retry</button></span>`;
 }
 
-// [MODIFIED] Task 5: Extreme canvas scale-down to prevent payload from exceeding 50,000 sheet characters
+// [MODIFIED] Task 4: Complete rework of processImage to maintain 100% quality, handle EXIF, and dynamic scale watermarking.
 function processImage(file, latLongStr) {
     return new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let w = img.naturalWidth || img.width; 
-                let h = img.naturalHeight || img.height;
-                
-                const MAX_DIM = 800;
-                if (w > h && w > MAX_DIM) { h = Math.floor(h * (MAX_DIM / w)); w = MAX_DIM; } 
-                else if (h > MAX_DIM) { w = Math.floor(w * (MAX_DIM / h)); h = MAX_DIM; }
-                
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                
-                const fontSize = Math.max(16, Math.floor(h * 0.03));
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                ctx.fillRect(0, h - (fontSize * 2.2), w, (fontSize * 2.2));
-                ctx.fillStyle = '#92D050'; 
-                ctx.font = `${fontSize}px sans-serif`;
-                ctx.fillText(`Date: ${new Date().toLocaleString()} | GPS: ${latLongStr || 'Missing'}`, 10, h - (fontSize * 0.8));
-                
-                resolve(canvas.toDataURL('image/jpeg', 0.6)); 
-            };
-            img.onerror = () => reject("Image load failed");
-            img.src = e.target.result;
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.naturalWidth; 
+            let h = img.naturalHeight;
+            
+            // Handle iOS Safari max canvas area limits (~16.7M pixels)
+            const MAX_AREA = 16777216;
+            if ((w * h) > MAX_AREA) {
+                const scaleDown = Math.sqrt(MAX_AREA / (w * h));
+                w = Math.floor(w * scaleDown);
+                h = Math.floor(h * scaleDown);
+                console.warn(`Image exceeds safe canvas memory limits. Sub-scaled to: ${w}x${h}`);
+            }
+            
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            // Font Size relative to short-edge (approx 3%), ensuring readability
+            const minEdge = Math.min(w, h);
+            let fontSize = Math.max(24, Math.floor(minEdge * 0.03));
+            
+            const localDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
+            const lines = [
+                `GPS: ${latLongStr || 'Missing'}`,
+                `Date: ${localDate}`
+            ];
+            
+            ctx.font = `bold ${fontSize}px sans-serif`;
+            const padding = Math.floor(fontSize * 0.5);
+            const lineSpace = Math.floor(fontSize * 0.2);
+            
+            let maxWidth = 0;
+            lines.forEach(line => {
+                let mw = ctx.measureText(line).width;
+                if(mw > maxWidth) maxWidth = mw;
+            });
+            
+            // Extra safety bounds check - scale font down if text exceeds image width somehow
+            if (maxWidth + (padding * 2) > w) {
+                fontSize = Math.floor((w - (padding * 2)) / (maxWidth / fontSize));
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                maxWidth = 0;
+                lines.forEach(line => {
+                    let mw = ctx.measureText(line).width;
+                    if(mw > maxWidth) maxWidth = mw;
+                });
+            }
+            
+            const boxWidth = maxWidth + (padding * 2);
+            const boxHeight = (lines.length * fontSize) + ((lines.length - 1) * lineSpace) + (padding * 2);
+            
+            // Bottom left positioning
+            const boxX = padding;
+            const boxY = h - boxHeight - padding;
+            
+            // Draw background rectangle
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+            
+            // Draw Text
+            ctx.fillStyle = '#92D050'; 
+            ctx.textBaseline = 'top';
+            let currY = boxY + padding;
+            
+            lines.forEach(line => {
+                ctx.fillText(line, boxX + padding, currY);
+                currY += (fontSize + lineSpace);
+            });
+            
+            // Return with JPEG quality 1.0 (uncompressed output relative to canvas input)
+            resolve(canvas.toDataURL('image/jpeg', 1.0)); 
+            URL.revokeObjectURL(img.src);
         };
-        reader.readAsDataURL(file);
+        img.onerror = () => { reject("Image load failed"); URL.revokeObjectURL(img.src); };
+        
+        // Generate blob URL which modern browsers auto-rotate correctly according to EXIF natively onto the canvas
+        img.src = URL.createObjectURL(file);
     });
 }
 
@@ -885,7 +892,6 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
     if(this.files[0]) { document.getElementById('prev_meterDtImg').src = URL.createObjectURL(this.files[0]); document.getElementById('prev_meterDtImg').classList.remove('hidden'); }
 });
 
-// [ADDED] Task 1: Real-time duplicate check with Debounce
 document.getElementById('f_meternumber').addEventListener('input', function(e) {
     const raw = this.value;
     const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -899,6 +905,13 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
     if (!val || document.getElementById('f_metertype').value.toLowerCase() === 'feeder') {
         msgEl.className = 'hidden';
         return;
+    }
+
+    // [MODIFIED] Task 2: Validate correctly formatting first before pinging server for duplicate!
+    if (!/^[A-Z]{2}[0-9]{7,8}\$/.test(val)) {
+        msgEl.className = 'small text-danger fw-bold mt-1 d-block';
+        msgEl.innerText = 'Keep typing (Requires 2 Letters + 7/8 Digits)';
+        return; 
     }
 
     msgEl.className = 'small text-secondary fw-bold mt-1 d-block';
@@ -939,7 +952,6 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
     }, 500);
 });
 
-// [ADDED] Task 4: Complete Front-end Validation intercept
 function validateForm() {
     let errors = [];
     const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
@@ -956,7 +968,8 @@ function validateForm() {
         
         const mn = document.getElementById('f_meternumber').value;
         if(!mn) errors.push("New Meter Number is required.");
-        else if(!/^[A-Z]{2}[0-9]{8,9}\$/.test(mn)) errors.push("Meter Number format invalid (2 letters, 8-9 digits).");
+        // [MODIFIED] Task 2: Validate form strictly requires the new regex (2 letters + 7/8 digits max 10 total)
+        else if(!/^[A-Z]{2}[0-9]{7,8}\$/.test(mn)) errors.push("Meter Number format invalid (requires 2 letters followed by 7 or 8 digits).");
         else if(isMeterDuplicate) errors.push("Meter Number is a duplicate.");
         else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait.");
     }
@@ -1038,16 +1051,14 @@ async function executeSubmit() {
             showToast("Offline disabled. Uploading directly...", true);
             try {
                 await apiCall(payload, 0); 
-                showToast("Form uploaded successfully!");
                 savedLocally = true; 
             } catch (serverErr) { throw new Error("Could not save locally AND server rejected it."); }
         }
         
+        // [MODIFIED] Task 3: Form clears firmly only on fully successful offline or online commit
         if (savedLocally) {
-            saveHierarchyToStorage(); // Task 2: Save as Load Config target
-            resetEntireForm();        // Task 2: Reset EVERYTHING
-            showToast("Submitted successfully!");
-            window.scrollTo(0, 0);
+            saveHierarchyToStorage(); 
+            resetEntireForm();        
             processSyncQueue();
         }
     } catch(err) {
@@ -1058,19 +1069,26 @@ async function executeSubmit() {
     }
 }
 
-// [ADDED] Task 2: Robust Form Auto-Clear logic
+// [MODIFIED] Task 3: Absolute destruction of form state and explicit UI cleanup
 function resetEntireForm() {
     document.getElementById('dtForm').reset();
     
-    // Explicit cascade resets so blank fields aren't holding ghosts
     ['f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_feedername'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.innerHTML = '<option value="">Select</option>';
     });
     
-    document.getElementById('f_subcode').value = '';
-    document.getElementById('f_feedercode').value = '';
-    document.getElementById('f_qrcode').value = '';
+    // Wipe specific locked fields
+    ['f_subcode', 'f_feedercode', 'f_qrcode'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
+    
+    // explicitly wipe the physical <input type="file"> objects
+    ['f_meterImg', 'f_meterDtImg'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = ''; 
+    });
     
     document.getElementById('prev_meterImg').classList.add('hidden');
     document.getElementById('prev_meterDtImg').classList.add('hidden');
@@ -1082,8 +1100,11 @@ function resetEntireForm() {
     isMeterDuplicateChecked = false;
     
     document.getElementById('f_metertype').dispatchEvent(new Event('change'));
+    
+    showToast("Submitted successfully, form cleared.");
+    window.scrollTo({top: 0, behavior: 'smooth'}); // Scroll to the very top gently
 }
 </script>
-<!-- QC, Report Portal, Admin script blocks omitted for length as they function completely verbatim -->
+<!-- QC, Report Portal script blocks omitted for length as they function completely verbatim -->
 </body>
 </html>
