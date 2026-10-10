@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- [MODIFIED] Removed "DT Feeder Tagging" -->
     <title>Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- [ADDED] Leaflet CSS for Live Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
 
@@ -37,14 +35,13 @@
         @media (max-width: 768px) {
             #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
             .nav-actions { flex-direction: column; width: 100%; align-items: flex-start !important; }
-            /* [MODIFIED] Increased tap target size for mobile buttons and adjusted alignment */
             .nav-actions button { width: 100%; margin-bottom: 8px; text-align: left; min-height: 44px; font-size: 1.1rem; }
             .nav-actions span { margin-bottom: 15px !important; display: inline-block; }
         }
-        /* [MODIFIED] Map container - Add default cursor to indicate it's not interactive */
         #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; cursor: default !important; }
-        /* [ADDED] Force Leaflet controls to hide just in case */
-        .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
+        
+        /* [MODIFIED] Removed CSS hiding Leaflet controls so user can zoom and toggle Map/Satellite */
+        /* .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; } */
     </style>
 </head>
 <body>
@@ -52,7 +49,6 @@
     <div id="loader" class="loading-overlay hidden">
         <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--accent-color);" role="status"></div>
         <h5 id="loader-text" class="fw-bold text-center px-3">Processing...</h5>
-        <!-- [ADDED] Fallback container for timeouts -->
         <div id="loader-fallback" class="mt-3 hidden"></div>
     </div>
 
@@ -70,7 +66,6 @@
             <div class="card-body p-4 text-center">
                 <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
                 
-                <!-- [MODIFIED] Removed specific title text, replaced with generic Login -->
                 <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
@@ -92,7 +87,6 @@
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
                     <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    <!-- [MODIFIED] Removed original title text -->
                     Portal
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
@@ -105,7 +99,6 @@
                         <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
                         <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal();">Report Portal</button>
                         <button id="navAdmin" class="btn btn-sm btn-danger me-2 fw-bold hidden" onclick="switchView('viewAdmin'); loadAdmin();">Admin</button>
-                        <!-- [MODIFIED] Ensure logout function triggers correctly on all devices -->
                         <button class="btn btn-sm btn-outline-light fw-bold" onclick="logout()">Logout</button>
                     </div>
                 </div>
@@ -157,16 +150,15 @@
                                     <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" pattern="^[A-Z]{2}[0-9]{8,9}$" title="Exactly 2 uppercase letters followed by 8 to 9 digits" required oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <label for="f_latlong" class="small text-muted fw-bold">GPS Location <span class="text-danger">*</span></label>
+                                    <!-- [MODIFIED] Renamed label to Latitude, Longitude -->
+                                    <label for="f_latlong" class="small text-muted fw-bold">Latitude, Longitude <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <!-- [MODIFIED] Ensure field is strictly readonly so no one can edit it manually -->
                                         <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for GPS..." readonly required>
                                         <button type="button" class="btn btn-outline-secondary fw-bold" onclick="startGPS()">Retry GPS</button>
                                     </div>
                                     <small class="text-muted" style="font-size: 11px;">Captures automatically via Live Map.</small>
                                 </div>
                                 
-                                <!-- [ADDED] Live Map Container -->
                                 <div class="col-12">
                                     <label class="small text-muted fw-bold">Live GPS Map</label>
                                     <div id="map"></div>
@@ -194,6 +186,7 @@
                 </div>
             </div>
 
+            <!-- QC Dashboard -->
             <div id="viewQC" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
@@ -206,13 +199,10 @@
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
-                            
-                            <!-- [ADDED] QC Date Filters -->
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="qc_fromDate" class="form-control"></div>
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="qc_toDate" class="form-control"></div>
 
                             <div class="col-12 mt-2 text-end">
-                                <!-- [MODIFIED] Added Reset Filters button -->
                                 <button class="btn px-4 btn-outline-secondary me-2" onclick="resetQCFilters()">Reset</button>
                                 <button class="btn px-4 text-white" style="background-color: var(--primary-color);" onclick="loadQC(1)">Apply Filters</button>
                             </div>
@@ -264,13 +254,13 @@
                 </div>
             </div>
 
+            <!-- Report Portal -->
             <div id="viewReport" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
                         <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
                         <div class="d-flex w-100 w-md-auto gap-2">
                             <button class="btn btn-light btn-sm fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="loadReportPortal(1)">VIEW / APPLY</button>
-                            <!-- [ADDED] Report Reset Filter -->
                             <button class="btn btn-outline-light btn-sm fw-bold w-100 w-md-auto" onclick="resetReportFilters()">RESET</button>
                             <button class="btn btn-accent btn-sm fw-bold shadow w-100 w-md-auto" onclick="exportReportCSV()">EXPORT CSV</button>
                         </div>
@@ -290,7 +280,6 @@
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="rpt_subdiv" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
                             <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="rpt_subname" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
                             
-                            <!-- [ADDED] Report Date Filters -->
                             <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="rpt_fromDate" class="form-control"></div>
                             <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="rpt_toDate" class="form-control"></div>
                         </div>
@@ -320,6 +309,7 @@
                 </div>
             </div>
 
+            <!-- Admin -->
             <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -364,7 +354,6 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
-<!-- [ADDED] Leaflet JS for Map -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
@@ -382,12 +371,10 @@ let rptCurrentPage = 1;
 let adminUsersList = [];
 let adminSearchTimeout;
 
-// [ADDED] Global variables for Live Map / GPS
 let map, marker;
 let currentLat = null, currentLng = null, currentAcc = null;
 let watchId = null;
 
-// [MODIFIED] Added fallback container reset to showLoader
 function showLoader(text="Processing...") { 
     document.getElementById('loader-text').innerText = text; 
     document.getElementById('loader-fallback').classList.add('hidden');
@@ -485,7 +472,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     }
 };
 
-// [MODIFIED] Added try/catch/finally and timeouts to fix the "Initializing Device" freeze
 async function routeUser(role) {
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('appView').classList.remove('hidden');
@@ -508,12 +494,8 @@ async function routeUser(role) {
         
         let initTimeout;
         try {
-            console.log("Init Step 1: Starting initialization...");
             showLoader("Step 1/3: Initializing Device...");
-            
-            // Hard fallback timeout (20 seconds) in case promises hang
             initTimeout = setTimeout(() => {
-                console.error("Init Timeout Hit");
                 hideLoader();
                 document.getElementById('loader-text').innerText = "Initialization took too long.";
                 document.getElementById('loader-fallback').innerHTML = '<button class="btn btn-warning fw-bold" onclick="location.reload()">Retry Load</button>';
@@ -521,11 +503,9 @@ async function routeUser(role) {
                 document.getElementById('loader').classList.remove('hidden');
             }, 20000);
 
-            console.log("Init Step 2: Fetching Master Data...");
             showLoader("Step 2/3: Fetching Form Data...");
             await initializeApp();
             
-            console.log("Init Step 3: Checking Offline Queue...");
             showLoader("Step 3/3: Checking Sync Status...");
             try {
                 const errStats = await apiCall({ action: 'getSurveyorFailedQueue' });
@@ -534,39 +514,31 @@ async function routeUser(role) {
                     alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`;
                     alertEl.classList.remove('hidden');
                 }
-            } catch(e) {
-                console.warn("Non-fatal error: Failed queue check timeout.", e);
-            }
+            } catch(e) {}
             
             clearTimeout(initTimeout);
-            console.log("Init Complete: Moving to view User");
             switchView('viewUser');
             startGPS();
             
         } catch(err) {
             clearTimeout(initTimeout);
-            console.error("Fatal Init Error:", err);
             showToast("Failed to initialize: " + err.message, true);
         } finally {
-            // THE FIX: hideLoader must always execute!
             hideLoader(); 
         }
     }
 }
 
-// [MODIFIED] Fixed Mobile Logout. Do not use location.reload() in GAS iframes, it causes crashes/blank screens.
 function logout() { 
     sessionStorage.clear(); 
     sessionToken = null;
     currentUser = null;
     
-    // Hide App UI, Show Login UI dynamically without reloading
     document.getElementById('appView').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
     document.getElementById('loginEmpCode').value = '';
     document.getElementById('loginPassword').value = '';
     
-    // Close the mobile collapse menu cleanly if it's open
     const navMenu = document.getElementById('navMenu');
     if (navMenu.classList.contains('show')) {
         if (typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
@@ -576,7 +548,6 @@ function logout() {
             navMenu.classList.remove('show');
         }
     }
-    
     showToast("Logged out successfully.");
 }
 
@@ -704,26 +675,40 @@ function loadSavedHierarchy() {
     showToast("Hierarchy loaded.");
 }
 
-// [MODIFIED] Set Map initialization to STRICTLY Read-Only configuration
+// [MODIFIED] Added Map/Satellite Base Layers and ensured View-Only constraints (except zoom controls)
 function initMap() {
     if(!map) {
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        });
+        
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles © Esri'
+        });
+
         map = L.map('map', {
-            zoomControl: false,       // Hide zoom buttons
-            dragging: false,          // Disable mouse dragging
-            touchZoom: false,         // Disable pinch-to-zoom
+            zoomControl: true,        // Allow zooming
+            dragging: false,          // Disable dragging the map manually
+            touchZoom: false,         // Disable pinch to zoom
             scrollWheelZoom: false,   // Disable scroll wheel zoom
             doubleClickZoom: false,   // Disable double click zoom
             boxZoom: false,           // Disable shift-drag zoom
-            keyboard: false           // Disable keyboard panning
+            keyboard: false,          // Disable keyboard panning
+            layers: [osm]             // Default base map
         }).setView([20.5937, 78.9629], 5);
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        // Add Map / Satellite toggle control
+        const baseMaps = {
+            "Map": osm,
+            "Satellite": satellite
+        };
+        L.control.layers(baseMaps).addTo(map);
     }
 }
 
+// [MODIFIED] Stripped out blocking accuracy logic, added robust fallback/timeout for watchPosition
 function startGPS() {
     initMap();
     if (navigator.geolocation) {
@@ -732,39 +717,60 @@ function startGPS() {
         
         if (watchId) navigator.geolocation.clearWatch(watchId);
         
+        // Timeout fallback if watchPosition stalls or fails to get high accuracy
+        const fallbackTimeout = setTimeout(() => {
+            document.getElementById('gpsStatus').innerHTML = "<span class='text-warning'>Trying coarse location...</span>";
+            navigator.geolocation.getCurrentPosition(
+                updateLocationSuccess,
+                updateLocationError,
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+            );
+        }, 15000);
+
         watchId = navigator.geolocation.watchPosition(
             (p) => { 
-                currentLat = p.coords.latitude;
-                currentLng = p.coords.longitude;
-                currentAcc = p.coords.accuracy;
-
-                document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
-                
-                if (currentAcc > 50) {
-                    document.getElementById('gpsStatus').innerHTML = `<span class="text-warning">Improving GPS accuracy... (${Math.round(currentAcc)}m) - Needs <50m</span>`;
-                } else {
-                    document.getElementById('gpsStatus').innerHTML = `<span class="text-success">GPS Locked (${Math.round(currentAcc)}m accuracy)</span>`;
-                }
-
-                const latlng = [currentLat, currentLng];
-                map.setView(latlng, 18);
-                
-                // [MODIFIED] Ensure marker is explicitly non-interactive
-                if(!marker) {
-                    marker = L.marker(latlng, { interactive: false }).addTo(map);
-                } else {
-                    marker.setLatLng(latlng);
-                }
+                clearTimeout(fallbackTimeout); // Success, cancel fallback
+                updateLocationSuccess(p);
             },
             (err) => {
-                document.getElementById('f_latlong').value = ""; 
-                document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. Ensure HTTPS and location permissions are granted. <button class="btn btn-sm btn-link" onclick="startGPS()">Retry</button></span>`;
+                clearTimeout(fallbackTimeout); // Failed fast, try coarse immediately
+                document.getElementById('gpsStatus').innerHTML = "<span class='text-warning'>Trying coarse location...</span>";
+                navigator.geolocation.getCurrentPosition(
+                    updateLocationSuccess,
+                    updateLocationError,
+                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+                );
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     } else {
         document.getElementById('gpsStatus').innerHTML = "<span class='text-danger'>Geolocation not supported on this device.</span>";
     }
+}
+
+// [ADDED] Reusable success callback for mapping & storing location
+function updateLocationSuccess(p) {
+    currentLat = p.coords.latitude;
+    currentLng = p.coords.longitude;
+    currentAcc = p.coords.accuracy;
+
+    document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+    // Show accuracy strictly as non-blocking grey info text
+    document.getElementById('gpsStatus').innerHTML = `<span class="text-muted" style="font-size: 11px;">±${Math.round(currentAcc)} m</span>`;
+
+    const latlng = [currentLat, currentLng];
+    map.setView(latlng, 18);
+    if(!marker) {
+        marker = L.marker(latlng, { interactive: false }).addTo(map); // Non-clickable pin
+    } else {
+        marker.setLatLng(latlng);
+    }
+}
+
+// [ADDED] Reusable error callback for GPS failure state
+function updateLocationError(err) {
+    document.getElementById('f_latlong').value = ""; 
+    document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. Please allow permissions. <button type="button" class="btn btn-sm btn-link p-0 fw-bold" onclick="startGPS()">Retry</button></span>`;
 }
 
 function processImage(file, latLongStr) {
@@ -816,11 +822,13 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
 document.getElementById('dtForm').onsubmit = async (e) => {
     e.preventDefault();
     
-    if (!currentLat || !currentLng || currentAcc > 50) {
-        showToast(`Valid GPS coordinates (<50m accuracy) are required. Current: ${currentAcc ? Math.round(currentAcc) + 'm' : 'None'}`, true);
+    // [MODIFIED] Removed strict (<50m) accuracy requirement. Only reject if invalid boundaries or missing.
+    if (!currentLat || !currentLng || isNaN(currentLat) || isNaN(currentLng) || currentLat < -90 || currentLat > 90 || currentLng < -180 || currentLng > 180) {
+        showToast(`Valid GPS coordinates are required to submit. Please wait for location or click Retry.`, true);
         return;
     }
     
+    // Since currentLat and currentLng are global and updated by watchPosition, this is always the most recent
     const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
     
     const submitBtn = document.getElementById('btnSubmitSurvey');
@@ -869,7 +877,6 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     }
 };
 
-// [ADDED] Quick reset helper for QC Filters
 function resetQCFilters() {
     ['qc_zone', 'qc_circle', 'qc_division', 'qc_subdiv'].forEach(id => document.getElementById(id).value = 'ALL');
     document.getElementById('qc_fromDate').value = '';
@@ -878,7 +885,6 @@ function resetQCFilters() {
 }
 
 async function loadQC(page = 1) {
-    // [ADDED] Validation before fetch
     const fd = document.getElementById('qc_fromDate').value;
     const td = document.getElementById('qc_toDate').value;
     if (fd && td && fd > td) {
@@ -894,7 +900,6 @@ async function loadQC(page = 1) {
         
         const payload = {
             action: 'getQCData', page: qcCurrentPage, limit: 50,
-            // [MODIFIED] Added date filters to payload
             filters: {
                 fromDate: fd,
                 toDate: td
@@ -1064,7 +1069,6 @@ async function submitQCAction(status) {
     } catch(err){ hideLoader(); }
 }
 
-// [ADDED] Quick reset helper for Report Filters
 function resetReportFilters() {
     ['rpt_zone', 'rpt_circle', 'rpt_division', 'rpt_subdiv', 'rpt_subname'].forEach(id => document.getElementById(id).value = 'ALL');
     document.getElementById('rpt_fromDate').value = '';
@@ -1073,7 +1077,6 @@ function resetReportFilters() {
 }
 
 async function loadReportPortal(page = 1) {
-    // [ADDED] Validation before fetch
     const fd = document.getElementById('rpt_fromDate').value;
     const td = document.getElementById('rpt_toDate').value;
     if (fd && td && fd > td) {
@@ -1095,7 +1098,6 @@ async function loadReportPortal(page = 1) {
                 division: document.getElementById('rpt_division').value,
                 subdiv: document.getElementById('rpt_subdiv').value,
                 subname: document.getElementById('rpt_subname').value,
-                // [MODIFIED] Passing date filters to server
                 fromDate: fd,
                 toDate: td
             }
