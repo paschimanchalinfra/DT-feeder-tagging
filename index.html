@@ -46,7 +46,7 @@
     <div id="loader" class="loading-overlay hidden">
         <div id="loader-spinner" class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--accent-color);" role="status"></div>
         <h5 id="loader-text" class="fw-bold text-center px-3">Processing...</h5>
-        <!-- [ADDED] Fallback container for step failures and graceful retry management -->
+        <!-- Fallback container for step failures and graceful retry management -->
         <div id="loader-fallback" class="mt-4 hidden text-center w-100 px-3" style="max-width: 500px;"></div>
     </div>
 
@@ -91,8 +91,8 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navMenu">
-                    <!-- [MODIFIED] Added Sync Badge -->
                     <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
+                        <!-- Offline Sync Badge -->
                         <span id="syncBadge" class="badge bg-warning text-dark me-3 hidden fw-bold" style="font-size: 0.9rem;"></span>
                         <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
                         <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
@@ -423,50 +423,77 @@ function generateUUID() {
     });
 }
 
-    // [ADDED] IndexedDB and Background Sync Engine
+// =====================================================================
+// [MODIFIED] Re-engineered Robust IndexedDB initialization & Queue Engine
+// =====================================================================
 const DB_NAME = 'PortalOfflineDB';
 const STORE_NAME = 'syncQueue';
+const DB_VERSION = 2; // Bumped version to force a clean init if needed
 let localDB = null;
 let isSyncing = false;
 
-function initIndexedDB() {
+function getDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
+        // Detect if IndexedDB is available (Private Browsing block)
+        if (!window.indexedDB) {
+            return reject(new Error("IndexedDB is not supported on this browser or you are in Private Browsing mode."));
+        }
+        
+        // Return active connection if available
+        if (localDB) return resolve(localDB);
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME, { keyPath: 'reqId' });
             }
         };
-        request.onsuccess = (e) => { localDB = e.target.result; resolve(); };
-        request.onerror = (e) => reject("IndexedDB error: " + e.target.error);
+
+        request.onsuccess = (e) => {
+            localDB = e.target.result;
+            // Handle iOS Safari dropping the DB unexpectedly (e.g. backgrounding app)
+            localDB.onversionchange = () => { localDB.close(); localDB = null; };
+            localDB.onclose = () => { localDB = null; };
+            resolve(localDB);
+        };
+
+        request.onerror = (e) => reject(new Error(e.target.error?.message || "Database open error"));
+        request.onblocked = () => reject(new Error("Database blocked by another tab. Please close other tabs of this app."));
     });
 }
 
-function saveToQueue(payload) {
+// [MODIFIED] Promisified Transaction Wrappers using getDB()
+async function saveToQueue(payload) {
+    const db = await getDB();
     return new Promise((resolve, reject) => {
-        const tx = localDB.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).put(payload);
+        const tx = db.transaction(STORE_NAME, 'readwrite');
         tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        tx.onerror = () => reject(new Error(tx.error?.name || "Transaction error"));
+        // Handle iOS QuotaExceededError which aborts silently
+        tx.onabort = () => reject(new Error(tx.error?.name || "Transaction aborted (Storage quota exceeded?)")); 
+        tx.objectStore(STORE_NAME).put(payload);
     });
 }
 
-function getQueue() {
+async function getQueue() {
+    const db = await getDB();
     return new Promise((resolve, reject) => {
-        const tx = localDB.transaction(STORE_NAME, 'readonly');
+        const tx = db.transaction(STORE_NAME, 'readonly');
         const req = tx.objectStore(STORE_NAME).getAll();
         req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+        req.onerror = () => reject(new Error(tx.error?.name || "Read error"));
     });
 }
 
-function removeFromQueue(reqId) {
+async function removeFromQueue(reqId) {
+    const db = await getDB();
     return new Promise((resolve, reject) => {
-        const tx = localDB.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).delete(reqId);
+        const tx = db.transaction(STORE_NAME, 'readwrite');
         tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        tx.onerror = () => reject(new Error(tx.error?.name || "Delete error"));
+        tx.objectStore(STORE_NAME).delete(reqId);
     });
 }
 
@@ -481,8 +508,9 @@ function updateSyncBadge(count) {
     }
 }
 
+// [MODIFIED] Added error boundary to background queue to prevent crash loops
 async function processSyncQueue() {
-    if (isSyncing || !localDB) return;
+    if (isSyncing) return;
     
     try {
         const queue = await getQueue();
@@ -493,40 +521,40 @@ async function processSyncQueue() {
 
         for (const item of queue) {
             try {
-                // Pass retries=0 so the background worker fails fast if the network drops, leaving it for the next loop
                 await apiCall(item, 0); 
-                await removeFromQueue(item.reqId); // Upload success -> Remove from local DB
+                await removeFromQueue(item.reqId); 
             } catch (e) {
                 console.warn(`Background sync paused. Network or server error on item ${item.reqId}.`);
-                break; // Stop syncing this cycle, try again in 15 seconds
+                break; 
             }
         }
+    } catch (dbErr) {
+        console.warn("Could not access local database for syncing:", dbErr.message);
     } finally {
         isSyncing = false;
-        const finalQueue = await getQueue();
-        updateSyncBadge(finalQueue.length);
+        try {
+            const finalQueue = await getQueue();
+            updateSyncBadge(finalQueue.length);
+        } catch(e) {}
     }
 }
 
-// Automatically check for pending uploads every 15 seconds
 setInterval(processSyncQueue, 15000);
 
-// [MODIFIED] Reusable apiCall helper with text/plain header routing, AbortController timeout, and robust diagnostics
+// =====================================================================
+// API Engine
+// =====================================================================
 async function apiCall(payload, retries = 1) {
     if (sessionToken) payload.token = sessionToken;
     
     const attempt = async () => {
         const controller = new AbortController();
-        // [MODIFIED] Change 20000 (20s) to 60000 (60s) to allow time for image uploads
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); 
         
         try {
             const res = await fetch(API_URL, { 
                 method: 'POST', 
-                headers: {
-                    // CRUCIAL FIX: Using 'text/plain' prevents browser CORS preflight OPTIONS and preserves the POST payload across Google's 302 redirect.
-                    'Content-Type': 'text/plain;charset=utf-8' 
-                },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 redirect: 'follow',
                 body: JSON.stringify(payload),
                 signal: controller.signal
@@ -540,9 +568,7 @@ async function apiCall(payload, retries = 1) {
             console.log(`[API Response for action: ${payload.action}]`, rawText.substring(0, 300));
             
             let json;
-            try {
-                json = JSON.parse(rawText);
-            } catch (parseErr) {
+            try { json = JSON.parse(rawText); } catch (parseErr) {
                 const snippet = rawText.substring(0, 200).replace(/(<([^>]+)>)/gi, "");
                 throw new Error(`Server returned invalid payload instead of JSON. Snippet: "${snippet}"`);
             }
@@ -553,7 +579,7 @@ async function apiCall(payload, retries = 1) {
         } catch (err) {
             clearTimeout(timeoutId);
             if (err.name === 'AbortError') {
-                throw new Error("Request timed out after 20 seconds. Please check your network connection.");
+                throw new Error("Request timed out after 60 seconds. Please check your network connection.");
             }
             throw err;
         }
@@ -603,7 +629,6 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     }
 };
 
-// [MODIFIED] Re-engineered initialization flow wrapped in explicit error-catching. Prevents hanging and guarantees the loader displays a detailed error message and Retry button if a step fails.
 async function routeUser(role) {
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('appView').classList.remove('hidden');
@@ -625,9 +650,13 @@ async function routeUser(role) {
         document.getElementById('navUser').classList.remove('hidden');
         
         try {
+            // [MODIFIED] Changed to new getDB() and gracefully ignore failure here so user isn't blocked on load
+            await getDB().catch(e => console.warn("Offline DB disabled or Private Browsing:", e.message)); 
+            processSyncQueue(); 
+
             console.log("Init Step 1/3: Initializing device parameters...");
             showLoader("Step 1/3: Initializing Device...");
-            await new Promise(resolve => setTimeout(resolve, 300)); // Small pause for smooth UX
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             console.log("Init Step 2/3: Fetching Form Data (Master Dropdowns)...");
             showLoader("Step 2/3: Fetching Form Data…");
@@ -653,7 +682,6 @@ async function routeUser(role) {
         } catch(err) {
             console.error("Initialization Sequence Failed:", err);
             
-            // Explicit error panel takeover: prevents blank screens and gives the user full control to retry.
             document.getElementById('loader-spinner').classList.add('hidden');
             document.getElementById('loader-text').innerText = "Initialization Failed";
             document.getElementById('loader-fallback').innerHTML = `
@@ -719,7 +747,7 @@ function setupCascading(prefix, includeAllOption) {
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
-        const el = document.getElementById(`${prefix}_${key}`);
+        const el = document.getElementById(`${prefix}_key`);
         if(!el) return;
 
         el.addEventListener('change', () => {
@@ -954,7 +982,18 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
     }
 });
 
-// [MODIFIED] Form Submission - Instant UI with Background Sync
+// [ADDED] Helper function to reset form UI
+function resetFormUI() {
+    document.getElementById('f_meternumber').value = '';
+    document.getElementById('f_meterImg').value = '';
+    document.getElementById('f_meterDtImg').value = '';
+    document.getElementById('prev_meterImg').classList.add('hidden');
+    document.getElementById('prev_meterDtImg').classList.add('hidden');
+}
+
+// =====================================================================
+// [MODIFIED] Form Submission - Instant UI with Background Sync and Direct Upload Fallback
+// =====================================================================
 document.getElementById('dtForm').onsubmit = async (e) => {
     e.preventDefault();
     
@@ -967,10 +1006,9 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     
     const submitBtn = document.getElementById('btnSubmitSurvey');
     submitBtn.disabled = true;
-    submitBtn.innerText = "Saving locally...";
+    submitBtn.innerText = "Processing images...";
     
     try {
-        // We still process images synchronously so the user can't select new ones while it runs
         const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
         const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
         
@@ -990,31 +1028,49 @@ document.getElementById('dtForm').onsubmit = async (e) => {
             meterDtImageBase64: img2Base64
         };
         
-        // 1. SAVE INSTANTLY TO BROWSER DATABASE
-        await saveToQueue(payload);
-        saveHierarchyToStorage(); 
+        let savedLocally = false;
+        submitBtn.innerText = "Saving locally...";
+
+        try {
+            // 1. ATTEMPT TO SAVE LOCALLY
+            await saveToQueue(payload);
+            savedLocally = true;
+        } catch (localErr) {
+            console.error("Local save failed:", localErr);
+            // 2. FALLBACK: DIRECT UPLOAD
+            submitBtn.innerText = "Storage blocked. Uploading directly...";
+            showToast("Could not save to device storage. Submitting directly to server...", true);
+            
+            try {
+                await apiCall(payload, 0); 
+                showToast("Form uploaded successfully!");
+                resetFormUI(); // Success on direct upload
+                return; // Exit
+            } catch (serverErr) {
+                console.error("Server upload failed:", serverErr);
+                throw new Error("Could not save offline AND server upload failed. Please check network connection and retry.");
+            }
+        }
         
-        // 2. CLEAR THE UI IMMEDIATELY
-        document.getElementById('f_meternumber').value = '';
-        document.getElementById('f_meterImg').value = '';
-        document.getElementById('f_meterDtImg').value = '';
-        document.getElementById('prev_meterImg').classList.add('hidden');
-        document.getElementById('prev_meterDtImg').classList.add('hidden');
-        
-        showToast("Form saved! It will upload automatically in the background.");
-        
-        // 3. TRIGGER BACKGROUND WORKER
-        processSyncQueue();
+        if (savedLocally) {
+            saveHierarchyToStorage(); 
+            resetFormUI();
+            showToast("Form saved! It will upload automatically in the background.");
+            processSyncQueue();
+        }
         
     } catch(err) {
-        showToast("Error saving form locally: " + err.message, true);
+        console.error("Submission error:", err);
+        showToast(err.message, true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
-        // We DO NOT call hideLoader() because we didn't block the screen with showLoader()
     }
 };
 
+// =====================================================================
+// QC Workflow
+// =====================================================================
 function resetQCFilters() {
     ['qc_zone', 'qc_circle', 'qc_division', 'qc_subdiv'].forEach(id => document.getElementById(id).value = 'ALL');
     document.getElementById('qc_fromDate').value = '';
@@ -1207,6 +1263,9 @@ async function submitQCAction(status) {
     } catch(err){ hideLoader(); }
 }
 
+// =====================================================================
+// Report Portal Workflow
+// =====================================================================
 function resetReportFilters() {
     ['rpt_zone', 'rpt_circle', 'rpt_division', 'rpt_subdiv', 'rpt_subname'].forEach(id => document.getElementById(id).value = 'ALL');
     document.getElementById('rpt_fromDate').value = '';
@@ -1326,6 +1385,9 @@ async function exportReportCSV() {
     hideLoader();
 }
 
+// =====================================================================
+// Admin User Management
+// =====================================================================
 async function loadAdmin() {
     showLoader("Loading Users...");
     try {
