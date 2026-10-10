@@ -747,7 +747,8 @@ function setupCascading(prefix, includeAllOption) {
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
-        const el = document.getElementById(`${prefix}_key`);
+        // [MODIFIED] FIX: Added the missing \$ before {key} so it resolves to f_zone, f_circle, etc.
+        const el = document.getElementById(`${prefix}_${key}`);
         if(!el) return;
 
         el.addEventListener('change', () => {
