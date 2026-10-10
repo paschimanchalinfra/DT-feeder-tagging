@@ -91,7 +91,9 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navMenu">
+                    <!-- [MODIFIED] Added Sync Badge -->
                     <div class="ms-auto d-flex align-items-center nav-actions mt-2 mt-lg-0">
+                        <span id="syncBadge" class="badge bg-warning text-dark me-3 hidden fw-bold" style="font-size: 0.9rem;"></span>
                         <span class="text-light me-3 mb-2 mb-lg-0 small fw-bold" id="userDisplay"></span>
                         <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden" onclick="switchView('viewUser')">Form Entry</button>
                         <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC();">QC Panel</button>
@@ -420,6 +422,94 @@ function generateUUID() {
         return v.toString(16);
     });
 }
+
+    // [ADDED] IndexedDB and Background Sync Engine
+const DB_NAME = 'PortalOfflineDB';
+const STORE_NAME = 'syncQueue';
+let localDB = null;
+let isSyncing = false;
+
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'reqId' });
+            }
+        };
+        request.onsuccess = (e) => { localDB = e.target.result; resolve(); };
+        request.onerror = (e) => reject("IndexedDB error: " + e.target.error);
+    });
+}
+
+function saveToQueue(payload) {
+    return new Promise((resolve, reject) => {
+        const tx = localDB.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(payload);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+function getQueue() {
+    return new Promise((resolve, reject) => {
+        const tx = localDB.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+function removeFromQueue(reqId) {
+    return new Promise((resolve, reject) => {
+        const tx = localDB.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(reqId);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+function updateSyncBadge(count) {
+    const badge = document.getElementById('syncBadge');
+    if (!badge) return;
+    if (count > 0) {
+        badge.classList.remove('hidden');
+        badge.innerText = `⏳ ${count} Pending Upload(s)`;
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+async function processSyncQueue() {
+    if (isSyncing || !localDB) return;
+    
+    try {
+        const queue = await getQueue();
+        updateSyncBadge(queue.length);
+        
+        if (queue.length === 0) return;
+        isSyncing = true;
+
+        for (const item of queue) {
+            try {
+                // Pass retries=0 so the background worker fails fast if the network drops, leaving it for the next loop
+                await apiCall(item, 0); 
+                await removeFromQueue(item.reqId); // Upload success -> Remove from local DB
+            } catch (e) {
+                console.warn(`Background sync paused. Network or server error on item ${item.reqId}.`);
+                break; // Stop syncing this cycle, try again in 15 seconds
+            }
+        }
+    } finally {
+        isSyncing = false;
+        const finalQueue = await getQueue();
+        updateSyncBadge(finalQueue.length);
+    }
+}
+
+// Automatically check for pending uploads every 15 seconds
+setInterval(processSyncQueue, 15000);
 
 // [MODIFIED] Reusable apiCall helper with text/plain header routing, AbortController timeout, and robust diagnostics
 async function apiCall(payload, retries = 1) {
@@ -864,6 +954,7 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
     }
 });
 
+// [MODIFIED] Form Submission - Instant UI with Background Sync
 document.getElementById('dtForm').onsubmit = async (e) => {
     e.preventDefault();
     
@@ -876,15 +967,12 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     
     const submitBtn = document.getElementById('btnSubmitSurvey');
     submitBtn.disabled = true;
-    submitBtn.innerText = "Processing Images...";
-    showLoader("Processing photos (100% Quality) (0/2)...");
+    submitBtn.innerText = "Saving locally...";
     
     try {
+        // We still process images synchronously so the user can't select new ones while it runs
         const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
-        showLoader("Processing photos (100% Quality) (1/2)...");
         const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
-        
-        showLoader("Submitting & Processing Entry...");
         
         const payload = {
             action: 'submit',
@@ -902,21 +990,28 @@ document.getElementById('dtForm').onsubmit = async (e) => {
             meterDtImageBase64: img2Base64
         };
         
-        const result = await apiCall(payload);
+        // 1. SAVE INSTANTLY TO BROWSER DATABASE
+        await saveToQueue(payload);
         saveHierarchyToStorage(); 
         
+        // 2. CLEAR THE UI IMMEDIATELY
         document.getElementById('f_meternumber').value = '';
         document.getElementById('f_meterImg').value = '';
         document.getElementById('f_meterDtImg').value = '';
         document.getElementById('prev_meterImg').classList.add('hidden');
         document.getElementById('prev_meterDtImg').classList.add('hidden');
         
-        showToast(result); 
-    } catch(err){
+        showToast("Form saved! It will upload automatically in the background.");
+        
+        // 3. TRIGGER BACKGROUND WORKER
+        processSyncQueue();
+        
+    } catch(err) {
+        showToast("Error saving form locally: " + err.message, true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
-        hideLoader();
+        // We DO NOT call hideLoader() because we didn't block the screen with showLoader()
     }
 };
 
