@@ -427,7 +427,8 @@ async function apiCall(payload, retries = 1) {
     
     const attempt = async () => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000); // 20-second timeout
+        // [MODIFIED] Change 20000 (20s) to 60000 (60s) to allow time for image uploads
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second timeout
         
         try {
             const res = await fetch(API_URL, { 
