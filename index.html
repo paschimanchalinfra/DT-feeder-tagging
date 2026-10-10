@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>DT Feeder Tagging</title>
+    <!-- [MODIFIED] Removed "DT Feeder Tagging" -->
+    <title>Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- [ADDED] Leaflet CSS for Live Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
 
     <style>
@@ -36,6 +39,8 @@
             .nav-actions { flex-direction: column; width: 100%; align-items: flex-start !important; }
             .nav-actions button { width: 100%; margin-bottom: 5px; text-align: left; }
         }
+        /* [ADDED] Custom style for map container */
+        #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; }
     </style>
 </head>
 <body>
@@ -59,6 +64,8 @@
             <div class="card-body p-4 text-center">
                 <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
                 
+                <!-- [MODIFIED] Removed specific title text, replaced with generic Login -->
+                <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
                         <label for="loginEmpCode" class="form-label text-muted small fw-bold">Employee Code</label>
@@ -79,7 +86,8 @@
             <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
                     <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    DT Feeder Tagging
+                    <!-- [MODIFIED] Removed original title text -->
+                    Portal
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -104,7 +112,7 @@
 
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-bold">New DT / Feeder Survey</h5>
+                        <h5 class="mb-0 fw-bold">New Survey</h5>
                         <button class="btn btn-sm btn-accent shadow-sm" onclick="loadSavedHierarchy()">Load Last Config</button>
                     </div>
                     <div class="card-body p-3 p-md-4">
@@ -144,10 +152,18 @@
                                 <div class="col-12 col-md-6">
                                     <label for="f_latlong" class="small text-muted fw-bold">GPS Location <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for image..." readonly required>
-                                        <button type="button" class="btn btn-outline-secondary fw-bold" onclick="getLocation(true)">Retry GPS</button>
+                                        <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for GPS..." readonly required>
+                                        <!-- [MODIFIED] Changed to invoke new Live GPS flow if needed manually -->
+                                        <button type="button" class="btn btn-outline-secondary fw-bold" onclick="startGPS()">Retry GPS</button>
                                     </div>
-                                    <small class="text-muted" style="font-size: 11px;">Captures automatically when an image is selected.</small>
+                                    <small class="text-muted" style="font-size: 11px;">Captures automatically via Live Map.</small>
+                                </div>
+                                
+                                <!-- [ADDED] Live Map Container -->
+                                <div class="col-12">
+                                    <label class="small text-muted fw-bold">Live GPS Map</label>
+                                    <div id="map"></div>
+                                    <div id="gpsStatus" class="small mt-1 fw-bold text-primary">Initializing GPS Map...</div>
                                 </div>
                             </div>
                             
@@ -171,21 +187,26 @@
                 </div>
             </div>
 
-            <!-- [CHANGE-1] Removed container constraint for QC view (Full Screen) -->
             <div id="viewQC" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
-                    <button class="btn btn-outline-secondary btn-sm fw-bold" onclick="loadQC()">⟳ Refresh Data</button>
                 </div>
                 
                 <div class="card shadow-sm border-0 bg-white">
                     <div class="card-body p-3">
                         <div class="row g-2 mb-4">
-                            <div class="col-12 col-md-3"><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
-                            <div class="col-12 col-md-3"><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
-                            <div class="col-12 col-md-3"><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
-                            <div class="col-12 col-md-3"><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
+                            
+                            <!-- [ADDED] QC Date Filters -->
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="qc_fromDate" class="form-control"></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="qc_toDate" class="form-control"></div>
+
                             <div class="col-12 mt-2 text-end">
+                                <!-- [MODIFIED] Added Reset Filters button -->
+                                <button class="btn px-4 btn-outline-secondary me-2" onclick="resetQCFilters()">Reset</button>
                                 <button class="btn px-4 text-white" style="background-color: var(--primary-color);" onclick="loadQC(1)">Apply Filters</button>
                             </div>
                         </div>
@@ -236,13 +257,14 @@
                 </div>
             </div>
 
-            <!-- [CHANGE-1] Removed container constraint for Report Portal (Full Screen) -->
             <div id="viewReport" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
                         <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
                         <div class="d-flex w-100 w-md-auto gap-2">
                             <button class="btn btn-light btn-sm fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="loadReportPortal(1)">VIEW / APPLY</button>
+                            <!-- [ADDED] Report Reset Filter -->
+                            <button class="btn btn-outline-light btn-sm fw-bold w-100 w-md-auto" onclick="resetReportFilters()">RESET</button>
                             <button class="btn btn-accent btn-sm fw-bold shadow w-100 w-md-auto" onclick="exportReportCSV()">EXPORT CSV</button>
                         </div>
                     </div>
@@ -254,12 +276,16 @@
                             <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #dc3545;"><div class="small text-muted fw-bold">Rejected</div><h4 class="mb-0 text-danger" id="sumRej">0</h4></div></div>
                         </div>
 
-                        <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded">
-                            <div class="col-12 col-md-2"><label class="small text-muted">Zone</label><select id="rpt_zone" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted">Circle</label><select id="rpt_circle" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted">Division</label><select id="rpt_division" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted">Sub Div</label><select id="rpt_subdiv" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-4"><label class="small text-muted">Substation Name</label><select id="rpt_subname" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                        <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded align-items-end">
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="rpt_zone" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="rpt_circle" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="rpt_division" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="rpt_subdiv" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="rpt_subname" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
+                            
+                            <!-- [ADDED] Report Date Filters -->
+                            <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="rpt_fromDate" class="form-control"></div>
+                            <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="rpt_toDate" class="form-control"></div>
                         </div>
 
                         <div class="table-responsive border rounded">
@@ -287,7 +313,6 @@
                 </div>
             </div>
 
-            <!-- [CHANGE-1] Removed container constraint for Admin view (Full Screen) -->
             <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -332,6 +357,8 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+<!-- [ADDED] Leaflet JS for Map -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxMWpuMr1cbob1qPcl69cuJ9ezEbXLzkWoeuAsZu2e8sLP8p39D3mgP5UwXpchyZx7GTA/exec';
@@ -348,11 +375,21 @@ let rptCurrentPage = 1;
 let adminUsersList = [];
 let adminSearchTimeout;
 
+// [ADDED] Global variables for Live Map / GPS
+let map, marker;
+let currentLat = null, currentLng = null, currentAcc = null;
+let watchId = null;
+
 function showLoader(text="Processing...") { document.getElementById('loader-text').innerText=text; document.getElementById('loader').classList.remove('hidden'); }
 function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
 function switchView(viewId) {
     ['viewUser', 'viewQC', 'viewReport', 'viewAdmin'].forEach(v => document.getElementById(v).classList.add('hidden'));
     document.getElementById(viewId).classList.remove('hidden');
+    
+    // [ADDED] Leaflet maps sometimes render gray blocks if initialized while hidden. Invalidate size fixes this.
+    if (viewId === 'viewUser' && map) {
+        setTimeout(() => map.invalidateSize(), 200);
+    }
 }
 
 function showToast(msg, isError=false) {
@@ -461,6 +498,8 @@ async function routeUser(role) {
         } catch(e) {}
         
         switchView('viewUser');
+        // [ADDED] Automatically start GPS monitoring on load
+        startGPS();
     }
 }
 
@@ -593,26 +632,57 @@ function loadSavedHierarchy() {
     showToast("Hierarchy loaded.");
 }
 
-function getLocation(manualRetry = false) {
+// [MODIFIED] Completely replaced manual GPS with watchPosition + Live Map integration
+function initMap() {
+    if(!map) {
+        map = L.map('map').setView([20.5937, 78.9629], 5); // India center approx
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+    }
+}
+
+function startGPS() {
+    initMap();
     if (navigator.geolocation) {
-        document.getElementById('f_latlong').value = "Locating via GPS...";
-        navigator.geolocation.getCurrentPosition(
-            p => { 
-                if (p.coords.accuracy > 50 && !manualRetry) {
-                    document.getElementById('f_latlong').value = "";
-                    showToast(`GPS Accuracy too low (${Math.round(p.coords.accuracy)}m). Needs <50m. Move outside and retry.`, true);
-                    return;
+        document.getElementById('gpsStatus').innerHTML = "<span class='text-primary'>Locating...</span>";
+        document.getElementById('f_latlong').value = "Locating...";
+        
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        
+        watchId = navigator.geolocation.watchPosition(
+            (p) => { 
+                currentLat = p.coords.latitude;
+                currentLng = p.coords.longitude;
+                currentAcc = p.coords.accuracy;
+
+                // Keeps strict 6 decimals, prevents concatenation errors
+                document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+                
+                if (currentAcc > 50) {
+                    document.getElementById('gpsStatus').innerHTML = `<span class="text-warning">Improving GPS accuracy... (${Math.round(currentAcc)}m) - Needs <50m</span>`;
+                } else {
+                    document.getElementById('gpsStatus').innerHTML = `<span class="text-success">GPS Locked (${Math.round(currentAcc)}m accuracy)</span>`;
                 }
-                document.getElementById('f_latlong').value = `${p.coords.latitude.toFixed(6)}, ${p.coords.longitude.toFixed(6)}`; 
+
+                // Update Map marker
+                const latlng = [currentLat, currentLng];
+                map.setView(latlng, 18);
+                if(!marker) {
+                    marker = L.marker(latlng).addTo(map);
+                } else {
+                    marker.setLatLng(latlng);
+                }
             },
-            err => {
+            (err) => {
                 document.getElementById('f_latlong').value = ""; 
-                if(manualRetry) showToast("GPS Denied or Timeout. Please check device permissions.", true);
+                document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. Ensure HTTPS and location permissions are granted. <button class="btn btn-sm btn-link" onclick="startGPS()">Retry</button></span>`;
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 } // strictly forces fresh hardware reading
         );
     } else {
-        if(manualRetry) showToast("Geolocation not supported.", true);
+        document.getElementById('gpsStatus').innerHTML = "<span class='text-danger'>Geolocation not supported on this device.</span>";
     }
 }
 
@@ -624,21 +694,25 @@ function processImage(file, latLongStr) {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                let w = img.width, h = img.height;
-                const MAX_WIDTH = 1280; 
-                if(w > MAX_WIDTH) { h = Math.round((h * MAX_WIDTH) / w); w = MAX_WIDTH; }
+                // [MODIFIED] Removed constraints completely, keeping 100% natural resolution
+                let w = img.naturalWidth || img.width; 
+                let h = img.naturalHeight || img.height;
                 
                 canvas.width = w; canvas.height = h;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, w, h);
                 
+                // Add proportional watermark so it's readable on huge images
+                const fontSize = Math.max(20, Math.floor(h * 0.03));
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                ctx.fillRect(0, h - 50, w, 50);
+                ctx.fillRect(0, h - (fontSize * 2), w, (fontSize * 2));
                 ctx.fillStyle = '#92D050'; 
-                ctx.font = '20px sans-serif';
-                ctx.fillText(`Date: ${new Date().toLocaleString()} | GPS: ${latLongStr || 'Missing'}`, 20, h - 20);
+                ctx.font = `${fontSize}px sans-serif`;
+                ctx.fillText(`Date: ${new Date().toLocaleString()} | GPS: ${latLongStr || 'Missing'}`, 20, h - (fontSize * 0.5));
                 
-                resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                // [MODIFIED] Changed JPEG compression from 0.7 to 1.0 (maximum quality). 
+                // *Note:* Very large base64 strings (over ~10-20MB) may hit Google Apps Script url fetch/payload size limits causing submission errors.
+                resolve(canvas.toDataURL('image/jpeg', 1.0)); 
             };
             img.onerror = () => reject("Image load failed");
             img.src = e.target.result;
@@ -648,7 +722,6 @@ function processImage(file, latLongStr) {
 }
 
 document.getElementById('f_meterImg').addEventListener('change', function() {
-    getLocation(false);
     if(this.files[0]) {
         const url = URL.createObjectURL(this.files[0]);
         document.getElementById('prev_meterImg').src = url;
@@ -656,7 +729,6 @@ document.getElementById('f_meterImg').addEventListener('change', function() {
     }
 });
 document.getElementById('f_meterDtImg').addEventListener('change', function() {
-    getLocation(false);
     if(this.files[0]) {
         const url = URL.createObjectURL(this.files[0]);
         document.getElementById('prev_meterDtImg').src = url;
@@ -667,21 +739,24 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
 document.getElementById('dtForm').onsubmit = async (e) => {
     e.preventDefault();
     
-    const latLong = document.getElementById('f_latlong').value;
-    if(!latLong || latLong.includes("Locating")) {
-        showToast("Valid GPS coordinates are required before submitting.", true);
+    // [MODIFIED] Block submission securely using live JS variables, not input field spoofing
+    if (!currentLat || !currentLng || currentAcc > 50) {
+        showToast(`Valid GPS coordinates (<50m accuracy) are required. Current: ${currentAcc ? Math.round(currentAcc) + 'm' : 'None'}`, true);
         return;
     }
+    
+    // Grabs freshest variable state directly at the moment of submission
+    const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
     
     const submitBtn = document.getElementById('btnSubmitSurvey');
     submitBtn.disabled = true;
     submitBtn.innerText = "Processing Images...";
-    showLoader("Compressing photos (0/2)...");
+    showLoader("Processing photos (100% Quality) (0/2)...");
     
     try {
-        const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], latLong);
-        showLoader("Compressing photos (1/2)...");
-        const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], latLong);
+        const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
+        showLoader("Processing photos (100% Quality) (1/2)...");
+        const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
         
         showLoader("Submitting & Processing Entry...");
         
@@ -696,7 +771,7 @@ document.getElementById('dtForm').onsubmit = async (e) => {
             dtrCapacity: document.getElementById('f_capacity').disabled ? "" : document.getElementById('f_capacity').value, 
             meterNumber: document.getElementById('f_meternumber').disabled ? "" : document.getElementById('f_meternumber').value.toUpperCase(),
             installStatus: document.getElementById('f_status').disabled ? "" : document.getElementById('f_status').value, 
-            latLong: latLong,
+            latLong: finalLatLong,
             meterImageBase64: img1Base64,
             meterDtImageBase64: img2Base64
         };
@@ -719,7 +794,23 @@ document.getElementById('dtForm').onsubmit = async (e) => {
     }
 };
 
+// [ADDED] Quick reset helper for QC Filters
+function resetQCFilters() {
+    ['qc_zone', 'qc_circle', 'qc_division', 'qc_subdiv'].forEach(id => document.getElementById(id).value = 'ALL');
+    document.getElementById('qc_fromDate').value = '';
+    document.getElementById('qc_toDate').value = '';
+    loadQC(1);
+}
+
 async function loadQC(page = 1) {
+    // [ADDED] Validation before fetch
+    const fd = document.getElementById('qc_fromDate').value;
+    const td = document.getElementById('qc_toDate').value;
+    if (fd && td && fd > td) {
+        showToast("From Date cannot be greater than To Date.", true);
+        return;
+    }
+
     showLoader("Fetching QC Queue...");
     qcCurrentPage = page;
     try {
@@ -727,7 +818,12 @@ async function loadQC(page = 1) {
         setupCascading('qc', true); 
         
         const payload = {
-            action: 'getQCData', page: qcCurrentPage, limit: 50
+            action: 'getQCData', page: qcCurrentPage, limit: 50,
+            // [MODIFIED] Added date filters to payload
+            filters: {
+                fromDate: fd,
+                toDate: td
+            }
         };
         const res = await apiCall(payload);
         rawQCData = res.data;
@@ -741,7 +837,7 @@ function renderQCTable(totalRecs) {
     tbody.innerHTML = '';
     
     if(!rawQCData || rawQCData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No pending records found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No pending records found matching your filters.</td></tr>';
         document.getElementById('qcPagingInfo').innerText = '';
         return;
     }
@@ -893,7 +989,23 @@ async function submitQCAction(status) {
     } catch(err){ hideLoader(); }
 }
 
+// [ADDED] Quick reset helper for Report Filters
+function resetReportFilters() {
+    ['rpt_zone', 'rpt_circle', 'rpt_division', 'rpt_subdiv', 'rpt_subname'].forEach(id => document.getElementById(id).value = 'ALL');
+    document.getElementById('rpt_fromDate').value = '';
+    document.getElementById('rpt_toDate').value = '';
+    loadReportPortal(1);
+}
+
 async function loadReportPortal(page = 1) {
+    // [ADDED] Validation before fetch
+    const fd = document.getElementById('rpt_fromDate').value;
+    const td = document.getElementById('rpt_toDate').value;
+    if (fd && td && fd > td) {
+        showToast("From Date cannot be greater than To Date.", true);
+        return;
+    }
+
     showLoader("Generating Analytics...");
     rptCurrentPage = page;
     try {
@@ -907,7 +1019,10 @@ async function loadReportPortal(page = 1) {
                 circle: document.getElementById('rpt_circle').value,
                 division: document.getElementById('rpt_division').value,
                 subdiv: document.getElementById('rpt_subdiv').value,
-                subname: document.getElementById('rpt_subname').value
+                subname: document.getElementById('rpt_subname').value,
+                // [MODIFIED] Passing date filters to server
+                fromDate: fd,
+                toDate: td
             }
         };
         
@@ -924,6 +1039,10 @@ function renderReportTable(totalRecs) {
     
     let cntApp = 0, cntRej = 0;
     
+    if (fullReportData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="14" class="text-center py-4 text-muted">No records found matching your filters.</td></tr>';
+    }
+
     fullReportData.forEach(d => {
         const tr = document.createElement('tr');
         if (d.qcStatus === 'Approved') cntApp++;
@@ -963,7 +1082,9 @@ async function exportReportCSV() {
                 circle: document.getElementById('rpt_circle').value,
                 division: document.getElementById('rpt_division').value,
                 subdiv: document.getElementById('rpt_subdiv').value,
-                subname: document.getElementById('rpt_subname').value
+                subname: document.getElementById('rpt_subname').value,
+                fromDate: document.getElementById('rpt_fromDate').value,
+                toDate: document.getElementById('rpt_toDate').value
             }
         };
         const res = await apiCall(payload);
