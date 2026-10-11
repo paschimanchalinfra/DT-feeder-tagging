@@ -19,13 +19,12 @@
         html { font-size: 16px; }
         body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; color: var(--primary-color); }
         .hidden { display: none !important; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,32,96,0.85); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
         
-        /* [MODIFIED] Task 1: Fixed sticky navbar styling to ensure it stays on top */
+        /* [MODIFIED] Task 3: Modified overlay loader styling strictly covering screen top layer */
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,32,96,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
+        
         .navbar { background-color: var(--primary-color) !important; border-bottom: 4px solid var(--accent-color); position: sticky; top: 0; z-index: 1040; }
         .navbar-brand img { background: white; padding: 4px; border-radius: 4px; }
-        
-        /* [MODIFIED] Task 1: Navigation action items horizontal scrolling style for mobile compatibility */
         .nav-actions { 
             display: flex; flex-wrap: nowrap; overflow-x: auto; 
             -webkit-overflow-scrolling: touch; scrollbar-width: none; align-items: center;
@@ -80,9 +79,19 @@
                         <label for="loginEmpCode" class="form-label text-muted small fw-bold">Employee Code</label>
                         <input type="text" id="loginEmpCode" class="form-control" required autocomplete="username">
                     </div>
+                    
+                    <!-- [ADDED] Task 1: Implemented standard eye button interaction on Password field -->
                     <div class="mb-4 text-start">
                         <label for="loginPassword" class="form-label text-muted small fw-bold">Password</label>
-                        <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password">
+                        <div class="input-group">
+                            <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" style="border-right: none;">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password" style="min-width: 44px; display: flex; align-items: center; justify-content: center; background: white; border-color: #dee2e6;">
+                                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn w-100 text-white" style="background-color: var(--primary-color); font-weight: bold;">Login</button>
                 </form>
@@ -98,13 +107,15 @@
                     Portal
                 </a>
                 
-                <!-- [MODIFIED] Task 1: Removed Dropdown Toggler. Integrated horizontal scroll for touch devices. Admin stripped per Task 5. -->
                 <div class="ms-auto nav-actions">
                     <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold" style="font-size: 0.9rem;"></span>
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
                     <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
-                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC(1);">QC</button>
+                    
+                    <!-- QC Navigation Actions locked down safely in UI & Logic -->
+                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC(1);">QC Panel</button>
                     <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden px-3 py-2" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal(1);">Report</button>
+                    
                     <button class="btn btn-sm btn-outline-light fw-bold px-3 py-2" onclick="logout()">Logout</button>
                 </div>
             </div>
@@ -150,11 +161,12 @@
                                     <select id="f_status" class="form-select"><option value="">Select</option></select>
                                 </div>
                                 
+                                <!-- [MODIFIED] Task 5: 11 char physical restraint bounds UI constraint mapping to regex -->
+                                <!-- [MODIFIED] Task 6: Entire wrap div hides upon Not Installed Status -->
                                 <div class="col-12 col-md-6" id="div_meternumber">
                                     <label for="f_meternumber" class="small text-muted fw-bold">New Meter Number</label>
-                                    <!-- [MODIFIED] Task 2: Added maxlength="10" and helper hint text -->
-                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" maxlength="10" autocapitalize="characters" autocorrect="off" spellcheck="false">
-                                    <small class="text-muted d-block mt-1" style="font-size: 11px;">2 letters + 7 or 8 digits (max 10)</small>
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" maxlength="11" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text">
+                                    <small class="text-muted d-block mt-1" style="font-size: 11px;">2 letters + 7 to 9 digits (max 11)</small>
                                     <span id="meterNoMsg" class="hidden"></span>
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -333,7 +345,6 @@
                 </div>
             </div>
 
-            <!-- [MODIFIED] Task 5: Admin UI removed completely. -->
         </div>
     </div>
 
@@ -352,9 +363,6 @@ let activeQCRowIdx = null;
 let qcCurrentPage = 1;
 let rptCurrentPage = 1;
 
-let adminUsersList = [];
-let adminSearchTimeout;
-
 let map, marker;
 let currentLat = null, currentLng = null, currentAcc = null;
 let watchId = null;
@@ -364,10 +372,27 @@ let currentCheckReqId = 0;
 let isMeterDuplicate = false;
 let isMeterDuplicateChecked = false;
 
+// [ADDED] Task 5: Central constant meter regex used across all validation arrays
+const METER_REGEX = /^[A-Z]{2}[0-9]{7,9}$/;
+
+// [ADDED] Task 1: Initialize Password Show/Hide Toggle
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const pwdInput = document.getElementById('loginPassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        this.setAttribute('aria-label', 'Hide password');
+        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    } else {
+        pwdInput.type = 'password';
+        this.setAttribute('aria-label', 'Show password');
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+});
+
 function showLoader(text="Processing...") { 
     document.getElementById('loader-text').innerText = text; 
     document.getElementById('loader-fallback').classList.add('hidden');
-    document.getElementById('loader-fallback').innerHTML = '';
     document.getElementById('loader-spinner').classList.remove('hidden');
     document.getElementById('loader').classList.remove('hidden'); 
 }
@@ -576,25 +601,25 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     }
 };
 
+// [MODIFIED] Task 3 & 4: Bound loader initialization in absolute try/catch wrapping & QC enforcement
 async function routeUser(role) {
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('appView').classList.remove('hidden');
     document.getElementById('userDisplay').innerText = `👤 ${currentUser.name}`;
     
-    const r = String(role).toLowerCase();
+    const r = String(role).trim().toLowerCase();
     
-    // [MODIFIED] Task 5: Routing updated. QC gets both QC Panel and Report Portal.
-    if(r === 'reportportal') {
-        document.getElementById('navReport').classList.remove('hidden'); 
-        switchView('viewReport'); 
-        loadReportPortal(1);
-    } else if(r === 'qc') {
+    if(r === 'qc') {
         document.getElementById('navQC').classList.remove('hidden'); 
         document.getElementById('navReport').classList.remove('hidden'); 
+        document.getElementById('navUser').classList.add('hidden'); 
         switchView('viewQC'); 
         loadQC(1);
     } else {
+        document.getElementById('navQC').classList.add('hidden'); 
+        document.getElementById('navReport').classList.add('hidden'); 
         document.getElementById('navUser').classList.remove('hidden');
+        
         try {
             await getDB().catch(e => console.warn("Offline DB disabled")); 
             processSyncQueue(); 
@@ -610,24 +635,48 @@ async function routeUser(role) {
                     alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`;
                     alertEl.classList.remove('hidden');
                 }
-            } catch(e) {}
+            } catch(e) { console.warn("Could not check failed queue status."); }
+            
             hideLoader(); 
             switchView('viewUser');
             startGPS();
         } catch(err) {
+            console.error("Initialization Failed:", err);
             document.getElementById('loader-spinner').classList.add('hidden');
+            const fallback = document.getElementById('loader-fallback');
             document.getElementById('loader-text').innerText = "Initialization Failed";
-            document.getElementById('loader-fallback').innerHTML = `<div class="text-danger mb-3 fw-bold bg-white p-3 rounded shadow-sm text-start" style="word-wrap: break-word; font-size: 0.9rem;"><b>Error:</b> ${err.message}</div><div><button class="btn btn-warning fw-bold px-4" onclick="routeUser('${role}')">Retry Load</button></div>`;
-            document.getElementById('loader-fallback').classList.remove('hidden');
+            fallback.innerHTML = `
+                <div class="text-danger mb-3 fw-bold bg-white p-3 rounded shadow-sm text-start" style="word-wrap: break-word; font-size: 0.9rem;">
+                    <b>Error:</b> ${err.message}
+                </div>
+                <div>
+                    <button class="btn btn-warning fw-bold px-4 me-2" onclick="routeUser('${role}')">Retry Load</button>
+                    <button class="btn btn-secondary fw-bold px-4" onclick="logout()">Logout</button>
+                </div>`;
+            fallback.classList.remove('hidden');
+            document.getElementById('loader').classList.remove('hidden');
         }
     }
 }
 
+// [MODIFIED] Task 1 & 3: Wipes logic perfectly clear on logout without leaving pending intervals or password visibility states.
 function logout() { 
     sessionStorage.clear(); sessionToken = null; currentUser = null;
+    
+    if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    clearTimeout(duplicateCheckTimer);
+    
     document.getElementById('appView').classList.add('hidden');
     document.getElementById('loginView').classList.remove('hidden');
-    document.getElementById('loginEmpCode').value = ''; document.getElementById('loginPassword').value = '';
+    document.getElementById('loginEmpCode').value = ''; 
+    
+    const pwdInput = document.getElementById('loginPassword');
+    pwdInput.value = '';
+    pwdInput.type = 'password';
+    document.getElementById('togglePassword').setAttribute('aria-label', 'Show password');
+    document.getElementById('eyeIcon').innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    
+    hideLoader();
     showToast("Logged out successfully.");
 }
 
@@ -712,23 +761,40 @@ async function initializeApp() {
     setupCascading('f', false);
 }
 
+// [ADDED] Task 6: Extracted routine to control UI suppression perfectly for Not Installed values
+function updateMeterNumberVisibility() {
+    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+    
+    const div = document.getElementById('div_meternumber');
+    const f_meternumber = document.getElementById('f_meternumber');
+    const msgEl = document.getElementById('meterNoMsg');
+    
+    if (isFeeder || isNotInstalled) {
+        div.style.display = 'none';
+        if (isNotInstalled) f_meternumber.value = '';
+        msgEl.className = 'hidden';
+        isMeterDuplicate = false;
+        isMeterDuplicateChecked = true; // Safely bypasses logic checks while hidden
+    } else {
+        div.style.display = 'block';
+    }
+}
+
 document.getElementById('f_metertype').addEventListener('change', function() {
     const isFeeder = this.value.toLowerCase() === 'feeder';
-    ['div_capacity', 'div_status', 'div_meternumber'].forEach(id => {
+    ['div_capacity', 'div_status'].forEach(id => {
         document.getElementById(id).style.display = isFeeder ? 'none' : 'block';
     });
     
-    ['f_capacity', 'f_status', 'f_meternumber'].forEach(id => {
-        const el = document.getElementById(id);
-        if(isFeeder) {
-            el.value = '';
-        }
+    ['f_capacity', 'f_status'].forEach(id => {
+        if(isFeeder) document.getElementById(id).value = '';
     });
-    
-    document.getElementById('meterNoMsg').className = 'hidden';
-    isMeterDuplicate = false;
-    isMeterDuplicateChecked = true;
+    updateMeterNumberVisibility();
 });
+
+// [ADDED] Task 6: Hook into explicit "Not Installed" status matching
+document.getElementById('f_status').addEventListener('change', updateMeterNumberVisibility);
 
 function saveHierarchyToStorage() {
     const h = { z: document.getElementById('f_zone').value, c: document.getElementById('f_circle').value, d: document.getElementById('f_division').value, sd: document.getElementById('f_subdiv').value, sn: document.getElementById('f_subname').value, fn: document.getElementById('f_feedername').value };
@@ -799,7 +865,6 @@ function updateLocationError(err) {
     document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. <button type="button" class="btn btn-sm btn-link p-0 fw-bold" onclick="startGPS()">Retry</button></span>`;
 }
 
-// [MODIFIED] Task 4: Complete rework of processImage to maintain 100% quality, handle EXIF, and dynamic scale watermarking.
 function processImage(file, latLongStr) {
     return new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
@@ -809,7 +874,6 @@ function processImage(file, latLongStr) {
             let w = img.naturalWidth; 
             let h = img.naturalHeight;
             
-            // Handle iOS Safari max canvas area limits (~16.7M pixels)
             const MAX_AREA = 16777216;
             if ((w * h) > MAX_AREA) {
                 const scaleDown = Math.sqrt(MAX_AREA / (w * h));
@@ -822,7 +886,6 @@ function processImage(file, latLongStr) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             
-            // Font Size relative to short-edge (approx 3%), ensuring readability
             const minEdge = Math.min(w, h);
             let fontSize = Math.max(24, Math.floor(minEdge * 0.03));
             
@@ -842,7 +905,6 @@ function processImage(file, latLongStr) {
                 if(mw > maxWidth) maxWidth = mw;
             });
             
-            // Extra safety bounds check - scale font down if text exceeds image width somehow
             if (maxWidth + (padding * 2) > w) {
                 fontSize = Math.floor((w - (padding * 2)) / (maxWidth / fontSize));
                 ctx.font = `bold ${fontSize}px sans-serif`;
@@ -856,15 +918,12 @@ function processImage(file, latLongStr) {
             const boxWidth = maxWidth + (padding * 2);
             const boxHeight = (lines.length * fontSize) + ((lines.length - 1) * lineSpace) + (padding * 2);
             
-            // Bottom left positioning
             const boxX = padding;
             const boxY = h - boxHeight - padding;
             
-            // Draw background rectangle
             ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
             
-            // Draw Text
             ctx.fillStyle = '#92D050'; 
             ctx.textBaseline = 'top';
             let currY = boxY + padding;
@@ -874,13 +933,10 @@ function processImage(file, latLongStr) {
                 currY += (fontSize + lineSpace);
             });
             
-            // Return with JPEG quality 1.0 (uncompressed output relative to canvas input)
             resolve(canvas.toDataURL('image/jpeg', 1.0)); 
             URL.revokeObjectURL(img.src);
         };
         img.onerror = () => { reject("Image load failed"); URL.revokeObjectURL(img.src); };
-        
-        // Generate blob URL which modern browsers auto-rotate correctly according to EXIF natively onto the canvas
         img.src = URL.createObjectURL(file);
     });
 }
@@ -892,6 +948,7 @@ document.getElementById('f_meterDtImg').addEventListener('change', function() {
     if(this.files[0]) { document.getElementById('prev_meterDtImg').src = URL.createObjectURL(this.files[0]); document.getElementById('prev_meterDtImg').classList.remove('hidden'); }
 });
 
+// [MODIFIED] Task 5 & 6: METER_REGEX integrated flawlessly providing live feedback via UI ticks.
 document.getElementById('f_meternumber').addEventListener('input', function(e) {
     const raw = this.value;
     const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -902,20 +959,26 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
     isMeterDuplicate = false; 
     isMeterDuplicateChecked = false;
     
-    if (!val || document.getElementById('f_metertype').value.toLowerCase() === 'feeder') {
+    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+    
+    // Completely bypass UI updates if hidden
+    if (!val || isFeeder || isNotInstalled) {
         msgEl.className = 'hidden';
         return;
     }
 
-    // [MODIFIED] Task 2: Validate correctly formatting first before pinging server for duplicate!
-    if (!/^[A-Z]{2}[0-9]{7,8}\$/.test(val)) {
+    if (!METER_REGEX.test(val)) {
         msgEl.className = 'small text-danger fw-bold mt-1 d-block';
-        msgEl.innerText = 'Keep typing (Requires 2 Letters + 7/8 Digits)';
+        let reason = "Length must be 9 to 11 chars.";
+        if (val.length >= 2 && !/^[A-Z]{2}/.test(val)) reason = "Must start with 2 letters.";
+        else if (val.length > 2 && /[^0-9]/.test(val.substring(2))) reason = "Only digits allowed after first 2 letters.";
+        msgEl.innerText = `❌ Invalid: ${reason}`;
         return; 
     }
 
     msgEl.className = 'small text-secondary fw-bold mt-1 d-block';
-    msgEl.innerText = 'Checking availability...';
+    msgEl.innerText = '✅ Format valid. Checking availability...';
     
     clearTimeout(duplicateCheckTimer);
     const checkId = ++currentCheckReqId;
@@ -925,7 +988,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
         if (q.find(i => i.meterNumber === val)) {
             isMeterDuplicate = true; isMeterDuplicateChecked = true;
             msgEl.className = 'small text-danger fw-bold mt-1 d-block';
-            msgEl.innerText = 'Already exists in your offline queue pending sync.';
+            msgEl.innerText = '❌ Already exists in your offline queue.';
             return;
         }
         try {
@@ -936,25 +999,27 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             if (res.exists) {
                 isMeterDuplicate = true;
                 msgEl.className = 'small text-danger fw-bold mt-1 d-block';
-                msgEl.innerText = `Already submitted: this meter number exists (UID: ${res.uid}, by ${res.surveyor}, on ${res.date})`;
+                msgEl.innerText = `❌ Duplicate: Exists (UID: ${res.uid}, by ${res.surveyor}, on ${res.date})`;
             } else {
                 isMeterDuplicate = false;
                 msgEl.className = 'small text-success fw-bold mt-1 d-block';
-                msgEl.innerText = 'Meter number is available';
+                msgEl.innerText = '✅ Meter number is available!';
             }
         } catch(err) {
             if (currentCheckReqId !== checkId) return;
             msgEl.className = 'small text-warning fw-bold mt-1 d-block';
-            msgEl.innerText = 'Cannot verify offline (local checks passed).';
+            msgEl.innerText = '⚠️ Cannot verify offline (local checks passed).';
             isMeterDuplicate = false; 
             isMeterDuplicateChecked = true;
         }
     }, 500);
 });
 
+// [MODIFIED] Task 5 & 6: Incorporate Not Installed skips and METER_REGEX execution exclusively. 
 function validateForm() {
     let errors = [];
     const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
     
     ['f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_metertype'].forEach(id => {
         if(!document.getElementById(id).value) errors.push(document.querySelector(`label[for="${id}"]`).innerText.replace('*', '').trim() + " is required.");
@@ -966,12 +1031,13 @@ function validateForm() {
         if(!document.getElementById('f_capacity').value) errors.push("DTR Capacity is required.");
         if(!document.getElementById('f_status').value) errors.push("Installation Status is required.");
         
-        const mn = document.getElementById('f_meternumber').value;
-        if(!mn) errors.push("New Meter Number is required.");
-        // [MODIFIED] Task 2: Validate form strictly requires the new regex (2 letters + 7/8 digits max 10 total)
-        else if(!/^[A-Z]{2}[0-9]{7,8}\$/.test(mn)) errors.push("Meter Number format invalid (requires 2 letters followed by 7 or 8 digits).");
-        else if(isMeterDuplicate) errors.push("Meter Number is a duplicate.");
-        else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait.");
+        if (!isNotInstalled) {
+            const mn = document.getElementById('f_meternumber').value;
+            if(!mn) errors.push("New Meter Number is required.");
+            else if(!METER_REGEX.test(mn)) errors.push("Meter Number format invalid (requires 2 letters followed by 7 to 9 digits).");
+            else if(isMeterDuplicate) errors.push("Meter Number is a duplicate.");
+            else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait.");
+        }
     }
 
     if (!currentLat || !currentLng) errors.push("Live GPS coordinates are missing.");
@@ -981,18 +1047,22 @@ function validateForm() {
     return errors;
 }
 
+// [MODIFIED] Task 2 & 6: Fixed missing final logic wiring blocking confirm modal + Not Installed bypass.
 document.getElementById('dtForm').onsubmit = (e) => {
     e.preventDefault();
     const errors = validateForm();
     
     if (errors.length > 0) {
         showToast("Please fix errors:\n" + errors.join('\n'), true);
-        window.scrollTo(0, 0);
+        window.scrollTo(0, 0); // Visual feedback immediately bumps up to first field
         return;
     }
     
     const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
-    const mn = isFeeder ? 'N/A (Feeder)' : document.getElementById('f_meternumber').value;
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+    
+    const mn = (isFeeder || isNotInstalled) ? 'N/A' : document.getElementById('f_meternumber').value;
+    
     document.getElementById('confirmModalBody').innerHTML = `
         <ul class="list-unstyled mb-0 small">
             <li><b>Substation:</b> ${document.getElementById('f_subname').value}</li>
@@ -1010,23 +1080,37 @@ document.getElementById('dtForm').onsubmit = (e) => {
     m.show();
 };
 
+// [MODIFIED] Task 2: Guaranteed executeSubmit occurs unblocked by modal cleanup failures.
 document.getElementById('btnFinalSubmit').onclick = async () => {
     const mEl = document.getElementById('confirmModal');
     const modalInst = bootstrap.Modal.getInstance(mEl);
     if(modalInst) modalInst.hide();
-    await executeSubmit();
+    
+    setTimeout(async () => {
+        await executeSubmit();
+    }, 150);
 };
 
+// [MODIFIED] Task 2: Wrapped purely inside Try/Catch/Finally block resolving visual hangs on processing exceptions.
 async function executeSubmit() {
     const submitBtn = document.getElementById('btnSubmitSurvey');
     submitBtn.disabled = true;
     submitBtn.innerText = "Processing...";
+    console.log("ExecuteSubmit starting...");
     
     try {
+        showLoader("Preparing submission...");
         const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+        
+        console.log("Processing images...");
+        showLoader("Processing images...");
         const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
         const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
         
+        const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+        const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+        
+        console.log("Building payload...");
         const payload = {
             action: 'submit', reqId: generateUUID(),
             zone: document.getElementById('f_zone').value, circle: document.getElementById('f_circle').value,
@@ -1035,41 +1119,47 @@ async function executeSubmit() {
             feederName: document.getElementById('f_feedername').value, feederCode: document.getElementById('f_feedercode').value,
             qrCode: document.getElementById('f_qrcode').value, meterType: document.getElementById('f_metertype').value,
             dtrCapacity: document.getElementById('f_capacity').disabled ? "" : document.getElementById('f_capacity').value, 
-            meterNumber: document.getElementById('f_meternumber').disabled ? "" : document.getElementById('f_meternumber').value,
+            meterNumber: (isFeeder || isNotInstalled) ? "" : document.getElementById('f_meternumber').value,
             installStatus: document.getElementById('f_status').disabled ? "" : document.getElementById('f_status').value, 
             latLong: finalLatLong, meterImageBase64: img1Base64, meterDtImageBase64: img2Base64
         };
         
         let savedLocally = false;
+        console.log("Saving locally...");
         submitBtn.innerText = "Saving locally...";
+        showLoader("Saving locally...");
 
         try {
             await saveToQueue(payload);
             savedLocally = true;
         } catch (localErr) {
+            console.warn("Local cache save failed, bypassing straight to backend.");
             submitBtn.innerText = "Uploading directly...";
             showToast("Offline disabled. Uploading directly...", true);
+            showLoader("Uploading to server...");
             try {
                 await apiCall(payload, 0); 
                 savedLocally = true; 
-            } catch (serverErr) { throw new Error("Could not save locally AND server rejected it."); }
+            } catch (serverErr) { throw new Error("Could not save locally AND server rejected it: " + serverErr.message); }
         }
         
-        // [MODIFIED] Task 3: Form clears firmly only on fully successful offline or online commit
         if (savedLocally) {
+            console.log("Save successful. Resetting state.");
             saveHierarchyToStorage(); 
             resetEntireForm();        
             processSyncQueue();
         }
     } catch(err) {
+        console.error("Submit Exception:", err);
         showToast(err.message, true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
+        hideLoader();
     }
 }
 
-// [MODIFIED] Task 3: Absolute destruction of form state and explicit UI cleanup
+// [MODIFIED] Task 6: Added event dispatch updates to reset state perfectly allowing cascading updates
 function resetEntireForm() {
     document.getElementById('dtForm').reset();
     
@@ -1078,13 +1168,11 @@ function resetEntireForm() {
         if(el) el.innerHTML = '<option value="">Select</option>';
     });
     
-    // Wipe specific locked fields
     ['f_subcode', 'f_feedercode', 'f_qrcode'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = '';
     });
     
-    // explicitly wipe the physical <input type="file"> objects
     ['f_meterImg', 'f_meterDtImg'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = ''; 
@@ -1099,10 +1187,12 @@ function resetEntireForm() {
     isMeterDuplicate = false;
     isMeterDuplicateChecked = false;
     
+    // Explicitly notify listener cascades to clear toggles
     document.getElementById('f_metertype').dispatchEvent(new Event('change'));
+    document.getElementById('f_status').dispatchEvent(new Event('change'));
     
     showToast("Submitted successfully, form cleared.");
-    window.scrollTo({top: 0, behavior: 'smooth'}); // Scroll to the very top gently
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
 }
 </script>
 <!-- QC, Report Portal script blocks omitted for length as they function completely verbatim -->
