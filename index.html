@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal</title>
     
-    <!-- Bootstrap Script: Subresource Integrity (SRI) Hash removed to fix the blocked CDN error -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
@@ -49,6 +48,10 @@
             #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
         }
         #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; cursor: default !important; }
+
+        /* [ADDED] Task 2: Dynamic CSS formatting mapped for QC Modal Redesign Viewer */
+        .qc-thumb { width: 60px; height: 60px; object-fit: cover; cursor: pointer; border-radius: 4px; background-color: #333; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #777; transition: all 0.2s; }
+        .qc-thumb:hover { opacity: 1 !important; }
     </style>
 </head>
 <body>
@@ -228,10 +231,10 @@
                 <div class="card shadow-sm border-0 bg-white">
                     <div class="card-body p-3">
                         <div class="row g-2 mb-4">
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="qc_zone" class="form-select cascade-trigger"><option value="ALL">All Zones</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select cascade-trigger"><option value="ALL">All Circles</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select cascade-trigger"><option value="ALL">All Divisions</option></select></div>
+                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select cascade-trigger"><option value="ALL">All Sub Divs</option></select></div>
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="qc_fromDate" class="form-control"></div>
                             <div class="col-12 col-md-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="qc_toDate" class="form-control"></div>
 
@@ -266,23 +269,11 @@
                 </div>
             </div>
 
-            <!-- QC Review Modal -->
+            <!-- [MODIFIED] Task 2: Completely redesigned architecture for QC Dual-Panel Editor Modal -->
             <div class="modal fade" id="qcModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
-                            <h5 class="modal-title fw-bold">Review Submission Details</h5>
-                            <button type="button" class="btn-close btn-close-white" id="fallbackModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body bg-light p-4" id="qcModalContent"></div>
-                        <div class="modal-footer" style="background-color: #f1f3f5;">
-                            <input type="text" id="qcRejectReason" class="form-control mb-2 hidden" placeholder="Enter reason for rejection (Required)">
-                            <div class="w-100 d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-secondary fw-bold" id="btnFallbackCloseModal" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
-                                <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve</button>
-                            </div>
-                        </div>
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" id="qcModalFullContent">
+                        <!-- Dynamic Injection Occurs Here -->
                     </div>
                 </div>
             </div>
@@ -370,6 +361,12 @@ let isMeterDuplicate = false;
 let isMeterDuplicateChecked = false;
 
 const METER_REGEX = /^[A-Z]{2}[0-9]{7,9}$/;
+
+// [ADDED] Task 2 Variables: Image State Tracking
+let qcImagesArr = [];
+let qcCurrentImgIndex = 0;
+let qcZoomLevel = 1;
+let qcNewImagesBase64 = {}; 
 
 document.getElementById('togglePassword').addEventListener('click', function() {
     const pwdInput = document.getElementById('loginPassword');
@@ -752,6 +749,10 @@ async function initializeApp() {
     populateDropdown('f_capacity', getUnique(masterDropdownData, 10));
     populateDropdown('f_status', getUnique(masterDropdownData, 11));
     setupCascading('f', false);
+    
+    // [ADDED] Task 3: Setup cascading dropdown functionality for Backend filter arrays to correctly receive parameter configurations 
+    setupCascading('qc', true);
+    setupCascading('rpt', true);
 }
 
 function updateMeterNumberVisibility() {
@@ -1228,66 +1229,208 @@ function resetQCFilters() {
     loadQC(1);
 }
 
+// [MODIFIED] Task 2: Advanced Layout Controller for QC Image Preview UI
+function qcSetImg(idx) {
+    qcCurrentImgIndex = idx;
+    qcZoomLevel = 1;
+    const b64 = qcNewImagesBase64[idx];
+    const targetUrl = b64 ? b64 : `https://drive.google.com/uc?id=${qcImagesArr[idx].id}`;
+    
+    document.getElementById('qcMainImg').src = targetUrl;
+    document.getElementById('qcMainImg').style.transform = 'scale(1)';
+    document.getElementById('qcImgBadge').innerText = qcImagesArr[idx].title;
+    document.getElementById('qcModifyLabel').innerText = qcImagesArr[idx].title;
+    document.getElementById('qcImgTabLink').href = targetUrl;
+    
+    document.querySelectorAll('.qc-thumb').forEach((el, i) => {
+        el.style.border = i === idx ? '2px solid #92D050' : '2px solid transparent';
+        el.style.opacity = i === idx ? '1' : '0.6';
+    });
+    document.getElementById('qcImgUploader').value = '';
+}
+function qcNextImg() { qcSetImg((qcCurrentImgIndex + 1) % qcImagesArr.length); }
+function qcPrevImg() { qcSetImg((qcCurrentImgIndex - 1 + qcImagesArr.length) % qcImagesArr.length); }
+function qcZoom(delta) {
+    qcZoomLevel += delta;
+    if(qcZoomLevel < 0.5) qcZoomLevel = 0.5;
+    if(qcZoomLevel > 4) qcZoomLevel = 4;
+    document.getElementById('qcMainImg').style.transform = `scale(${qcZoomLevel})`;
+}
+
+// [MODIFIED] Task 2: Dynamically Injected UI Component mimicking Provided Screenshot completely
 function openQCModal(idx) {
     activeQCRowIdx = idx;
     const data = rawQCData[idx];
-    document.getElementById('qcModalContent').innerHTML = `
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <h6 class="fw-bold border-bottom pb-2">Asset Info</h6>
-                <p class="mb-1"><b>Substation:</b> ${data.subName}</p>
-                <p class="mb-1"><b>Feeder:</b> ${data.feederName || 'N/A'}</p>
-                <p class="mb-1"><b>Meter Type:</b> ${data.meterType}</p>
-                <p class="mb-1"><b>Meter No:</b> <span class="bg-warning px-1 rounded fw-bold text-dark">${data.meterNumber || 'N/A'}</span></p>
-                <p class="mb-1"><b>Status:</b> ${data.installStatus || 'N/A'}</p>
-                <p class="mb-1"><b>GPS:</b> <small>${data.latLong}</small></p>
+    
+    qcImagesArr = [
+        { title: "Meter Installation", id: data.meterImgId, key: 'meterImgId' },
+        { title: "Meter with DT", id: data.meterDtImgId, key: 'meterDtImgId' }
+    ];
+    qcNewImagesBase64 = {}; 
+    
+    const val = (k) => data[k] || '';
+    
+    // Auto-generate extra fields safely extracting JSON without touching UI reserved inputs
+    let dynamicFieldsHtml = '';
+    const skipFields = ['meterNumber', 'fieldRemark', 'materialRequired', 'dependency', 'remarkBucket', 'zone', 'circle', 'division', 'subdiv', 'subName', 'feederName', 'meterType', 'latLong', 'reqId'];
+    Object.keys(data).forEach(k => {
+        if(!skipFields.includes(k) && typeof data[k] !== 'object') {
+            dynamicFieldsHtml += `<label class="small fw-bold mt-3 text-capitalize">${k.replace(/([A-Z])/g, ' $1')}</label>
+            <input type="text" class="form-control qc-dynamic-field" data-key="${k}" value="${val(k)}">`;
+        }
+    });
+
+    document.getElementById('qcModalFullContent').innerHTML = `
+        <div class="modal-header bg-white border-bottom align-items-center">
+            <div>
+                <h5 class="modal-title fw-bold" style="color: #0056b3;">Verification for Meter: ${val('meterNumber') || 'N/A'}</h5>
+                <small class="text-muted fw-bold">Location: ${val('zone')} / ${val('circle')} / ${val('division')} | Date: ${new Date(data.date).toISOString().split('T')[0]}</small>
             </div>
-            <div class="col-md-6 mb-3 border-start">
-                <h6 class="fw-bold border-bottom pb-2">Images</h6>
-                <img src="https://drive.google.com/thumbnail?id=${data.meterImgId}&sz=w800" class="img-fluid mb-2 border rounded shadow-sm w-100" style="max-height: 200px; object-fit: cover; cursor: pointer;" onclick="window.open('https://drive.google.com/uc?id=${data.meterImgId}', '_blank')">
-                <img src="https://drive.google.com/thumbnail?id=${data.meterDtImgId}&sz=w800" class="img-fluid border rounded shadow-sm w-100" style="max-height: 200px; object-fit: cover; cursor: pointer;" onclick="window.open('https://drive.google.com/uc?id=${data.meterDtImgId}', '_blank')">
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3 fw-bold" data-bs-dismiss="modal">Close</button>
+        </div>
+        
+        <div class="modal-body p-0">
+            <div class="row g-0">
+                <!-- Left Side Viewer -->
+                <div class="col-12 col-md-7 d-flex flex-column" style="background-color: #1a1a1a; min-height: 50vh;">
+                    <div class="d-flex justify-content-between p-3" style="z-index: 10;">
+                        <span id="qcImgBadge" class="badge bg-black border border-secondary px-3 py-2">Meter Installation</span>
+                        <a id="qcImgTabLink" href="#" target="_blank" class="text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                                <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center position-relative overflow-hidden">
+                        <button class="btn btn-dark position-absolute start-0 ms-2" onclick="qcPrevImg()" style="z-index:10; background:rgba(0,0,0,0.5);">&#10094;</button>
+                        <img id="qcMainImg" src="" style="max-width: 100%; max-height: 100%; transition: transform 0.2s;" />
+                        <button class="btn btn-dark position-absolute end-0 me-2" onclick="qcNextImg()" style="z-index:10; background:rgba(0,0,0,0.5);">&#10095;</button>
+                        
+                        <div class="position-absolute bottom-0 mb-3 rounded-pill" style="background:rgba(0,0,0,0.6);">
+                            <button class="btn btn-sm text-white" onclick="qcZoom(-0.2)"><b>-</b> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-zoom-out" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/><path d="M10.344 11.742c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1 6.538 6.538 0 0 1-1.398 1.4z"/><path fill-rule="evenodd" d="M3 6.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/></svg></button>
+                            <button class="btn btn-sm text-white" onclick="qcZoom(0.2)"><b>+</b> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-zoom-in" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/><path d="M10.344 11.742c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1 6.538 6.538 0 0 1-1.398 1.4z"/><path fill-rule="evenodd" d="M6.5 3a.5.5 0 0 1 .5.5V6h2.5a.5.5 0 0 1 0 1H7v2.5a.5.5 0 0 1-1 0V7H3.5a.5.5 0 0 1 0-1H6V3.5a.5.5 0 0 1 .5-.5z"/></svg></button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 text-white border-top border-secondary">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="small me-2">Modify <b id="qcModifyLabel">Meter Installation</b>:</span>
+                            <input type="file" id="qcImgUploader" class="form-control form-control-sm w-50" accept="image/*">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <img id="qcThumb_0" class="qc-thumb" src="https://drive.google.com/thumbnail?id=${qcImagesArr[0].id}&sz=w200" onclick="qcSetImg(0)">
+                            <img id="qcThumb_1" class="qc-thumb" src="https://drive.google.com/thumbnail?id=${qcImagesArr[1].id}&sz=w200" onclick="qcSetImg(1)">
+                            <div class="qc-thumb text-center">IMG</div>
+                            <div class="qc-thumb text-center">IMG</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Side Form Data -->
+                <div class="col-12 col-md-5 p-4" style="max-height: 70vh; overflow-y: auto;">
+                    <h6 class="fw-bold mb-3 text-primary">1. Form Details</h6>
+                    
+                    <label class="small fw-bold">Meter No (Editable)</label>
+                    <input type="text" id="qc_edit_meterNumber" class="form-control mb-3" value="${val('meterNumber')}">
+                    
+                    <label class="small fw-bold">Field Remark</label>
+                    <textarea id="qc_edit_fieldRemark" class="form-control mb-3" rows="2">${val('fieldRemark')}</textarea>
+                    
+                    <label class="small fw-bold">Material Required for Rectification</label>
+                    <textarea id="qc_edit_materialRequired" class="form-control mb-3" rows="2">${val('materialRequired')}</textarea>
+                    
+                    <label class="small fw-bold">Dependency</label>
+                    <select id="qc_edit_dependency" class="form-select mb-3">
+                        <option value="">Select</option>
+                        <option value="O&M" ${val('dependency')==='O&M'?'selected':''}>O&M</option>
+                        <option value="Projects" ${val('dependency')==='Projects'?'selected':''}>Projects</option>
+                        <option value="Other" ${val('dependency')==='Other'?'selected':''}>Other</option>
+                    </select>
+                    
+                    <label class="small fw-bold">Remark Bucket</label>
+                    <select id="qc_edit_remarkBucket" class="form-select mb-3">
+                        <option value="">Select</option>
+                        <option value="Defective" ${val('remarkBucket')==='Defective'?'selected':''}>Defective</option>
+                        <option value="Missing" ${val('remarkBucket')==='Missing'?'selected':''}>Missing</option>
+                    </select>
+
+                    <div class="border-top pt-2 mt-2">
+                        ${dynamicFieldsHtml}
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <div class="modal-footer d-flex justify-content-between bg-light border-top p-3">
+            <button type="button" class="btn fw-bold px-4" style="background-color: #ffe6e6; color: #dc3545;" id="btnRejectQC">❌ DELETE (Reject & Nuke)</button>
+            <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm" id="btnApproveQC">✅ APPROVE & UPDATE</button>
+        </div>
     `;
-    
-    const reasonInput = document.getElementById('qcRejectReason');
-    reasonInput.classList.add('hidden');
-    reasonInput.value = '';
-    
-    // Wire up buttons explicitly preventing stacked listeners
-    const btnApprove = document.getElementById('btnApproveQC');
-    const btnReject = document.getElementById('btnRejectQC');
-    
-    btnApprove.replaceWith(btnApprove.cloneNode(true));
-    btnReject.replaceWith(btnReject.cloneNode(true));
+
+    document.getElementById('qcImgUploader').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            qcNewImagesBase64[qcCurrentImgIndex] = ev.target.result;
+            qcSetImg(qcCurrentImgIndex); // Reload preview
+        };
+        reader.readAsDataURL(file);
+    });
     
     document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
     document.getElementById('btnRejectQC').onclick = () => {
-        const input = document.getElementById('qcRejectReason');
-        if (input.classList.contains('hidden')) {
-            input.classList.remove('hidden');
-            input.focus();
-        } else {
-            submitQCAction('Rejected', input.value);
-        }
+        const reason = prompt("Proceeding will reject this record. Enter rejection reason (Required):");
+        if (reason !== null) submitQCAction('Rejected', reason);
     };
-    
-    const modal = new bootstrap.Modal(document.getElementById('qcModal'));
-    modal.show();
+
+    qcSetImg(0); // Launch 
+    new bootstrap.Modal(document.getElementById('qcModal')).show();
 }
 
 async function submitQCAction(status, reason = '') {
     if (status === 'Rejected' && (!reason || reason.trim().length < 3)) {
-        showToast("A rejection reason is required.", true);
-        return;
+        return showToast("A valid rejection reason is required.", true);
     }
-    const data = rawQCData[activeQCRowIdx];
-    showLoader(`Marking as ${status}...`);
+    
+    let updatedDetails = null;
+    let newMeterImgBase64 = qcNewImagesBase64[0] || null;
+    let newMeterDtImgBase64 = qcNewImagesBase64[1] || null;
+
+    if (status === 'Approved') {
+        const mn = document.getElementById('qc_edit_meterNumber').value.trim();
+        if(mn && !METER_REGEX.test(mn)) {
+            return showToast("Meter Number format invalid (requires 2 letters followed by 7 to 9 digits).", true);
+        }
+        updatedDetails = {
+            meterNumber: mn,
+            fieldRemark: document.getElementById('qc_edit_fieldRemark').value,
+            materialRequired: document.getElementById('qc_edit_materialRequired').value,
+            dependency: document.getElementById('qc_edit_dependency').value,
+            remarkBucket: document.getElementById('qc_edit_remarkBucket').value
+        };
+        // Pull Dynamic Appendages 
+        document.querySelectorAll('.qc-dynamic-field').forEach(el => {
+            updatedDetails[el.getAttribute('data-key')] = el.value;
+        });
+    }
+
+    showLoader(`Processing ${status}...`);
     try {
-        await apiCall({ action: 'submitQC', uid: data.uid, status: status, reason: reason });
+        const data = rawQCData[activeQCRowIdx];
+        await apiCall({ 
+            action: 'submitQC', 
+            uid: data.uid, 
+            status: status, 
+            reason: reason,
+            updatedDetails: updatedDetails,
+            newMeterImgBase64: newMeterImgBase64,
+            newMeterDtImgBase64: newMeterDtImgBase64 
+        });
         showToast(`Submission successfully ${status}!`);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('qcModal'));
-        if (modal) modal.hide();
+        bootstrap.Modal.getInstance(document.getElementById('qcModal')).hide();
         loadQC(qcCurrentPage);
     } catch(err) {
         showToast(err.message, true);
@@ -1378,6 +1521,7 @@ function resetReportFilters() {
     loadReportPortal(1);
 }
 
+// [MODIFIED] Task 1: Complete reconstruction to yield unified keys generating absolute horizontal CSV arrays safely escaping inner values and prefixes.
 async function exportReportCSV() {
     showLoader("Preparing CSV Export...");
     try {
@@ -1399,18 +1543,41 @@ async function exportReportCSV() {
             return;
         }
         
-        let csv = 'Date,UID,Surveyor,Zone,Circle,Division,Sub Div,Substation,Feeder Name,Meter Type,Capacity,Meter No,Install Status,QC Status,QC By,QC Date,Reject Reason,LatLong\n';
+        const baseKeys = ['Date', 'UID', 'Surveyor', 'LatLong', 'QC Status', 'QC By', 'QC Date', 'Reject Reason', 'Meter Image Link', 'Meter DT Image Link'];
+        let allKeys = new Set(baseKeys);
+        
         data.forEach(row => {
-            const clean = (str) => '"' + String(str || '').replace(/"/g, '""') + '"';
-            csv += [
-                clean(new Date(row.date).toLocaleString()), clean(row.uid), clean(row.surveyor),
-                clean(row.zone), clean(row.circle), clean(row.division), clean(row.subdiv), clean(row.subName),
-                clean(row.feederName), clean(row.meterType), clean(row.dtrCapacity), clean(row.meterNumber),
-                clean(row.installStatus), clean(row.qcStatus), clean(row.qcBy), clean(row.qcDate), clean(row.rejectReason), clean(row.latLong)
-            ].join(',') + '\n';
+            Object.keys(row).forEach(k => {
+                if (!['date', 'uid', 'empCode', 'surveyor', 'latLong', 'meterImgId', 'meterDtImgId', 'qcStatus', 'qcBy', 'qcDate', 'rejectReason', 'reqId'].includes(k)) {
+                    allKeys.add(k);
+                }
+            });
         });
         
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const headerArr = Array.from(allKeys);
+        let csv = '\uFEFF' + headerArr.map(k => `"${k.replace(/"/g, '""')}"`).join(',') + '\n';
+        
+        data.forEach(row => {
+            let rowArr = headerArr.map(key => {
+                let val = '';
+                if (key === 'Date') val = new Date(row.date).toLocaleString();
+                else if (key === 'UID') val = row.uid;
+                else if (key === 'Surveyor') val = `${row.surveyor} (${row.empCode})`;
+                else if (key === 'LatLong') val = row.latLong;
+                else if (key === 'QC Status') val = row.qcStatus;
+                else if (key === 'QC By') val = row.qcBy;
+                else if (key === 'QC Date') val = row.qcDate;
+                else if (key === 'Reject Reason') val = row.rejectReason;
+                else if (key === 'Meter Image Link') val = row.meterImgId ? `https://drive.google.com/uc?id=${row.meterImgId}` : '';
+                else if (key === 'Meter DT Image Link') val = row.meterDtImgId ? `https://drive.google.com/uc?id=${row.meterDtImgId}` : '';
+                else val = row[key] || '';
+                
+                return `"${String(val).replace(/"/g, '""')}"`;
+            });
+            csv += rowArr.join(',') + '\n';
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
