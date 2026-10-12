@@ -10,44 +10,28 @@
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
 
     <style>
-        :root { 
-            --main-bg: #f8f9fa; 
-            --primary-color: #002060; 
-            --accent-color: #92D050; 
-            --qc-header: #e9f5e1; 
-        }
+        :root { --main-bg: #f8f9fa; --primary-color: #002060; --accent-color: #92D050; }
         html { font-size: 16px; }
-        body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; color: var(--primary-color); }
+        body { background-color: var(--main-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--primary-color); }
         .hidden { display: none !important; }
-        
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,32,96,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column; }
-        
         .navbar { background-color: var(--primary-color) !important; border-bottom: 4px solid var(--accent-color); position: sticky; top: 0; z-index: 1040; }
         .navbar-brand img { background: white; padding: 4px; border-radius: 4px; }
-        .nav-actions { 
-            display: flex; flex-wrap: nowrap; overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; scrollbar-width: none; align-items: center;
-        }
+        .nav-actions { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: center; }
         .nav-actions::-webkit-scrollbar { display: none; }
         .nav-actions .btn { min-width: max-content; min-height: 44px; display: flex; align-items: center; justify-content: center; }
-        
-        .table-responsive { max-height: 65vh; overflow-y: auto; overflow-x: auto; width: 100%; border-radius: 8px; border: 1px solid #dee2e6; }
+        .table-responsive { max-height: 65vh; overflow-y: auto; width: 100%; border-radius: 8px; border: 1px solid #dee2e6; }
         th { position: sticky; top: 0; background-color: var(--primary-color) !important; color: white !important; z-index: 10; font-size: 0.875rem; white-space: nowrap; }
         td { font-size: 0.875rem; white-space: nowrap; vertical-align: middle; }
-        .card-header { background-color: var(--primary-color); color: white; }
         .form-control, .form-select, .btn { min-height: 44px; }
-        input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; color: var(--primary-color); font-weight: 600; border: 1px dashed #adb5bd; }
+        input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; font-weight: 600; border: 1px dashed #adb5bd; }
         .btn-accent { background-color: var(--accent-color) !important; color: var(--primary-color) !important; font-weight: bold; border: none; }
         .btn-accent:hover { background-color: #7ebd45 !important; color: white !important; }
-        .summary-card { border-left: 5px solid var(--primary-color); border-radius: 8px; }
-        
         .toast-container { z-index: 1055; pointer-events: none; }
         .toast { pointer-events: auto; }
-        
-        @media (max-width: 768px) {
-            #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
-        }
-        #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; cursor: default !important; }
+        #map { border-radius: 8px; border: 1px solid #ccc; height: 250px; width: 100%; }
+        .gallery-img { max-height: 150px; object-fit: cover; cursor: pointer; transition: transform 0.2s; }
+        .gallery-img:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -59,10 +43,10 @@
     </div>
 
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="appToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="appToast" class="toast align-items-center text-white bg-primary border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="toastMessage">Message</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -70,26 +54,15 @@
     <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
-                
-                <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
+                <h4 class="mb-4 fw-bold" style="color: var(--primary-color);">Login Portal</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
-                        <label for="loginEmpCode" class="form-label text-muted small fw-bold">Employee Code</label>
+                        <label class="form-label text-muted small fw-bold">Employee Code</label>
                         <input type="text" id="loginEmpCode" class="form-control" required autocomplete="username">
                     </div>
-                    
                     <div class="mb-4 text-start">
-                        <label for="loginPassword" class="form-label text-muted small fw-bold">Password</label>
-                        <div class="input-group">
-                            <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" style="border-right: none;">
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password" style="min-width: 44px; display: flex; align-items: center; justify-content: center; background: white; border-color: #dee2e6;">
-                                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </button>
-                        </div>
+                        <label class="form-label text-muted small fw-bold">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password">
                     </div>
                     <button type="submit" class="btn w-100 text-white" style="background-color: var(--primary-color); font-weight: bold;">Login</button>
                 </form>
@@ -100,20 +73,14 @@
     <div id="appView" class="hidden">
         <nav class="navbar navbar-dark shadow-sm">
             <div class="container-fluid d-flex flex-nowrap align-items-center">
-                <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
-                    <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    Portal
-                </a>
-                
+                <a class="navbar-brand fw-bold me-3" href="#">Portal</a>
                 <div class="ms-auto nav-actions">
-                    <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold" style="font-size: 0.9rem;"></span>
+                    <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold"></span>
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
-                    <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
-                    
-                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC(1);">QC Panel</button>
-                    
-                    <!-- [MODIFIED] Task 5: Deleted navReport button completely -->
-                    <button class="btn btn-sm btn-outline-light fw-bold px-3 py-2" onclick="logout()">Logout</button>
+                    <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold" onclick="switchView('viewUser')">Form Entry</button>
+                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden" onclick="switchView('viewQC'); loadQC(1);">QC Panel</button>
+                    <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden" onclick="switchView('viewReport'); loadReportPortal(1);">Report</button>
+                    <button class="btn btn-sm btn-outline-light fw-bold" onclick="logout()">Logout</button>
                 </div>
             </div>
         </nav>
@@ -133,104 +100,72 @@
                         <form id="dtForm">
                             <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Location Hierarchy</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-3"><label for="f_zone" class="small text-muted fw-bold">Zone</label><select id="f_zone" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label for="f_circle" class="small text-muted fw-bold">Circle</label><select id="f_circle" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label for="f_division" class="small text-muted fw-bold">Division</label><select id="f_division" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-3"><label for="f_subdiv" class="small text-muted fw-bold">Sub Division</label><select id="f_subdiv" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-6"><label for="f_subname" class="small text-muted fw-bold">Substation Name</label><select id="f_subname" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-6"><label for="f_subcode" class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
-                                <div class="col-12 col-md-4"><label for="f_feedername" class="small text-muted fw-bold">Feeder Name</label><select id="f_feedername" class="form-select cascade-trigger"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label for="f_feedercode" class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
-                                <div class="col-12 col-md-4"><label for="f_qrcode" class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control locked-field" placeholder="Auto-fills" readonly></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Zone <span class="text-danger">*</span></label><select id="f_zone" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Circle <span class="text-danger">*</span></label><select id="f_circle" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Division <span class="text-danger">*</span></label><select id="f_division" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-3"><label class="small text-muted fw-bold">Sub Div <span class="text-danger">*</span></label><select id="f_subdiv" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Name <span class="text-danger">*</span></label><select id="f_subname" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Substation Code</label><input type="text" id="f_subcode" class="form-control locked-field" readonly></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Name</label><select id="f_feedername" class="form-select cascade-trigger"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder Code</label><input type="text" id="f_feedercode" class="form-control locked-field" readonly></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">New Meter QR Code</label><input type="text" id="f_qrcode" class="form-control locked-field" readonly></div>
                             </div>
                             
                             <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Asset Details</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-4">
-                                    <label for="f_metertype" class="small text-muted fw-bold">Meter Type</label>
-                                    <select id="f_metertype" class="form-select"><option value="">Select</option></select>
-                                </div>
-                                <div class="col-12 col-md-4" id="div_capacity">
-                                    <label for="f_capacity" class="small text-muted fw-bold">DTR Capacity (KVA)</label>
-                                    <select id="f_capacity" class="form-select"><option value="">Select</option></select>
-                                </div>
-                                <div class="col-12 col-md-4" id="div_status">
-                                    <label for="f_status" class="small text-muted fw-bold">Installation Status</label>
-                                    <select id="f_status" class="form-select"><option value="">Select</option></select>
-                                </div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Meter Type <span class="text-danger">*</span></label><select id="f_metertype" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4" id="div_capacity"><label class="small text-muted fw-bold">DTR Capacity (KVA) <span class="text-danger">*</span></label><select id="f_capacity" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4" id="div_status"><label class="small text-muted fw-bold">Installation Status <span class="text-danger">*</span></label><select id="f_status" class="form-select"><option value="">Select</option></select></div>
                                 
                                 <div class="col-12 col-md-6" id="div_meternumber">
-                                    <label for="f_meternumber" class="small text-muted fw-bold">New Meter Number</label>
-                                    <input type="text" id="f_meternumber" class="form-control" placeholder="e.g. AB12345678" maxlength="11" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text">
-                                    <small class="text-muted d-block mt-1" style="font-size: 11px;">2 letters + 7 to 9 digits (max 11)</small>
+                                    <label class="small text-muted fw-bold">New Meter Number <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_meternumber" class="form-control" placeholder="AB12345678" maxlength="11" onblur="this.value=this.value.trim().toUpperCase()">
                                     <span id="meterNoMsg" class="hidden"></span>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <label for="f_latlong" class="small text-muted fw-bold">Latitude, Longitude <span class="text-danger">*</span></label>
+                                    <label class="small text-muted fw-bold">Latitude, Longitude <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for GPS..." readonly>
                                         <button type="button" class="btn btn-outline-secondary fw-bold" onclick="startGPS()">Retry GPS</button>
                                     </div>
-                                    <small class="text-muted" style="font-size: 11px;">Captures automatically via Live Map.</small>
                                 </div>
+                                <div class="col-12"><div id="map"></div><div id="gpsStatus" class="small mt-1 fw-bold text-primary">Initializing GPS Map...</div></div>
+                            </div>
+
+                            <!-- [ADDED] Task 3: 21 New Manual and Dropdown Fields Grouping -->
+                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Additional Details</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder PT Capacity <span class="text-danger">*</span></label><input type="text" id="f_feederPtCapacity" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Feeder MF <span class="text-danger">*</span></label><input type="text" id="f_feederMf" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DT Name / Location Name <span class="text-danger">*</span></label><input type="text" id="f_dtName" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DTR PM Module Code</label><input type="text" id="f_dtrPmCode" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DTR PM Module Name</label><input type="text" id="f_dtrPmName" class="form-control" onblur="this.value=this.value.trim()"></div>
                                 
-                                <div class="col-12">
-                                    <label class="small text-muted fw-bold">Live GPS Map</label>
-                                    <div id="map"></div>
-                                    <div id="gpsStatus" class="small mt-1 fw-bold text-primary">Initializing GPS Map...</div>
-                                </div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DTR Energized Or Not <span class="text-danger">*</span></label><select id="f_dtrEnergized" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DTR Box CT Ratio <span class="text-danger">*</span></label><select id="f_dtrBoxCt" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DTR Box MF <span class="text-danger">*</span></label><select id="f_dtrBoxMf" class="form-select"><option value="">Select</option></select></div>
+                                
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DT Box Number <span class="text-danger">*</span></label><input type="text" id="f_dtBoxNumber" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DT Box Status <span class="text-danger">*</span></label><select id="f_dtBoxStatus" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">DT Box Seal Status <span class="text-danger">*</span></label><select id="f_dtBoxSealStatus" class="form-select"><option value="">Select</option></select></div>
+                                
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DT Box Seal Number <span class="text-danger">*</span></label><input type="text" id="f_dtBoxSealNumber" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DT Meter Ping Status <span class="text-danger">*</span></label><select id="f_dtMeterPingStatus" class="form-select"><option value="">Select</option></select></div>
+                                
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Any Rectification Required <span class="text-danger">*</span></label><select id="f_rectificationReq" class="form-select"><option value="">Select</option></select></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Joint Visit Linman / JE Name <span class="text-danger">*</span></label><input type="text" id="f_jointVisitName" class="form-control" onblur="this.value=this.value.trim()"></div>
+                                <div class="col-12"><label class="small text-muted fw-bold">Any Remark</label><input type="text" id="f_anyRemark" class="form-control" onblur="this.value=this.value.trim()"></div>
                             </div>
                             
-                            <!-- [ADDED] Task 1: Complete integration of all requested fields -->
-                            <h6 class="fw-bold mb-3 border-bottom pb-2 mt-4" style="color: var(--primary-color);">Feeder & DT Details</h6>
+                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Attachments (All Fields Mandatory)</h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-4"><label for="f_feederPtCapacity" class="small text-muted fw-bold">Feeder PT Capacity <span class="text-danger">*</span></label><input type="text" id="f_feederPtCapacity" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_feederPtPhoto" class="small text-muted fw-bold">Feeder PT Photo <span class="text-danger">*</span></label><input type="file" id="f_feederPtPhoto" class="form-control file-picker" accept="image/*" capture="environment"><img id="prev_feederPtPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
-                                <div class="col-12 col-md-4"><label for="f_feederMf" class="small text-muted fw-bold">Feeder MF <span class="text-danger">*</span></label><input type="text" id="f_feederMf" class="form-control"></div>
-
-                                <div class="col-12 col-md-4"><label for="f_dtName" class="small text-muted fw-bold">DT Name / Location Name <span class="text-danger">*</span></label><input type="text" id="f_dtName" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_dtrPmCode" class="small text-muted fw-bold">DTR PM Module Code</label><input type="text" id="f_dtrPmCode" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_dtrPmName" class="small text-muted fw-bold">DTR PM Module Name</label><input type="text" id="f_dtrPmName" class="form-control"></div>
-
-                                <div class="col-12 col-md-4"><label for="f_dtrEnergized" class="small text-muted fw-bold">DTR Energized Or Not <span class="text-danger">*</span></label><select id="f_dtrEnergized" class="form-select"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label for="f_dtrCtRatio" class="small text-muted fw-bold">DTR Box CT Ratio <span class="text-danger">*</span></label><select id="f_dtrCtRatio" class="form-select"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label for="f_dtrMf" class="small text-muted fw-bold">DTR Box MF <span class="text-danger">*</span></label><select id="f_dtrMf" class="form-select"><option value="">Select</option></select></div>
-                            </div>
-
-                            <h6 class="fw-bold mb-3 border-bottom pb-2 mt-4" style="color: var(--primary-color);">Box & Seal Details</h6>
-                            <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-4"><label for="f_dtBoxMarkingPhoto" class="small text-muted fw-bold">DT Box Marking Photo <span class="text-danger">*</span></label><input type="file" id="f_dtBoxMarkingPhoto" class="form-control file-picker" accept="image/*" capture="environment"><img id="prev_dtBoxMarkingPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
-                                <div class="col-12 col-md-4"><label for="f_dtBoxNumber" class="small text-muted fw-bold">DT Box Number <span class="text-danger">*</span></label><input type="text" id="f_dtBoxNumber" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_dtBoxStatus" class="small text-muted fw-bold">DT Box Status <span class="text-danger">*</span></label><select id="f_dtBoxStatus" class="form-select"><option value="">Select</option></select></div>
-
-                                <div class="col-12 col-md-4"><label for="f_dtBoxSealStatus" class="small text-muted fw-bold">DT Box Seal Status <span class="text-danger">*</span></label><select id="f_dtBoxSealStatus" class="form-select"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label for="f_dtBoxSealNumber" class="small text-muted fw-bold">DT Box Seal Number <span class="text-danger">*</span></label><input type="text" id="f_dtBoxSealNumber" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_dtBoxSealPhoto" class="small text-muted fw-bold">DT Box Seal Photo <span class="text-danger">*</span></label><input type="file" id="f_dtBoxSealPhoto" class="form-control file-picker" accept="image/*" capture="environment"><img id="prev_dtBoxSealPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
-                            </div>
-
-                            <h6 class="fw-bold mb-3 border-bottom pb-2 mt-4" style="color: var(--primary-color);">Ping & Conclusion Attachments</h6>
-                            <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-4"><label for="f_dtMeterPingStatus" class="small text-muted fw-bold">DT Meter Ping Status <span class="text-danger">*</span></label><select id="f_dtMeterPingStatus" class="form-select"><option value="">Select</option></select></div>
-                                <div class="col-12 col-md-4"><label for="f_dtMeterPingPhoto" class="small text-muted fw-bold">DT Meter Ping Screenshot <span class="text-danger">*</span></label><input type="file" id="f_dtMeterPingPhoto" class="form-control file-picker" accept="image/*" capture="environment"><img id="prev_dtMeterPingPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
-                                <div class="col-12 col-md-4"><label for="f_rectification" class="small text-muted fw-bold">Any Rectification Required <span class="text-danger">*</span></label><select id="f_rectification" class="form-select"><option value="">Select</option></select></div>
-
-                                <div class="col-12 col-md-4"><label for="f_jvName" class="small text-muted fw-bold">Joint Visit Linman / JE Name <span class="text-danger">*</span></label><input type="text" id="f_jvName" class="form-control"></div>
-                                <div class="col-12 col-md-4"><label for="f_jvSldPhoto" class="small text-muted fw-bold">Joint Visit SLD Photo <span class="text-danger">*</span></label><input type="file" id="f_jvSldPhoto" class="form-control file-picker" accept="image/*" capture="environment"><img id="prev_jvSldPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
-                                <div class="col-12 col-md-4"><label for="f_remark" class="small text-muted fw-bold">Any Remark</label><input type="text" id="f_remark" class="form-control"></div>
-                            </div>
-                            
-                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--primary-color);">Core Attachments</h6>
-                            <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-6">
-                                    <label for="f_meterImg" class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label>
-                                    <input type="file" id="f_meterImg" class="form-control file-picker" accept="image/*" capture="environment">
-                                    <img id="prev_meterImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label for="f_meterDtImg" class="small text-muted fw-bold">Meter with DT Image <span class="text-danger">*</span></label>
-                                    <input type="file" id="f_meterDtImg" class="form-control file-picker" accept="image/*" capture="environment">
-                                    <img id="prev_meterDtImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
-                                </div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label><input type="file" id="f_meterImg" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_meterImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Meter with DT Image <span class="text-danger">*</span></label><input type="file" id="f_meterDtImg" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_meterDtImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Feeder PT Photo <span class="text-danger">*</span></label><input type="file" id="f_feederPtPhoto" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_feederPtPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DT Box Marking Photo <span class="text-danger">*</span></label><input type="file" id="f_dtBoxMarkingPhoto" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_dtBoxMarkingPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DT Box Seal Photo <span class="text-danger">*</span></label><input type="file" id="f_dtBoxSealPhoto" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_dtBoxSealPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">DT Meter Ping Screenshot <span class="text-danger">*</span></label><input type="file" id="f_dtMeterPingPhoto" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_dtMeterPingPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
+                                <div class="col-12 col-md-6"><label class="small text-muted fw-bold">Joint Visit SLD Photo <span class="text-danger">*</span></label><input type="file" id="f_jointVisitSldPhoto" class="form-control img-upload" accept="image/*" capture="environment"><img id="prev_jointVisitSldPhoto" class="img-thumbnail mt-2 hidden" style="max-height: 100px;"></div>
                             </div>
 
                             <button type="submit" id="btnSubmitSurvey" class="btn btn-lg btn-submit btn-accent shadow-sm mt-3 w-100">Submit Final Survey</button>
@@ -240,12 +175,12 @@
             </div>
 
             <!-- Confirmation Modal -->
-            <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+            <div class="modal fade" id="confirmModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header text-white" style="background-color: var(--primary-color);">
                             <h5 class="modal-title fw-bold">Review before submitting</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body bg-light" id="confirmModalBody"></div>
                         <div class="modal-footer">
@@ -261,37 +196,14 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                     <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
                 </div>
-                
                 <div class="card shadow-sm border-0 bg-white">
                     <div class="card-body p-3">
-                        <div class="row g-2 mb-4">
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="qc_zone" class="form-select qc-filter"><option value="ALL">All Zones</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select qc-filter"><option value="ALL">All Circles</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select qc-filter"><option value="ALL">All Divisions</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select qc-filter"><option value="ALL">All Sub Divs</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="qc_fromDate" class="form-control"></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="qc_toDate" class="form-control"></div>
-
-                            <div class="col-12 mt-2 text-end">
-                                <button class="btn px-4 btn-outline-secondary me-2" onclick="resetQCFilters()">Reset</button>
-                                <button class="btn px-4 text-white" style="background-color: var(--primary-color);" onclick="loadQC(1)">Apply Filters</button>
-                            </div>
-                        </div>
-
                         <div class="table-responsive">
                             <table class="table table-hover qc-table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Feeder Info</th>
-                                        <th>Submitted By</th>
-                                        <th>Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
+                                <thead><tr><th>Feeder Info</th><th>Submitted By</th><th>Date</th><th>Action</th></tr></thead>
                                 <tbody id="qcTableBody"></tbody>
                             </table>
                         </div>
-                        
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <span id="qcPagingInfo" class="small text-muted fw-bold"></span>
                             <div>
@@ -303,35 +215,19 @@
                 </div>
             </div>
 
-            <!-- [MODIFIED] Task 6: Expanded QC Modal Full Screen Logic -->
-            <div class="modal fade" id="qcModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg" style="height: 92vh;">
+            <!-- QC Review Modal -->
+            <div class="modal fade" id="qcModal" tabindex="-1">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header text-white" style="background-color: var(--primary-color);">
-                            <h5 class="modal-title fw-bold">Review & Edit Submission Details</h5>
-                            <button type="button" class="btn-close btn-close-white" id="fallbackModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title fw-bold">Review & Edit Submission</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body bg-light p-0 h-100 overflow-hidden">
-                             <!-- Dynamic content injected here -->
-                             <div id="qcModalContent" class="h-100 m-0"></div>
-                        </div>
+                        <div class="modal-body bg-light p-4" id="qcModalContent"></div>
                         <div class="modal-footer" style="background-color: #f1f3f5;">
-                            <!-- [MODIFIED] Task 4: Fix QC missing dropdowns -> Rejection Fields added here -->
-                            <div id="rejectFields" class="hidden w-100 mb-2">
-                                <div class="row">
-                                    <div class="col-md-6 mb-2">
-                                        <select id="qcDependency" class="form-select fw-bold border-danger"><option value="">Select Dependency</option></select>
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <select id="qcRemarkBucket" class="form-select fw-bold border-danger"><option value="">Select Remark Bucket</option></select>
-                                    </div>
-                                    <div class="col-12">
-                                        <input type="text" id="qcRejectReason" class="form-control border-danger" placeholder="Enter reason for rejection (Required)">
-                                    </div>
-                                </div>
-                            </div>
+                            <input type="text" id="qcRejectReason" class="form-control mb-2 hidden" placeholder="Enter reason for rejection (Required)">
                             <div class="w-100 d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-secondary fw-bold" id="btnFallbackCloseModal" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
                                 <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve (Save Edits)</button>
                             </div>
@@ -339,7 +235,36 @@
                     </div>
                 </div>
             </div>
-            <!-- [DELETED] Task 5: Report Module UI completely purged -->
+
+            <!-- REPORT PORTAL VIEW -->
+            <div id="viewReport" class="hidden" style="width: 100%; margin: 0 auto;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
+                        <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
+                        <button class="btn btn-accent btn-sm fw-bold shadow" onclick="exportReportCSV()">EXPORT CSV</button>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="table-responsive border rounded">
+                            <table class="table table-striped table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th><th>UID</th><th>Surveyor</th><th>Substation</th><th>Feeder</th>
+                                        <th>Meter Type</th><th>Meter No.</th><th>QC Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span id="reportPagingInfo" class="small text-muted fw-bold"></span>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" id="btnRptPrev" onclick="changeReportPage(-1)">Previous</button>
+                                <button class="btn btn-sm btn-outline-primary ms-1" id="btnRptNext" onclick="changeReportPage(1)">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -352,190 +277,43 @@ let sessionToken = null;
 let currentUser = null;
 let masterDropdownData = []; 
 let rawQCData = []; 
+let fullReportData = []; 
 let activeQCRowIdx = null; 
-let qcCurrentPage = 1;
-let map, marker;
-let currentLat = null, currentLng = null, currentAcc = null;
-let watchId = null;
-let duplicateCheckTimer;
-let currentCheckReqId = 0;
-let isMeterDuplicate = false;
-let isMeterDuplicateChecked = false;
+let qcCurrentPage = 1; let rptCurrentPage = 1;
+let map, marker, currentLat = null, currentLng = null, currentAcc = null, watchId = null;
+let duplicateCheckTimer, currentCheckReqId = 0, isMeterDuplicate = false, isMeterDuplicateChecked = false;
 const METER_REGEX = /^[A-Z]{2}[0-9]{7,9}$/;
 
-// Global mapping to make looping new image inputs robust
-const IMG_CONFIGS = [
-    { id: 'f_meterImg', key: 'meterImgId', title: 'Meter_Image' },
-    { id: 'f_meterDtImg', key: 'meterDtImgId', title: 'Meter_DT_Image' },
-    { id: 'f_feederPtPhoto', key: 'feederPtImgId', title: 'Feeder_PT_Photo' },
-    { id: 'f_dtBoxMarkingPhoto', key: 'dtBoxMarkingImgId', title: 'DT_Box_Marking_Photo' },
-    { id: 'f_dtBoxSealPhoto', key: 'dtBoxSealImgId', title: 'DT_Box_Seal_Photo' },
-    { id: 'f_dtMeterPingPhoto', key: 'dtMeterPingImgId', title: 'DT_Meter_Ping_Photo' },
-    { id: 'f_jvSldPhoto', key: 'jvSldImgId', title: 'Joint_Visit_SLD_Photo' }
-];
-
-document.getElementById('togglePassword').addEventListener('click', function() {
-    const pwdInput = document.getElementById('loginPassword');
-    const eyeIcon = document.getElementById('eyeIcon');
-    if (pwdInput.type === 'password') {
-        pwdInput.type = 'text';
-        this.setAttribute('aria-label', 'Hide password');
-        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
-    } else {
-        pwdInput.type = 'password';
-        this.setAttribute('aria-label', 'Show password');
-        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-    }
-});
-
-function showLoader(text="Processing...") { 
-    document.getElementById('loader-text').innerText = text; 
-    document.getElementById('loader-fallback').classList.add('hidden');
-    document.getElementById('loader-spinner').classList.remove('hidden');
-    document.getElementById('loader').classList.remove('hidden'); 
-}
-function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
-
-function switchView(viewId) {
-    ['viewUser', 'viewQC'].forEach(v => { // Report removed
-        const el = document.getElementById(v);
-        if(el) el.classList.add('hidden');
-    });
-    const target = document.getElementById(viewId);
-    if(target) target.classList.remove('hidden');
-    if (viewId === 'viewUser' && map) setTimeout(() => map.invalidateSize(), 200);
-}
-
-function showToast(msg, isError=false) {
-    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-        const toastEl = document.getElementById('appToast');
-        const toastBody = document.getElementById('toastMessage');
-        toastEl.classList.remove('bg-primary', 'bg-danger', 'bg-success');
-        toastEl.classList.add(isError ? 'bg-danger' : 'bg-success');
-        toastBody.innerText = msg;
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    } else {
-        alert(msg);
-    }
-}
-
-function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-const DB_NAME = 'PortalOfflineDB';
-const STORE_NAME = 'syncQueue';
-const DB_VERSION = 2;
-let localDB = null;
-let isSyncing = false;
-
+// IndexedDB Offline Setup
+const DB_NAME = 'PortalOfflineDB'; const STORE_NAME = 'syncQueue'; const DB_VERSION = 2; let localDB = null; let isSyncing = false;
 function getDB() {
     return new Promise((resolve, reject) => {
-        if (!window.indexedDB) return reject(new Error("IndexedDB is not supported."));
+        if (!window.indexedDB) return reject(new Error("No IndexedDB"));
         if (localDB) return resolve(localDB);
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'reqId' });
-        };
-        request.onsuccess = (e) => {
-            localDB = e.target.result;
-            localDB.onversionchange = () => { localDB.close(); localDB = null; };
-            localDB.onclose = () => { localDB = null; };
-            resolve(localDB);
-        };
-        request.onerror = (e) => reject(new Error(e.target.error?.message));
-        request.onblocked = () => reject(new Error("Database blocked"));
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains(STORE_NAME)) e.target.result.createObjectStore(STORE_NAME, { keyPath: 'reqId' }); };
+        req.onsuccess = e => { localDB = e.target.result; resolve(localDB); };
+        req.onerror = () => reject(new Error("DB blocked"));
     });
 }
+async function saveToQueue(p) { const db = await getDB(); return new Promise((res, rej) => { const tx = db.transaction(STORE_NAME, 'readwrite'); tx.oncomplete = res; tx.objectStore(STORE_NAME).put(p); }); }
+async function getQueue() { const db = await getDB(); return new Promise((res) => { const tx = db.transaction(STORE_NAME, 'readonly'); const r = tx.objectStore(STORE_NAME).getAll(); r.onsuccess = () => res(r.result); }); }
+async function removeFromQueue(reqId) { const db = await getDB(); return new Promise(res => { const tx = db.transaction(STORE_NAME, 'readwrite'); tx.oncomplete = res; tx.objectStore(STORE_NAME).delete(reqId); }); }
 
-async function saveToQueue(payload) {
-    const db = await getDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(new Error(tx.error?.name));
-        tx.onabort = () => reject(new Error(tx.error?.name)); 
-        tx.objectStore(STORE_NAME).put(payload);
-    });
-}
-async function getQueue() {
-    const db = await getDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const req = tx.objectStore(STORE_NAME).getAll();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(new Error(tx.error?.name));
-    });
-}
-async function removeFromQueue(reqId) {
-    const db = await getDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(new Error(tx.error?.name));
-        tx.objectStore(STORE_NAME).delete(reqId);
-    });
-}
-function updateSyncBadge(count) {
-    const badge = document.getElementById('syncBadge');
-    if (!badge) return;
-    if (count > 0) { badge.classList.remove('hidden'); badge.innerText = `⏳ ${count} Pending Upload(s)`; } 
-    else { badge.classList.add('hidden'); }
-}
+function updateSyncBadge(c) { const b = document.getElementById('syncBadge'); if (c > 0) { b.classList.remove('hidden'); b.innerText = `⏳ ${c} Pending`; } else b.classList.add('hidden'); }
 
+// [MODIFIED] Processes offline queue incrementally - uploads base64 images separately to avoid payload limit
 async function processSyncQueue() {
     if (isSyncing) return;
     try {
-        const queue = await getQueue();
-        updateSyncBadge(queue.length);
+        const queue = await getQueue(); updateSyncBadge(queue.length);
         if (queue.length === 0) return;
         isSyncing = true;
         for (const item of queue) {
-            try {
-                // [ADDED] Task 1: Sequential Image Chunk Uploading
-                if (item.pendingImages && item.pendingImages.length > 0) {
-                    const remaining = [...item.pendingImages];
-                    for (let i = 0; i < remaining.length; i++) {
-                        const img = remaining[i];
-                        const id = await apiCall({
-                            action: 'uploadImage',
-                            title: img.title,
-                            meterOrUid: item.meterNumber || item.reqId,
-                            base64: img.base64
-                        }, 1, true);
-
-                        item[img.key] = id;
-                        item.pendingImages = item.pendingImages.filter(x => x.key !== img.key);
-                        await saveToQueue(item); 
-                    }
-                }
-                
-                // Exclude the heavy image arrays when pushing standard submission payload
-                const payloadClone = { ...item };
-                delete payloadClone.pendingImages;
-
-                await apiCall(payloadClone, 0, true); 
-                await removeFromQueue(item.reqId); 
-            } catch (e) {
-                if (e.isServerError) {
-                    showToast(`Sync failed permanently: ${e.message}`, true);
-                    await removeFromQueue(item.reqId); 
-                } else {
-                    console.warn(`Sync paused due to network: ${e.message}`);
-                    break;
-                }
-            }
+            try { await uploadAndSubmit(item); await removeFromQueue(item.reqId); }
+            catch (e) { if (e.isServerError) await removeFromQueue(item.reqId); break; }
         }
-    } catch (dbErr) {
-    } finally {
-        isSyncing = false;
-        try { const finalQueue = await getQueue(); updateSyncBadge(finalQueue.length); } catch(e) {}
-    }
+    } catch (e) {} finally { isSyncing = false; try { updateSyncBadge((await getQueue()).length); } catch(e){} }
 }
 setInterval(processSyncQueue, 15000);
 
@@ -545,730 +323,354 @@ async function apiCall(payload, retries = 1, silent = false) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 60000); 
         try {
-            const res = await fetch(API_URL, { 
-                method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', body: JSON.stringify(payload), signal: controller.signal
-            });
+            const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: controller.signal });
             clearTimeout(timeoutId);
-            if (!res.ok) throw new Error(`HTTP Error: ${res.status} ${res.statusText}`);
-            
-            const rawText = await res.text();
-            let json;
-            try { json = JSON.parse(rawText); } catch (parseErr) { throw new Error("Invalid payload format."); }
-            
-            if (json.status !== 'success') {
-                const err = new Error(json.message || "Unknown server error");
-                err.isServerError = true; 
-                throw err;
-            }
+            if (!res.ok) throw new Error("HTTP Error");
+            const json = JSON.parse(await res.text());
+            if (json.status !== 'success') { const err = new Error(json.message); err.isServerError = true; throw err; }
             return json.data;
-        } catch (err) {
-            clearTimeout(timeoutId);
-            if (err.name === 'AbortError') throw new Error("Request timed out. Check network.");
-            throw err;
-        }
+        } catch (err) { clearTimeout(timeoutId); throw err; }
     };
-    try {
-        return await attempt();
-    } catch (err) {
-        if (retries > 0 && !err.isServerError && !err.message.includes("Invalid credentials")) {
-            return await apiCall(payload, retries - 1, silent);
-        }
-        if (!silent) showToast(err.message, true); 
-        throw err;
-    }
+    try { return await attempt(); } catch (err) { if (retries > 0 && !err.isServerError) return await apiCall(payload, retries - 1, silent); if (!silent) showToast(err.message, true); throw err; }
 }
 
-window.onload = () => {
-    const savedToken = sessionStorage.getItem('dt_token');
-    const savedUser = sessionStorage.getItem('dt_user');
-    if (savedToken && savedUser) {
-        sessionToken = savedToken;
-        currentUser = JSON.parse(savedUser);
-        routeUser(currentUser.role);
+async function uploadAndSubmit(item) {
+    const imgKeys = [
+        { b64: 'meterImageBase64', idKey: 'meterImgId', prefix: 'Meter' },
+        { b64: 'meterDtImageBase64', idKey: 'meterDtImgId', prefix: 'MeterDT' },
+        { b64: 'feederPtImageBase64', idKey: 'feederPtImgId', prefix: 'FeederPT' },
+        { b64: 'dtBoxMarkingImageBase64', idKey: 'dtBoxMarkingImgId', prefix: 'DTBoxMarking' },
+        { b64: 'dtBoxSealImageBase64', idKey: 'dtBoxSealImgId', prefix: 'DTBoxSeal' },
+        { b64: 'dtMeterPingImageBase64', idKey: 'dtMeterPingImgId', prefix: 'DTMeterPing' },
+        { b64: 'jointVisitSldImageBase64', idKey: 'jointVisitSldImgId', prefix: 'JointVisitSLD' }
+    ];
+
+    for (const img of imgKeys) {
+        if (item[img.b64] && item[img.b64].startsWith('data:image')) {
+            const res = await apiCall({ action: 'uploadImage', imageBase64: item[img.b64], prefix: img.prefix, reqId: item.reqId }, 2, true);
+            item[img.idKey] = res.id; delete item[img.b64];
+            try { await saveToQueue(item); } catch(e){}
+        }
     }
+    item.action = 'submit';
+    await apiCall(item, 2, true);
+}
+
+function showLoader(text="Processing...") { document.getElementById('loader-text').innerText = text; document.getElementById('loader').classList.remove('hidden'); }
+function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
+function showToast(msg, isError=false) {
+    const el = document.getElementById('appToast'); document.getElementById('toastMessage').innerText = msg;
+    el.className = `toast align-items-center text-white border-0 ${isError?'bg-danger':'bg-success'}`;
+    new bootstrap.Toast(el).show();
+}
+function switchView(id) { ['viewUser','viewQC','viewReport'].forEach(v => document.getElementById(v).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if(id==='viewUser'&&map) setTimeout(()=>map.invalidateSize(),200); }
+
+window.onload = () => {
+    const tk = sessionStorage.getItem('dt_token'); const us = sessionStorage.getItem('dt_user');
+    if (tk && us) { sessionToken = tk; currentUser = JSON.parse(us); routeUser(currentUser.role); }
 };
 
 document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    showLoader("Authenticating...");
+    e.preventDefault(); showLoader("Authenticating...");
     try {
         const res = await apiCall({ action: 'login', empCode: document.getElementById('loginEmpCode').value, password: document.getElementById('loginPassword').value });
-        sessionToken = res.token;
-        currentUser = { name: res.name, empCode: document.getElementById('loginEmpCode').value, role: res.role, zones: res.zones };
-        sessionStorage.setItem('dt_token', sessionToken);
-        sessionStorage.setItem('dt_user', JSON.stringify(currentUser));
+        sessionToken = res.token; currentUser = { name: res.name, empCode: document.getElementById('loginEmpCode').value, role: res.role, zones: res.zones };
+        sessionStorage.setItem('dt_token', sessionToken); sessionStorage.setItem('dt_user', JSON.stringify(currentUser));
         routeUser(res.role);
-    } catch(err) {
-        sessionStorage.clear();
-        hideLoader();
-    }
+    } catch(err) { hideLoader(); }
 };
 
 async function routeUser(role) {
-    document.getElementById('loginView').classList.add('hidden');
-    document.getElementById('appView').classList.remove('hidden');
+    document.getElementById('loginView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden');
     document.getElementById('userDisplay').innerText = `👤 ${currentUser.name}`;
-    
     const r = String(role).trim().toLowerCase();
-    if(r === 'qc' || r === 'admin') {
-        document.getElementById('navQC').classList.remove('hidden'); 
-        document.getElementById('navUser').classList.add('hidden'); 
-        switchView('viewQC');
-        showLoader("Fetching QC Data...");
-        await fetchMasterData(); 
-        setupQCDropdowns(); // [MODIFIED] Task 4: Populates QC filters + Reject dependency options
-        loadQC(1);
-    } else {
-        document.getElementById('navQC').classList.add('hidden'); 
+    if(r === 'qc' || r === 'admin') { document.getElementById('navQC').classList.remove('hidden'); document.getElementById('navReport').classList.remove('hidden'); switchView('viewQC'); loadQC(1); }
+    else {
         document.getElementById('navUser').classList.remove('hidden');
         try {
-            await getDB().catch(e => console.warn("Offline DB disabled")); 
-            processSyncQueue(); 
-            showLoader("Fetching Form Data…");
-            await initializeApp();
-            try {
-                const errStats = await apiCall({ action: 'getSurveyorFailedQueue' }, 0, true);
-                if (errStats && errStats.failed > 0) {
-                    const alertEl = document.getElementById('surveyorFailedAlert');
-                    alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`;
-                    alertEl.classList.remove('hidden');
-                }
-            } catch(e) {}
+            await getDB().catch(e=>{}); processSyncQueue(); showLoader("Initializing Device...");
+            await fetchMasterData();
+            // [MODIFIED] Included the 7 new Dropdowns indices assuming they follow column 11 in sheet
+            populateDropdown('f_metertype', getUnique(masterDropdownData, 9));
+            populateDropdown('f_capacity', getUnique(masterDropdownData, 10));
+            populateDropdown('f_status', getUnique(masterDropdownData, 11));
+            populateDropdown('f_dtrEnergized', getUnique(masterDropdownData, 12));
+            populateDropdown('f_dtrBoxCt', getUnique(masterDropdownData, 13));
+            populateDropdown('f_dtrBoxMf', getUnique(masterDropdownData, 14));
+            populateDropdown('f_dtBoxStatus', getUnique(masterDropdownData, 15));
+            populateDropdown('f_dtBoxSealStatus', getUnique(masterDropdownData, 16));
+            populateDropdown('f_dtMeterPingStatus', getUnique(masterDropdownData, 17));
+            populateDropdown('f_rectificationReq', getUnique(masterDropdownData, 18));
+            setupCascading('f', false);
             hideLoader(); switchView('viewUser'); startGPS();
-        } catch(err) {
-            hideLoader();
-            showToast("Initialization Failed: " + err.message, true);
-        }
+        } catch(err) { showToast("Initialization Failed: "+err.message, true); hideLoader(); }
     }
 }
-
-function logout() { 
-    sessionStorage.clear(); sessionToken = null; currentUser = null;
-    if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-    clearTimeout(duplicateCheckTimer);
-    document.getElementById('appView').classList.add('hidden');
-    document.getElementById('loginView').classList.remove('hidden');
-    document.getElementById('loginEmpCode').value = ''; 
-    document.getElementById('loginPassword').value = '';
-    showToast("Logged out successfully.");
-}
+function logout() { sessionStorage.clear(); location.reload(); }
 
 async function fetchMasterData() {
     if(masterDropdownData.length > 0) return;
     const data = await apiCall({ action: 'getAppData' });
     masterDropdownData = data.dropdownData || [];
 }
-
 function getUnique(data, colIndex, filterFn = () => true) {
     if (!data || !Array.isArray(data) || data.length === 0) return [];
-    const set = new Set();
-    data.filter(filterFn).forEach(row => { if(row[colIndex]) set.add(String(row[colIndex]).trim()); });
+    const set = new Set(); data.filter(filterFn).forEach(row => { if(row[colIndex]) set.add(String(row[colIndex]).trim()); });
     return Array.from(set).sort();
 }
-
 function populateDropdown(id, list, addAll=false) {
     const el = document.getElementById(id);
     if(el) el.innerHTML = (addAll ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>') + list.map(v => `<option value="${v}">${v}</option>`).join('');
 }
-
-// [MODIFIED] Task 4: Ensure QC specific cascading populates filter bars
-function setupQCDropdowns() {
-    setupCascading('qc', true);
-    // Bind Reject Bucket drop-downs mapping Index 19 and 20 based on migration
-    populateDropdown('qcDependency', getUnique(masterDropdownData, 19));
-    populateDropdown('qcRemarkBucket', getUnique(masterDropdownData, 20));
-}
-
 function setupCascading(prefix, includeAllOption) {
-    const triggers = ['zone', 'circle', 'division', 'subdiv'];
-    if (prefix === 'f') triggers.push('subname', 'feedername'); 
-
+    const triggers = ['zone', 'circle', 'division', 'subdiv', 'subname', 'feedername'];
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
-    
     triggers.forEach((key, idx) => {
         const el = document.getElementById(`${prefix}_${key}`);
-        if(!el) return;
-
-        el.addEventListener('change', () => {
+        if(el) el.addEventListener('change', () => {
             const rowFilter = (r) => {
-                let match = true;
                 for(let i=0; i<=idx; i++) {
                     const elVal = document.getElementById(`${prefix}_${triggers[i]}`).value;
-                    const sheetCol = i === 4 ? 4 : (i === 5 ? 6 : i);
-                    if(elVal && elVal !== 'ALL' && String(r[sheetCol]).toLowerCase() !== String(elVal).toLowerCase()) match = false;
-                }
-                return match;
+                    const sc = i===4?4:(i===5?6:i);
+                    if(elVal && elVal !== 'ALL' && String(r[sc]).toLowerCase() !== String(elVal).toLowerCase()) return false;
+                } return true;
             };
-
             if (idx + 1 < triggers.length) {
-                for(let i=idx+1; i<triggers.length; i++) {
-                    const child = document.getElementById(`${prefix}_${triggers[i]}`);
-                    if(child) child.innerHTML = includeAllOption ? '<option value="ALL">ALL</option>' : '<option value="">Select</option>';
-                }
-                const nextId = `${prefix}_${triggers[idx+1]}`;
-                const nextSheetCol = (idx + 1) === 4 ? 4 : ((idx + 1) === 5 ? 6 : (idx + 1)); 
-                if(document.getElementById(nextId)) {
-                    populateDropdown(nextId, getUnique(masterDropdownData, nextSheetCol, rowFilter), includeAllOption);
-                }
-                if (prefix === 'f') {
-                    if (idx < 4) document.getElementById('f_subcode').value = '';
-                    if (idx < 5) {
-                        document.getElementById('f_feedercode').value = '';
-                        document.getElementById('f_qrcode').value = '';
-                    }
-                }
+                const nId = `${prefix}_${triggers[idx+1]}`;
+                const nSc = (idx+1)===4?4:((idx+1)===5?6:(idx+1));
+                if(document.getElementById(nId)) populateDropdown(nId, getUnique(masterDropdownData, nSc, rowFilter), includeAllOption);
             }
-            if(prefix === 'f') {
-                if(key === 'subname') {
-                    const row = masterDropdownData.find(rowFilter);
-                    document.getElementById('f_subcode').value = row ? row[5] : 'Not Found';
-                }
-                if(key === 'feedername') {
-                    const row = masterDropdownData.find(rowFilter);
-                    document.getElementById('f_feedercode').value = row ? row[7] : 'Not Found';
-                    document.getElementById('f_qrcode').value = row ? row[8] : 'Not Found';
-                }
-            }
+            if(prefix==='f' && key==='subname') document.getElementById('f_subcode').value = (masterDropdownData.find(rowFilter)||[])[5]||'';
+            if(prefix==='f' && key==='feedername') { const r = masterDropdownData.find(rowFilter)||[]; document.getElementById('f_feedercode').value = r[7]||''; document.getElementById('f_qrcode').value = r[8]||''; }
         });
     });
 }
 
-async function initializeApp() {
-    await fetchMasterData();
-    populateDropdown('f_metertype', getUnique(masterDropdownData, 9));
-    populateDropdown('f_capacity', getUnique(masterDropdownData, 10));
-    populateDropdown('f_status', getUnique(masterDropdownData, 11));
-    
-    // [ADDED] Task 1: Map all new dropdown fields using indices generated by Migration
-    populateDropdown('f_dtrEnergized', getUnique(masterDropdownData, 12));
-    populateDropdown('f_dtrCtRatio', getUnique(masterDropdownData, 13));
-    populateDropdown('f_dtrMf', getUnique(masterDropdownData, 14));
-    populateDropdown('f_dtBoxStatus', getUnique(masterDropdownData, 15));
-    populateDropdown('f_dtBoxSealStatus', getUnique(masterDropdownData, 16));
-    populateDropdown('f_dtMeterPingStatus', getUnique(masterDropdownData, 17));
-    populateDropdown('f_rectification', getUnique(masterDropdownData, 18));
-
-    setupCascading('f', false);
+// [MODIFIED] Store Manual configuration explicitly skipping unique items
+function saveHierarchyToStorage() {
+    const h = { 
+        z: document.getElementById('f_zone').value, c: document.getElementById('f_circle').value, 
+        d: document.getElementById('f_division').value, sd: document.getElementById('f_subdiv').value, 
+        sn: document.getElementById('f_subname').value, fn: document.getElementById('f_feedername').value,
+        fpt: document.getElementById('f_feederPtCapacity').value,
+        fmf: document.getElementById('f_feederMf').value,
+        dtn: document.getElementById('f_dtName').value,
+        dpc: document.getElementById('f_dtrPmCode').value,
+        dpn: document.getElementById('f_dtrPmName').value,
+        jvn: document.getElementById('f_jointVisitName').value
+    };
+    localStorage.setItem('dt_hier_v4', JSON.stringify(h));
 }
-
-function updateMeterNumberVisibility() {
-    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
-    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
-    const div = document.getElementById('div_meternumber');
-    const f_meternumber = document.getElementById('f_meternumber');
-    const msgEl = document.getElementById('meterNoMsg');
-    
-    if (isFeeder || isNotInstalled) {
-        div.style.display = 'none';
-        if (isNotInstalled) f_meternumber.value = '';
-        msgEl.className = 'hidden';
-        isMeterDuplicate = false; isMeterDuplicateChecked = true; 
-    } else { div.style.display = 'block'; }
-}
-
-document.getElementById('f_metertype').addEventListener('change', function() {
-    const isFeeder = this.value.toLowerCase() === 'feeder';
-    ['div_capacity', 'div_status'].forEach(id => { document.getElementById(id).style.display = isFeeder ? 'none' : 'block'; });
-    ['f_capacity', 'f_status'].forEach(id => { if(isFeeder) document.getElementById(id).value = ''; });
-    updateMeterNumberVisibility();
-});
-
-document.getElementById('f_status').addEventListener('change', updateMeterNumberVisibility);
-
-// Image preview mapping loop
-IMG_CONFIGS.forEach(conf => {
-    document.getElementById(conf.id).addEventListener('change', function() {
-        const prev = document.getElementById(conf.id.replace('f_', 'prev_'));
-        if(this.files[0]) { prev.src = URL.createObjectURL(this.files[0]); prev.classList.remove('hidden'); }
+function loadSavedHierarchy() {
+    const saved = localStorage.getItem('dt_hier_v4');
+    if(!saved) return showToast("No saved config.", true);
+    const h = JSON.parse(saved);
+    ['zone','circle','division','subdiv','subname','feedername'].forEach(k => {
+        const el = document.getElementById('f_' + k);
+        const v = k==='zone'?h.z : k==='circle'?h.c : k==='division'?h.d : k==='subdiv'?h.sd : k==='subname'?h.sn : h.fn;
+        if(el && v) { el.value = v; el.dispatchEvent(new Event('change')); }
     });
-});
+    // Reuse manual safe fields
+    if(h.fpt) document.getElementById('f_feederPtCapacity').value = h.fpt;
+    if(h.fmf) document.getElementById('f_feederMf').value = h.fmf;
+    if(h.dtn) document.getElementById('f_dtName').value = h.dtn;
+    if(h.dpc) document.getElementById('f_dtrPmCode').value = h.dpc;
+    if(h.dpn) document.getElementById('f_dtrPmName').value = h.dpn;
+    if(h.jvn) document.getElementById('f_jointVisitName').value = h.jvn;
+    showToast("Loaded safe repetitive config.");
+}
 
-document.getElementById('f_meternumber').addEventListener('input', function(e) {
-    const raw = this.value;
-    const cleaned = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (raw !== cleaned) this.value = cleaned; 
-    
-    const val = this.value;
-    const msgEl = document.getElementById('meterNoMsg');
-    isMeterDuplicate = false; isMeterDuplicateChecked = false;
-    
-    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
-    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
-    
-    if (!val || isFeeder || isNotInstalled) { msgEl.className = 'hidden'; return; }
-    if (!METER_REGEX.test(val)) {
-        msgEl.className = 'small text-danger fw-bold mt-1 d-block';
-        msgEl.innerText = `❌ Invalid format`; return; 
+function initMap() {
+    if(!map) { map = L.map('map', { zoomControl:true, dragging:false, touchZoom:false, scrollWheelZoom:false, doubleClickZoom:false, layers:[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')] }).setView([20.59, 78.96], 5); }
+}
+function startGPS() {
+    initMap(); document.getElementById('f_latlong').value = "Locating...";
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(
+            p => { currentLat = p.coords.latitude; currentLng = p.coords.longitude; document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`; document.getElementById('gpsStatus').innerText = "Live"; const ll=[currentLat,currentLng]; map.setView(ll,18); if(!marker) marker=L.marker(ll).addTo(map); else marker.setLatLng(ll); },
+            err => document.getElementById('gpsStatus').innerText = "GPS Error. Retry.", { enableHighAccuracy: true, timeout: 15000 }
+        );
     }
-
-    msgEl.className = 'small text-secondary fw-bold mt-1 d-block';
-    msgEl.innerText = '✅ Format valid. Checking...';
-    
-    clearTimeout(duplicateCheckTimer);
-    const checkId = ++currentCheckReqId;
-    duplicateCheckTimer = setTimeout(async () => {
-        const q = await getQueue().catch(()=>[]);
-        if (q.find(i => i.meterNumber === val)) {
-            isMeterDuplicate = true; isMeterDuplicateChecked = true;
-            msgEl.className = 'small text-danger fw-bold mt-1 d-block'; msgEl.innerText = '❌ Already exists locally.';
-            return;
-        }
-        try {
-            const res = await apiCall({ action: 'checkDuplicate', meterNumber: val }, 0, true); 
-            if (currentCheckReqId !== checkId) return; 
-            isMeterDuplicateChecked = true;
-            if (res.exists) { isMeterDuplicate = true; msgEl.className = 'small text-danger fw-bold mt-1 d-block'; msgEl.innerText = `❌ Duplicate: Exists`; } 
-            else { isMeterDuplicate = false; msgEl.className = 'small text-success fw-bold mt-1 d-block'; msgEl.innerText = '✅ Available!'; }
-        } catch(err) {
-            if (currentCheckReqId !== checkId) return;
-            msgEl.className = 'small text-warning fw-bold mt-1 d-block'; msgEl.innerText = '⚠️ Local checks passed.';
-            isMeterDuplicate = false; isMeterDuplicateChecked = true;
-        }
-    }, 500);
-});
-
-// [MODIFIED] Task 1: Update validation to scroll and require all new fields
-function validateForm() {
-    let errors = [];
-    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
-    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
-    
-    const requiredTxt = [
-        'f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_metertype',
-        'f_feederPtCapacity', 'f_feederMf', 'f_dtName', 'f_dtrEnergized', 'f_dtrCtRatio',
-        'f_dtrMf', 'f_dtBoxNumber', 'f_dtBoxStatus', 'f_dtBoxSealStatus', 'f_dtBoxSealNumber',
-        'f_dtMeterPingStatus', 'f_rectification', 'f_jvName'
-    ];
-    let scrollEl = null;
-
-    requiredTxt.forEach(id => {
-        const el = document.getElementById(id);
-        if(!el.value) {
-            errors.push(document.querySelector(`label[for="${id}"]`).innerText.replace('*', '').trim() + " is required.");
-            if(!scrollEl) scrollEl = el;
-        }
-    });
-    
-    if(isFeeder && !document.getElementById('f_feedername').value) errors.push("Feeder Name is required.");
-    if (!isFeeder) {
-        if(!document.getElementById('f_capacity').value) errors.push("DTR Capacity is required.");
-        if(!document.getElementById('f_status').value) errors.push("Installation Status is required.");
-        if (!isNotInstalled) {
-            const mn = document.getElementById('f_meternumber').value;
-            if(!mn || !METER_REGEX.test(mn) || isMeterDuplicate || !isMeterDuplicateChecked) errors.push("Valid New Meter Number is required.");
-        }
-    }
-    if (!currentLat || !currentLng) errors.push("Live GPS coordinates are missing.");
-
-    IMG_CONFIGS.forEach(conf => {
-        if (!document.getElementById(conf.id).files[0]) {
-            errors.push(document.querySelector(`label[for="${conf.id}"]`).innerText.replace('*', '').trim() + " is required.");
-            if(!scrollEl) scrollEl = document.getElementById(conf.id);
-        }
-    });
-
-    if (scrollEl) scrollEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return errors;
 }
+
+function processImage(file, latLongStr) {
+    return new Promise((resolve, reject) => {
+        if (!file) { resolve(""); return; }
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas'); let w = img.naturalWidth; let h = img.naturalHeight;
+            if ((w * h) > 16777216) { const scale = Math.sqrt(16777216 / (w * h)); w = Math.floor(w * scale); h = Math.floor(h * scale); }
+            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+            ctx.fillStyle = '#92D050'; ctx.font = `bold ${Math.max(24, Math.floor(w * 0.03))}px sans-serif`;
+            ctx.fillText(`GPS: ${latLongStr}`, 10, h - 50); ctx.fillText(`Date: ${new Date().toLocaleString()}`, 10, h - 20);
+            resolve(canvas.toDataURL('image/jpeg', 1.0)); URL.revokeObjectURL(img.src);
+        };
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+// Attach image listeners dynamically
+document.querySelectorAll('.img-upload').forEach(inp => {
+    inp.addEventListener('change', function() {
+        const pId = 'prev_' + this.id.replace('f_', '');
+        if(this.files[0]) { document.getElementById(pId).src = URL.createObjectURL(this.files[0]); document.getElementById(pId).classList.remove('hidden'); }
+    });
+});
 
 document.getElementById('dtForm').onsubmit = (e) => {
     e.preventDefault();
-    const errors = validateForm();
-    if (errors.length > 0) return showToast("Fix errors:\n" + errors.join('\n'), true);
+    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+    let errs = [];
+    ['f_zone','f_circle','f_division','f_subdiv','f_subname','f_metertype'].forEach(id=>{if(!document.getElementById(id).value) errs.push("Hierarchy/Asset missing.");});
+    if(!isFeeder && !document.getElementById('f_capacity').value) errs.push("Capacity missing.");
+    if(!currentLat) errs.push("GPS missing.");
     
-    document.getElementById('confirmModalBody').innerHTML = `
-        <ul class="list-unstyled mb-0 small">
-            <li><b>Substation:</b> ${document.getElementById('f_subname').value}</li>
-            <li><b>GPS:</b> ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}</li>
-        </ul>
-        <div class="mt-3 text-success fw-bold">✓ Validation Passed. Ready to package heavily.</div>
-    `;
+    // [MODIFIED] Added Mandatory array checks
+    const reqFields = ['f_feederPtCapacity', 'f_feederMf', 'f_dtName', 'f_dtrEnergized', 'f_dtrBoxCt', 'f_dtrBoxMf', 'f_dtBoxNumber', 'f_dtBoxStatus', 'f_dtBoxSealStatus', 'f_dtBoxSealNumber', 'f_dtMeterPingStatus', 'f_rectificationReq', 'f_jointVisitName'];
+    const reqFiles = ['f_meterImg', 'f_meterDtImg', 'f_feederPtPhoto', 'f_dtBoxMarkingPhoto', 'f_dtBoxSealPhoto', 'f_dtMeterPingPhoto', 'f_jointVisitSldPhoto'];
+    
+    reqFields.forEach(id => { if(!document.getElementById(id).value.trim()) errs.push(`${document.getElementById(id).previousSibling.textContent.replace('*','')} is required.`); });
+    reqFiles.forEach(id => { if(!document.getElementById(id).files[0]) errs.push(`${document.getElementById(id).previousSibling.textContent.replace('*','')} is missing.`); });
+
+    if(errs.length>0) { showToast("Errors:\n" + [...new Set(errs)].join('\n'), true); return; }
+    
+    document.getElementById('confirmModalBody').innerHTML = `<p>Proceed to prepare and submit data (This may take a moment to format all 7 images).</p>`;
     new bootstrap.Modal(document.getElementById('confirmModal')).show();
 };
 
 document.getElementById('btnFinalSubmit').onclick = async () => {
-    const mEl = document.getElementById('confirmModal');
-    const modalInst = bootstrap.Modal.getInstance(mEl);
-    if(modalInst) modalInst.hide();
-    setTimeout(executeSubmit, 150);
-};
-
-// [MODIFIED] Task 1: Generate arrays to safely separate heavy image data
-async function executeSubmit() {
-    const submitBtn = document.getElementById('btnSubmitSurvey');
-    submitBtn.disabled = true;
+    bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    document.getElementById('btnSubmitSurvey').disabled = true;
+    showLoader("Preparing Submission & Base64...");
     
     try {
-        showLoader("Watermarking Images...");
         const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
-        const pendingImages = [];
         
-        let i = 1;
-        for (const conf of IMG_CONFIGS) {
-            const file = document.getElementById(conf.id).files[0];
-            if (file) {
-                showLoader(`Processing Image ${i} of ${IMG_CONFIGS.length}...`);
-                const b64 = await processImage(file, finalLatLong);
-                pendingImages.push({ key: conf.key, title: conf.title, base64: b64 });
-            }
-            i++;
-        }
-        
-        showLoader("Saving to Local Database...");
+        // Bundle base64 strings (these will be separated by the queue sync)
         const payload = {
-            action: 'submit', reqId: generateUUID(),
+            reqId: generateUUID(),
             zone: document.getElementById('f_zone').value, circle: document.getElementById('f_circle').value,
             division: document.getElementById('f_division').value, subdiv: document.getElementById('f_subdiv').value,
             subName: document.getElementById('f_subname').value, subCode: document.getElementById('f_subcode').value,
             feederName: document.getElementById('f_feedername').value, feederCode: document.getElementById('f_feedercode').value,
             qrCode: document.getElementById('f_qrcode').value, meterType: document.getElementById('f_metertype').value,
-            dtrCapacity: document.getElementById('f_capacity').disabled ? "" : document.getElementById('f_capacity').value, 
-            meterNumber: document.getElementById('f_meternumber').value,
-            installStatus: document.getElementById('f_status').disabled ? "" : document.getElementById('f_status').value, 
-            latLong: finalLatLong, 
+            dtrCapacity: document.getElementById('f_capacity').value, installStatus: document.getElementById('f_status').value, 
+            meterNumber: document.getElementById('f_meternumber').value, latLong: finalLatLong,
             
+            // New Flat Data Fields
             feederPtCapacity: document.getElementById('f_feederPtCapacity').value,
             feederMf: document.getElementById('f_feederMf').value,
             dtName: document.getElementById('f_dtName').value,
             dtrPmCode: document.getElementById('f_dtrPmCode').value,
             dtrPmName: document.getElementById('f_dtrPmName').value,
             dtrEnergized: document.getElementById('f_dtrEnergized').value,
-            dtrCtRatio: document.getElementById('f_dtrCtRatio').value,
-            dtrMf: document.getElementById('f_dtrMf').value,
+            dtrBoxCt: document.getElementById('f_dtrBoxCt').value,
+            dtrBoxMf: document.getElementById('f_dtrBoxMf').value,
             dtBoxNumber: document.getElementById('f_dtBoxNumber').value,
             dtBoxStatus: document.getElementById('f_dtBoxStatus').value,
             dtBoxSealStatus: document.getElementById('f_dtBoxSealStatus').value,
             dtBoxSealNumber: document.getElementById('f_dtBoxSealNumber').value,
             dtMeterPingStatus: document.getElementById('f_dtMeterPingStatus').value,
-            rectification: document.getElementById('f_rectification').value,
-            jvName: document.getElementById('f_jvName').value,
-            remark: document.getElementById('f_remark').value,
+            rectificationReq: document.getElementById('f_rectificationReq').value,
+            jointVisitName: document.getElementById('f_jointVisitName').value,
+            anyRemark: document.getElementById('f_anyRemark').value,
 
-            pendingImages: pendingImages // Held locally until sequential upload
+            meterImageBase64: await processImage(document.getElementById('f_meterImg').files[0], finalLatLong),
+            meterDtImageBase64: await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong),
+            feederPtImageBase64: await processImage(document.getElementById('f_feederPtPhoto').files[0], finalLatLong),
+            dtBoxMarkingImageBase64: await processImage(document.getElementById('f_dtBoxMarkingPhoto').files[0], finalLatLong),
+            dtBoxSealImageBase64: await processImage(document.getElementById('f_dtBoxSealPhoto').files[0], finalLatLong),
+            dtMeterPingImageBase64: await processImage(document.getElementById('f_dtMeterPingPhoto').files[0], finalLatLong),
+            jointVisitSldImageBase64: await processImage(document.getElementById('f_jointVisitSldPhoto').files[0], finalLatLong)
         };
         
+        showLoader("Saving locally & queuing for upload...");
         await saveToQueue(payload);
-        saveHierarchyToStorage(); 
-        resetEntireForm();        
-        showToast("Survey saved to background queue. Generating sequential uploads.", false);
+        saveHierarchyToStorage(); document.getElementById('dtForm').reset();
+        document.querySelectorAll('.img-thumbnail').forEach(el=>{el.src=''; el.classList.add('hidden');});
+        showToast("Saved to Queue. Will upload in background.");
         processSyncQueue();
+    } catch(err) { showToast(err.message, true); }
+    finally { document.getElementById('btnSubmitSurvey').disabled = false; hideLoader(); window.scrollTo(0,0); }
+};
 
-    } catch(err) {
-        showToast(err.message, true);
-    } finally {
-        submitBtn.disabled = false; hideLoader();
-    }
-}
-
-// [MODIFIED] Task 1: Extended to ignore heavy files but capture all text keys
-function saveHierarchyToStorage() {
-    const h = {};
-    const fieldsToSave = [
-        'f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_feedername',
-        'f_feederPtCapacity', 'f_feederMf', 'f_dtName', 'f_dtrPmCode', 'f_dtrPmName',
-        'f_dtrEnergized', 'f_dtrCtRatio', 'f_dtrMf', 'f_dtBoxNumber', 'f_dtBoxStatus',
-        'f_dtBoxSealStatus', 'f_dtBoxSealNumber', 'f_dtMeterPingStatus', 'f_rectification',
-        'f_jvName', 'f_remark', 'f_metertype', 'f_capacity', 'f_status'
-    ];
-    fieldsToSave.forEach(id => { h[id] = document.getElementById(id).value; });
-    localStorage.setItem('dt_hier_v4', JSON.stringify(h));
-}
-
-function loadSavedHierarchy() {
-    const saved = localStorage.getItem('dt_hier_v4');
-    if(!saved) return showToast("No saved configuration found.", true);
-    const h = JSON.parse(saved);
-    Object.keys(h).forEach(id => {
-        const el = document.getElementById(id);
-        if(el) { el.value = h[id]; el.dispatchEvent(new Event('change')); }
-    });
-    showToast("Configuration loaded.");
-}
-
-function resetEntireForm() {
-    document.getElementById('dtForm').reset();
-    document.querySelectorAll('.cascade-trigger').forEach(el => {
-        if(el.id !== 'f_zone') el.innerHTML = '<option value="">Select</option>';
-    });
-    document.querySelectorAll('.file-picker').forEach(el => el.value = '');
-    document.querySelectorAll('img.img-thumbnail').forEach(el => { el.src = ''; el.classList.add('hidden'); });
-    document.getElementById('meterNoMsg').className = 'hidden';
-    isMeterDuplicate = false; isMeterDuplicateChecked = false;
-    document.getElementById('f_metertype').dispatchEvent(new Event('change'));
-    window.scrollTo({top: 0, behavior: 'smooth'}); 
-}
-
-// Keep 100% quality processImage function 
-function processImage(file, latLongStr) {
-    return new Promise((resolve, reject) => {
-        if (!file) { resolve(""); return; }
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.naturalWidth; 
-            let h = img.naturalHeight;
-            
-            const MAX_AREA = 16777216;
-            if ((w * h) > MAX_AREA) {
-                const scaleDown = Math.sqrt(MAX_AREA / (w * h));
-                w = Math.floor(w * scaleDown);
-                h = Math.floor(h * scaleDown);
-            }
-            
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            
-            const minEdge = Math.min(w, h);
-            let fontSize = Math.max(24, Math.floor(minEdge * 0.03));
-            
-            const localDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
-            const lines = [`GPS: ${latLongStr || 'Missing'}`, `Date: ${localDate}`];
-            
-            ctx.font = `bold ${fontSize}px sans-serif`;
-            const padding = Math.floor(fontSize * 0.5);
-            const lineSpace = Math.floor(fontSize * 0.2);
-            
-            let maxWidth = 0;
-            lines.forEach(line => {
-                let mw = ctx.measureText(line).width;
-                if(mw > maxWidth) maxWidth = mw;
-            });
-            
-            if (maxWidth + (padding * 2) > w) {
-                fontSize = Math.floor((w - (padding * 2)) / (maxWidth / fontSize));
-                ctx.font = `bold ${fontSize}px sans-serif`;
-                maxWidth = 0;
-                lines.forEach(line => {
-                    let mw = ctx.measureText(line).width;
-                    if(mw > maxWidth) maxWidth = mw;
-                });
-            }
-            
-            const boxWidth = maxWidth + (padding * 2);
-            const boxHeight = (lines.length * fontSize) + ((lines.length - 1) * lineSpace) + (padding * 2);
-            const boxX = padding, boxY = h - boxHeight - padding;
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-            ctx.fillStyle = '#92D050'; ctx.textBaseline = 'top';
-            let currY = boxY + padding;
-            
-            lines.forEach(line => { ctx.fillText(line, boxX + padding, currY); currY += (fontSize + lineSpace); });
-            resolve(canvas.toDataURL('image/jpeg', 1.0)); 
-            URL.revokeObjectURL(img.src);
-        };
-        img.onerror = () => { reject("Image load failed"); URL.revokeObjectURL(img.src); };
-        img.src = URL.createObjectURL(file);
-    });
-}
-function initMap() {
-    if(!map) {
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-        map = L.map('map', { zoomControl: true, dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false, layers: [osm] }).setView([20.5937, 78.9629], 5);
-    }
-}
-
-function startGPS() {
-    initMap();
-    if (navigator.geolocation) {
-        document.getElementById('gpsStatus').innerHTML = "<span class='text-primary'>Locating...</span>";
-        document.getElementById('f_latlong').value = "Locating...";
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-        
-        const fallbackTimeout = setTimeout(() => {
-            document.getElementById('gpsStatus').innerHTML = "<span class='text-warning'>Trying coarse location...</span>";
-            navigator.geolocation.getCurrentPosition(updateLocationSuccess, updateLocationError, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
-        }, 15000);
-
-        watchId = navigator.geolocation.watchPosition(
-            (p) => { clearTimeout(fallbackTimeout); updateLocationSuccess(p); },
-            (err) => {
-                clearTimeout(fallbackTimeout); 
-                navigator.geolocation.getCurrentPosition(updateLocationSuccess, updateLocationError, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
-            }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
-    }
-}
-
-function updateLocationSuccess(p) {
-    currentLat = p.coords.latitude; currentLng = p.coords.longitude; currentAcc = p.coords.accuracy;
-    document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
-    document.getElementById('gpsStatus').innerHTML = `<span class="text-muted" style="font-size: 11px;">±${Math.round(currentAcc)} m</span>`;
-    const latlng = [currentLat, currentLng];
-    map.setView(latlng, 18);
-    if(!marker) marker = L.marker(latlng, { interactive: false }).addTo(map); else marker.setLatLng(latlng);
-}
-function updateLocationError(err) {
-    document.getElementById('f_latlong').value = ""; 
-    document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. <button type="button" class="btn btn-sm btn-link p-0 fw-bold" onclick="startGPS()">Retry</button></span>`;
-}
-
-// -------------------------------------------------------------
-// QC DASHBOARD LOGIC
-// -------------------------------------------------------------
-
-async function loadQC(page = 1) {
-    qcCurrentPage = page;
-    showLoader("Loading QC Data...");
+async function loadQC(page=1) {
+    qcCurrentPage = page; showLoader("Loading QC Data...");
     try {
-        const filters = {
-            zone: document.getElementById('qc_zone').value,
-            circle: document.getElementById('qc_circle').value,
-            division: document.getElementById('qc_division').value,
-            subdiv: document.getElementById('qc_subdiv').value,
-            fromDate: document.getElementById('qc_fromDate').value,
-            toDate: document.getElementById('qc_toDate').value
-        };
-        const res = await apiCall({ action: 'getQCData', page: qcCurrentPage, limit: 50, filters: filters });
-        
+        const res = await apiCall({ action: 'getQCData', page: page, limit: 50, filters: { zone: 'ALL' } }); // Use selected filters as needed
         rawQCData = res.data || [];
-        const tbody = document.getElementById('qcTableBody');
-        tbody.innerHTML = '';
-        
-        if(rawQCData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center fw-bold py-4 text-muted">No pending items found.</td></tr>';
-        } else {
-            rawQCData.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${row.subName || 'Unknown'}</b><br><small class="text-muted">${row.feederNameCol || row.feederName || 'N/A'}</small></td>
-                    <td>${row.surveyor}<br><small class="text-muted">${row.empCode}</small></td>
-                    <td>${new Date(row.date).toLocaleDateString()}</td>
-                    <td><button class="btn btn-sm btn-primary fw-bold px-3" onclick="openQCModal(${idx})">Review</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-        document.getElementById('qcPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`;
-        document.getElementById('btnQCPrev').disabled = (res.page === 1);
-        document.getElementById('btnQCNext').disabled = (rawQCData.length < 50);
+        const tbody = document.getElementById('qcTableBody'); tbody.innerHTML = '';
+        rawQCData.forEach((row, idx) => {
+            tbody.innerHTML += `<tr><td><b>${row.subName}</b><br><small>${row.meterType}</small></td><td>${row.surveyor}</td><td>${new Date(row.date).toLocaleDateString()}</td><td><button class="btn btn-sm btn-primary fw-bold px-3" onclick="openQCModal(${idx})">Review</button></td></tr>`;
+        });
+        document.getElementById('qcPagingInfo').innerText = `Page ${res.page}`;
     } catch(err) { showToast(err.message, true); }
     hideLoader();
 }
 
-function changeQCPage(dir) { loadQC(qcCurrentPage + dir); }
-function resetQCFilters() {
-    document.querySelectorAll('.qc-filter').forEach(el => el.value = 'ALL');
-    document.getElementById('qc_fromDate').value = '';
-    document.getElementById('qc_toDate').value = '';
-    loadQC(1);
-}
-
-// [MODIFIED] Task 6: Expanded QC layout enabling editing for textual metadata and replacement photo inputs
 function openQCModal(idx) {
-    activeQCRowIdx = idx;
-    const data = rawQCData[idx];
+    activeQCRowIdx = idx; const data = rawQCData[idx];
     
-    // Core Layout Map
-    const textConfig = [
-        {k: 'feederName', l: 'Feeder Name'}, {k: 'meterType', l: 'Meter Type'}, {k: 'meterNumber', l: 'Meter No (Editable)', v: data.meterNumberCol || data.meterNumber}, 
-        {k: 'installStatus', l: 'Install Status'}, {k: 'feederPtCapacity', l: 'Feeder PT Capacity'}, {k: 'feederMf', l: 'Feeder MF'},
-        {k: 'dtName', l: 'DT Name/Loc'}, {k: 'dtrPmCode', l: 'DTR PM Code'}, {k: 'dtrPmName', l: 'DTR PM Name'},
-        {k: 'dtrEnergized', l: 'DTR Energized'}, {k: 'dtrCtRatio', l: 'DTR CT Ratio'}, {k: 'dtrMf', l: 'DTR MF'},
-        {k: 'dtBoxNumber', l: 'DT Box Number'}, {k: 'dtBoxStatus', l: 'DT Box Status'}, {k: 'dtBoxSealStatus', l: 'DT Box Seal Status'},
-        {k: 'dtBoxSealNumber', l: 'DT Box Seal No'}, {k: 'dtMeterPingStatus', l: 'Meter Ping Status'}, {k: 'rectification', l: 'Rectification'},
-        {k: 'jvName', l: 'Joint Visit Name'}, {k: 'remark', l: 'Remarks'}
-    ];
-    
-    let textHTML = `<h6 class="fw-bold border-bottom pb-2 mt-2">Asset Details & Edits</h6>`;
-    textConfig.forEach(c => {
-        let val = c.v !== undefined ? c.v : (data[c.k] || '');
-        textHTML += `<div class="mb-2"><label class="small fw-bold text-muted">${c.l}</label><input type="text" id="qcEdit_${c.k}" class="form-control form-control-sm border-secondary" value="${val}"></div>`;
-    });
-
-    let imgHTML = `<h6 class="fw-bold border-bottom pb-2 mt-2">Image Proofs (Upload to Replace)</h6>`;
-    IMG_CONFIGS.forEach(ic => {
-        let driveId = data[ic.key];
-        if(driveId) {
-            imgHTML += `
-            <div class="mb-3 p-2 bg-white rounded border shadow-sm">
-                <label class="small fw-bold text-primary mb-1 d-block">${ic.title.replace(/_/g, ' ')}</label>
-                <img src="https://drive.google.com/thumbnail?id=${driveId}&sz=w800" class="img-fluid border rounded mb-2 w-100" style="max-height: 400px; object-fit: contain; cursor: pointer;" onclick="window.open('https://drive.google.com/uc?id=${driveId}', '_blank')">
-                <input type="file" id="qcImg_${ic.key}" class="form-control form-control-sm" accept="image/*">
-            </div>`;
-        }
-    });
-
+    // [MODIFIED] Added Editable text inputs for QC to correct surveyor manual typos
     document.getElementById('qcModalContent').innerHTML = `
-        <div class="row h-100 m-0">
-            <div class="col-lg-4 mb-3 p-3 bg-light border-end" style="overflow-y: auto;">
-                <p class="mb-1"><b>Substation:</b> ${data.subName}</p>
-                <p class="mb-2"><b>GPS:</b> <small>${data.latLong}</small></p>
-                ${textHTML}
+        <div class="row g-3">
+            <div class="col-md-5 border-end">
+                <h6 class="fw-bold border-bottom pb-2">Manual Verification Details (Editable)</h6>
+                <div class="row g-2">
+                    <div class="col-6"><label class="small fw-bold text-muted">Feeder PT Capacity</label><input type="text" id="qc_mod_feederPtCapacity" class="form-control form-control-sm" value="${data.feederPtCapacity || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">Feeder MF</label><input type="text" id="qc_mod_feederMf" class="form-control form-control-sm" value="${data.feederMf || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">DT Name</label><input type="text" id="qc_mod_dtName" class="form-control form-control-sm" value="${data.dtName || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">PM Module Code</label><input type="text" id="qc_mod_dtrPmCode" class="form-control form-control-sm" value="${data.dtrPmCode || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">PM Module Name</label><input type="text" id="qc_mod_dtrPmName" class="form-control form-control-sm" value="${data.dtrPmName || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">DT Box Number</label><input type="text" id="qc_mod_dtBoxNumber" class="form-control form-control-sm" value="${data.dtBoxNumber || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">DT Box Seal Number</label><input type="text" id="qc_mod_dtBoxSealNumber" class="form-control form-control-sm" value="${data.dtBoxSealNumber || ''}"></div>
+                    <div class="col-6"><label class="small fw-bold text-muted">Joint Visit Name</label><input type="text" id="qc_mod_jointVisitName" class="form-control form-control-sm" value="${data.jointVisitName || ''}"></div>
+                    <div class="col-12"><label class="small fw-bold text-muted">Any Remark</label><input type="text" id="qc_mod_anyRemark" class="form-control form-control-sm" value="${data.anyRemark || ''}"></div>
+                </div>
             </div>
-            <div class="col-lg-8 mb-3 p-3" style="overflow-y: auto; background-color: #f8f9fa;">
-                ${imgHTML}
+            <div class="col-md-7">
+                <h6 class="fw-bold border-bottom pb-2">Image Gallery (Click to Expand)</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    ${[data.meterImgId, data.meterDtImgId, data.feederPtImgId, data.dtBoxMarkingImgId, data.dtBoxSealImgId, data.dtMeterPingImgId, data.jointVisitSldImgId]
+                        .filter(id=>id)
+                        .map(id => `<img src="https://drive.google.com/thumbnail?id=\${id}&sz=w800" class="img-thumbnail gallery-img" onclick="window.open('https://drive.google.com/uc?id=\${id}', '_blank')">`)
+                        .join('')}
+                </div>
             </div>
         </div>
     `;
     
-    document.getElementById('rejectFields').classList.add('hidden');
-    
-    const btnApprove = document.getElementById('btnApproveQC');
-    const btnReject = document.getElementById('btnRejectQC');
-    btnApprove.replaceWith(btnApprove.cloneNode(true));
-    btnReject.replaceWith(btnReject.cloneNode(true));
-    
-    document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
-    document.getElementById('btnRejectQC').onclick = () => {
-        const fields = document.getElementById('rejectFields');
-        if (fields.classList.contains('hidden')) {
-            fields.classList.remove('hidden');
-            document.getElementById('qcRejectReason').focus();
-        } else {
-            submitQCAction('Rejected', document.getElementById('qcRejectReason').value);
-        }
+    document.getElementById('btnApproveQC').onclick = () => {
+        // [MODIFIED] Collect modified Manual fields to save before approval
+        const updated = {
+            feederPtCapacity: document.getElementById('qc_mod_feederPtCapacity').value.trim(),
+            feederMf: document.getElementById('qc_mod_feederMf').value.trim(),
+            dtName: document.getElementById('qc_mod_dtName').value.trim(),
+            dtrPmCode: document.getElementById('qc_mod_dtrPmCode').value.trim(),
+            dtrPmName: document.getElementById('qc_mod_dtrPmName').value.trim(),
+            dtBoxNumber: document.getElementById('qc_mod_dtBoxNumber').value.trim(),
+            dtBoxSealNumber: document.getElementById('qc_mod_dtBoxSealNumber').value.trim(),
+            jointVisitName: document.getElementById('qc_mod_jointVisitName').value.trim(),
+            anyRemark: document.getElementById('qc_mod_anyRemark').value.trim()
+        };
+        submitQCAction('Approved', '', updated);
     };
     
+    document.getElementById('btnRejectQC').onclick = () => {
+        const inp = document.getElementById('qcRejectReason');
+        if (inp.classList.contains('hidden')) { inp.classList.remove('hidden'); inp.focus(); } 
+        else submitQCAction('Rejected', inp.value);
+    };
     new bootstrap.Modal(document.getElementById('qcModal')).show();
 }
 
-async function submitQCAction(status, reason = '') {
-    if (status === 'Rejected' && (!reason || reason.trim().length < 3)) return showToast("A rejection reason is required.", true);
-    
-    const data = rawQCData[activeQCRowIdx];
-    showLoader(`Gathering Edits for ${status}...`);
-    
+async function submitQCAction(status, reason = '', updatedManual = null) {
+    if (status === 'Rejected' && (!reason || reason.trim().length < 3)) { showToast("Reason required.", true); return; }
+    showLoader(`Marking ${status}...`);
     try {
-        const updatedData = { ...data };
-        
-        // Grab text edits dynamically
-        const editInputs = document.querySelectorAll('[id^="qcEdit_"]');
-        editInputs.forEach(el => {
-            const k = el.id.replace('qcEdit_', '');
-            updatedData[k] = el.value;
-        });
-
-        // Loop for image replacements specifically requesting API upload
-        for (const ic of IMG_CONFIGS) {
-            const fileInput = document.getElementById('qcImg_' + ic.key);
-            if (fileInput && fileInput.files[0]) {
-                showLoader(`Uploading Replacement Image: ${ic.title}...`);
-                const b64 = await processImage(fileInput.files[0], data.latLong);
-                const id = await apiCall({ action: 'uploadImage', title: 'QC_Update_' + ic.title, meterOrUid: updatedData.uid, base64: b64 });
-                updatedData[ic.key] = id;
-            }
-        }
-
-        const submitPayload = { 
-            action: 'submitQC', 
-            uid: data.uid, 
-            status: status, 
-            reason: reason,
-            dependency: document.getElementById('qcDependency').value,
-            remarkBucket: document.getElementById('qcRemarkBucket').value,
-            updatedDetails: updatedData 
-        };
-
-        showLoader(`Saving QC Results...`);
-        await apiCall(submitPayload);
-        showToast(`Submission successfully ${status}!`);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('qcModal'));
-        if (modal) modal.hide();
-        loadQC(qcCurrentPage);
-    } catch(err) {
-        showToast(err.message, true);
-    }
+        await apiCall({ action: 'submitQC', uid: rawQCData[activeQCRowIdx].uid, status: status, reason: reason, updatedManual: updatedManual });
+        showToast("Success!"); bootstrap.Modal.getInstance(document.getElementById('qcModal')).hide(); loadQC(qcCurrentPage);
+    } catch(err) { showToast(err.message, true); }
     hideLoader();
 }
 </script>
