@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portal</title>
+    <title>IntelliSmart DT Feeder Tagging Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="icon" href="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w64" type="image/x-icon">
@@ -32,6 +32,7 @@
         .toast { pointer-events: auto; }
         @media (max-width: 768px) { #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; } }
         #map { border-radius: 8px; border: 1px solid #ccc; z-index: 1; height: 250px; width: 100%; cursor: default !important; }
+        .brand-line { height: 3px; background-color: var(--accent-color); width: 60px; margin: 8px auto 16px auto; border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -51,20 +52,29 @@
         </div>
     </div>
 
-    <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
+    <div id="loginView" style="max-width: 420px; margin: 8vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
-                <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
+                <!-- [MODIFIED] Embedded SVG logo guaranteeing 0% 404 risk with Drive fallback -->
+                <svg id="loginLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70" style="max-height: 70px; width: 100%; max-width: 280px; margin-bottom: 12px;" role="img" aria-label="IntelliSmart DT Feeder Tagging Logo">
+                    <rect width="320" height="70" rx="8" fill="#ffffff"/>
+                    <circle cx="38" cy="35" r="24" fill="#002060"/>
+                    <path d="M38 18 L38 30 M26 42 L38 32 L50 42 M38 36 L38 52" stroke="#92D050" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="38" cy="35" r="3.5" fill="#ffffff"/>
+                    <text x="75" y="34" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#002060">Intelli<tspan fill="#92D050">Smart</tspan></text>
+                    <text x="76" y="52" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#555555" letter-spacing="1.2">DT FEEDER TAGGING</text>
+                </svg>
+                <div class="brand-line"></div>
+                <h4 class="mb-3 fw-bold" style="color: var(--primary-color) !important;">Portal Login</h4>
                 <form id="loginForm">
                     <div class="mb-3 text-start">
                         <label for="loginEmpCode" class="form-label text-muted small fw-bold">Employee Code</label>
-                        <input type="text" id="loginEmpCode" class="form-control" required autocomplete="username">
+                        <input type="text" id="loginEmpCode" class="form-control" required autocomplete="username" placeholder="e.g. EMP1001">
                     </div>
                     <div class="mb-4 text-start">
                         <label for="loginPassword" class="form-label text-muted small fw-bold">Password</label>
                         <div class="input-group">
-                            <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" style="border-right: none;">
+                            <input type="password" id="loginPassword" class="form-control" required autocomplete="current-password" style="border-right: none;" placeholder="Enter password">
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password" style="min-width: 44px; display: flex; align-items: center; justify-content: center; background: white; border-color: #dee2e6;">
                                 <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -73,7 +83,7 @@
                             </button>
                         </div>
                     </div>
-                    <button type="submit" class="btn w-100 text-white" style="background-color: var(--primary-color); font-weight: bold;">Login</button>
+                    <button type="submit" class="btn w-100 text-white" style="background-color: var(--primary-color); font-weight: bold; min-height: 44px;">Login</button>
                 </form>
             </div>
         </div>
@@ -83,8 +93,14 @@
         <nav class="navbar navbar-dark shadow-sm">
             <div class="container-fluid d-flex flex-nowrap align-items-center">
                 <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
-                    <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
-                    Portal
+                    <!-- [MODIFIED] Embedded navbar logo for guaranteed rendering without 404 -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="36" height="36" class="me-2" role="img" aria-label="IntelliSmart Logo">
+                        <circle cx="22" cy="22" r="20" fill="#ffffff"/>
+                        <circle cx="22" cy="22" r="16" fill="#002060"/>
+                        <path d="M22 10 L22 18 M14 26 L22 19 L30 26 M22 23 L22 34" stroke="#92D050" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="22" cy="22" r="2.5" fill="#ffffff"/>
+                    </svg>
+                    <span>IntelliSmart <span style="color: var(--accent-color);">Portal</span></span>
                 </a>
                 <div class="ms-auto nav-actions">
                     <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold" style="font-size: 0.9rem;"></span>
@@ -95,6 +111,7 @@
                 </div>
             </div>
         </nav>
+
 
         <div class="container-fluid px-3 py-4">
             
@@ -278,6 +295,26 @@
                                 <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
                                 <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve</button>
                             </div>
+            <!-- [ADDED] Forced password change modal for initial/temporary credential rotation -->
+            <div class="modal fade" id="passwordChangeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
+                            <h5 class="modal-title fw-bold">Set New Password</h5>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="small text-muted mb-3">You must update your temporary password before accessing your account.</p>
+                            <form id="passwordChangeForm">
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label small fw-bold">New Password</label>
+                                    <input type="password" id="newPassword" class="form-control" minlength="6" required autocomplete="new-password" placeholder="At least 6 characters">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label small fw-bold">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" class="form-control" minlength="6" required autocomplete="new-password" placeholder="Re-enter new password">
+                                </div>
+                                <button type="submit" class="btn w-100 text-white fw-bold" style="background-color: var(--primary-color); min-height: 44px;">Update Password & Continue</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -306,107 +343,371 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     }
 });
 
-function showLoader(text="Processing...") { document.getElementById('loader-text').innerText = text; document.getElementById('loader-fallback').classList.add('hidden'); document.getElementById('loader-spinner').classList.remove('hidden'); document.getElementById('loader').classList.remove('hidden'); }
-function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
-function switchView(viewId) { ['viewUser', 'viewQC'].forEach(v => { const el = document.getElementById(v); if(el) el.classList.add('hidden'); }); const target = document.getElementById(viewId); if(target) target.classList.remove('hidden'); if (viewId === 'viewUser' && map) { setTimeout(() => map.invalidateSize(), 200); } }
-
-function showToast(msg, isError=false) {
-    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-        const toastEl = document.getElementById('appToast'); const toastBody = document.getElementById('toastMessage');
-        toastEl.classList.remove('bg-primary', 'bg-danger', 'bg-success'); toastEl.classList.add(isError ? 'bg-danger' : 'bg-success'); toastBody.innerText = msg;
-        new bootstrap.Toast(toastEl).show();
-    } else { alert(msg); }
+// [ADDED] HTML escaping helper to neutralize XSS vulnerabilities
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
-function generateUUID() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
+function showLoader(text="Processing...") { 
+    document.getElementById('loader-text').innerText = text; 
+    document.getElementById('loader-fallback').classList.add('hidden'); 
+    document.getElementById('loader-spinner').classList.remove('hidden'); 
+    document.getElementById('loader').classList.remove('hidden'); 
+}
 
-const DB_NAME = 'PortalOfflineDB'; const STORE_NAME = 'syncQueue'; const DB_VERSION = 2; let localDB = null; let isSyncing = false;
-function getDB() { return new Promise((resolve, reject) => { if (!window.indexedDB) return reject(new Error("IndexedDB is not supported.")); if (localDB) return resolve(localDB); const request = indexedDB.open(DB_NAME, DB_VERSION); request.onupgradeneeded = (e) => { const db = e.target.result; if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'reqId' }); }; request.onsuccess = (e) => { localDB = e.target.result; localDB.onversionchange = () => { localDB.close(); localDB = null; }; localDB.onclose = () => { localDB = null; }; resolve(localDB); }; request.onerror = (e) => reject(new Error(e.target.error?.message)); request.onblocked = () => reject(new Error("Database blocked")); }); }
-async function saveToQueue(payload) { const db = await getDB(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, 'readwrite'); tx.oncomplete = () => resolve(); tx.onerror = () => reject(new Error(tx.error?.name)); tx.objectStore(STORE_NAME).put(payload); }); }
-async function getQueue() { const db = await getDB(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, 'readonly'); const req = tx.objectStore(STORE_NAME).getAll(); req.onsuccess = () => resolve(req.result); req.onerror = () => reject(new Error(tx.error?.name)); }); }
-async function removeFromQueue(reqId) { const db = await getDB(); return new Promise((resolve, reject) => { const tx = db.transaction(STORE_NAME, 'readwrite'); tx.oncomplete = () => resolve(); tx.onerror = () => reject(new Error(tx.error?.name)); tx.objectStore(STORE_NAME).delete(reqId); }); }
-function updateSyncBadge(count) { const badge = document.getElementById('syncBadge'); if (!badge) return; if (count > 0) { badge.classList.remove('hidden'); badge.innerText = `⏳ ${count} Pending Upload(s)`; } else { badge.classList.add('hidden'); } }
+function hideLoader() { 
+    document.getElementById('loader').classList.add('hidden'); 
+}
+
+function switchView(viewId) { 
+    ['viewUser', 'viewQC'].forEach(v => { 
+        const el = document.getElementById(v); 
+        if(el) el.classList.add('hidden'); 
+    }); 
+    const target = document.getElementById(viewId); 
+    if(target) target.classList.remove('hidden'); 
+    if (viewId === 'viewUser') {
+        if (!masterDropdownData || masterDropdownData.length === 0) {
+            initializeApp().catch(e => console.warn("Init on view switch:", e));
+        }
+        if (map) { 
+            setTimeout(() => map.invalidateSize(), 200); 
+        } else {
+            startGPS();
+        }
+    } 
+}
+
+// [MODIFIED] Defensive showToast ensuring message is never undefined or empty
+function showToast(msg, isError=false) {
+    let cleanMsg = msg;
+    if (cleanMsg === undefined || cleanMsg === null) {
+        cleanMsg = isError ? "An error occurred during operation." : "Operation completed successfully.";
+    } else if (typeof cleanMsg === 'object') {
+        cleanMsg = cleanMsg.message || cleanMsg.error || JSON.stringify(cleanMsg);
+    } else {
+        cleanMsg = String(cleanMsg);
+    }
+    if (!cleanMsg || cleanMsg === 'undefined' || cleanMsg.trim() === '') {
+        cleanMsg = isError ? "An unexpected error occurred." : "Operation succeeded.";
+    }
+
+    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+        const toastEl = document.getElementById('appToast'); 
+        const toastBody = document.getElementById('toastMessage');
+        toastEl.classList.remove('bg-primary', 'bg-danger', 'bg-success'); 
+        toastEl.classList.add(isError ? 'bg-danger' : 'bg-success'); 
+        toastBody.innerText = cleanMsg;
+        new bootstrap.Toast(toastEl).show();
+    } else { 
+        alert(cleanMsg); 
+    }
+}
+
+function generateUUID() { 
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { 
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8); 
+        return v.toString(16); 
+    }); 
+}
+
+const DB_NAME = 'PortalOfflineDB'; 
+const STORE_NAME = 'syncQueue'; 
+const DB_VERSION = 2; 
+let localDB = null; 
+let isSyncing = false;
+
+function getDB() { 
+    return new Promise((resolve, reject) => { 
+        if (!window.indexedDB) return reject(new Error("IndexedDB is not supported.")); 
+        if (localDB) return resolve(localDB); 
+        const request = indexedDB.open(DB_NAME, DB_VERSION); 
+        request.onupgradeneeded = (e) => { 
+            const db = e.target.result; 
+            if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, { keyPath: 'reqId' }); 
+        }; 
+        request.onsuccess = (e) => { 
+            localDB = e.target.result; 
+            localDB.onversionchange = () => { localDB.close(); localDB = null; }; 
+            localDB.onclose = () => { localDB = null; }; 
+            resolve(localDB); 
+        }; 
+        request.onerror = (e) => reject(new Error(e.target.error?.message || "IndexedDB open failed")); 
+        request.onblocked = () => reject(new Error("IndexedDB database blocked")); 
+    }); 
+}
+
+async function saveToQueue(payload) { 
+    const db = await getDB(); 
+    return new Promise((resolve, reject) => { 
+        const tx = db.transaction(STORE_NAME, 'readwrite'); 
+        tx.oncomplete = () => resolve(); 
+        tx.onerror = () => reject(new Error(tx.error?.name || "Queue write error")); 
+        tx.objectStore(STORE_NAME).put(payload); 
+    }); 
+}
+
+async function getQueue() { 
+    const db = await getDB(); 
+    return new Promise((resolve, reject) => { 
+        const tx = db.transaction(STORE_NAME, 'readonly'); 
+        const req = tx.objectStore(STORE_NAME).getAll(); 
+        req.onsuccess = () => resolve(req.result); 
+        req.onerror = () => reject(new Error(tx.error?.name || "Queue read error")); 
+    }); 
+}
+
+async function removeFromQueue(reqId) { 
+    const db = await getDB(); 
+    return new Promise((resolve, reject) => { 
+        const tx = db.transaction(STORE_NAME, 'readwrite'); 
+        tx.oncomplete = () => resolve(); 
+        tx.onerror = () => reject(new Error(tx.error?.name || "Queue remove error")); 
+        tx.objectStore(STORE_NAME).delete(reqId); 
+    }); 
+}
+
+function updateSyncBadge(count) { 
+    const badge = document.getElementById('syncBadge'); 
+    if (!badge) return; 
+    if (count > 0) { 
+        badge.classList.remove('hidden'); 
+        badge.innerText = `⏳ ${count} Pending Upload(s)`; 
+    } else { 
+        badge.classList.add('hidden'); 
+    } 
+}
 
 async function processSyncQueue() {
     if (isSyncing) return;
     try {
-        const queue = await getQueue(); updateSyncBadge(queue.length);
+        const queue = await getQueue(); 
+        updateSyncBadge(queue.length);
         if (queue.length === 0) return;
         isSyncing = true;
         for (const item of queue) {
-            try { await apiCall(item, 0, true); await removeFromQueue(item.reqId); } catch (e) { if (e.isServerError) { showToast(`Sync failed permanently: ${e.message}`, true); await removeFromQueue(item.reqId); } else { break; } }
+            try { 
+                await apiCall(item, 0, true); 
+                await removeFromQueue(item.reqId); 
+            } catch (e) { 
+                if (e.isServerError) { 
+                    showToast(`Sync rejected: ${e.message}`, true); 
+                    await removeFromQueue(item.reqId); 
+                } else { 
+                    break; 
+                } 
+            }
         }
-    } catch (dbErr) { } finally { isSyncing = false; try { const finalQueue = await getQueue(); updateSyncBadge(finalQueue.length); } catch(e) {} }
+    } catch (dbErr) { 
+        console.warn("Sync queue access error:", dbErr);
+    } finally { 
+        isSyncing = false; 
+        try { 
+            const finalQueue = await getQueue(); 
+            updateSyncBadge(finalQueue.length); 
+        } catch(e) {} 
+    }
 }
 setInterval(processSyncQueue, 15000);
 
+// [MODIFIED] Resilient apiCall helper with timeout, clear logs, and safe JSON parsing
 async function apiCall(payload, retries = 1, silent = false) {
     if (sessionToken) payload.token = sessionToken;
     const attempt = async () => {
-        const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 60000); 
+        const controller = new AbortController(); 
+        const timeoutId = setTimeout(() => controller.abort(), 60000); 
         try {
-            const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', body: JSON.stringify(payload), signal: controller.signal });
+            console.log(`[API-CALL] Action: ${payload.action || 'unknown'}`);
+            const res = await fetch(API_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                redirect: 'follow', 
+                body: JSON.stringify(payload), 
+                signal: controller.signal 
+            });
             clearTimeout(timeoutId);
             if (!res.ok) throw new Error(`HTTP Error: ${res.status} ${res.statusText}`);
-            const rawText = await res.text(); let json;
-            try { json = JSON.parse(rawText); } catch (parseErr) { throw new Error("Invalid payload format."); }
-            if (json.status !== 'success') { const err = new Error(json.message || "Unknown server error"); err.isServerError = true; throw err; }
-            return json.data;
-        } catch (err) { clearTimeout(timeoutId); if (err.name === 'AbortError') throw new Error("Request timed out. Check network."); throw err; }
+            const rawText = await res.text(); 
+            let json;
+            try { 
+                json = JSON.parse(rawText); 
+            } catch (parseErr) { 
+                console.error("[API-ERROR] Non-JSON response:", rawText.slice(0, 200));
+                throw new Error("Invalid server response format: " + rawText.slice(0, 100)); 
+            }
+            if (json.success === false || json.status === 'error') { 
+                const errMsg = json.error || json.message || "Unknown server error";
+                const err = new Error(errMsg); 
+                err.isServerError = true; 
+                throw err; 
+            }
+            return json.data !== undefined ? json.data : json;
+        } catch (err) { 
+            clearTimeout(timeoutId); 
+            if (err.name === 'AbortError') throw new Error("Request timed out after 60s. Please check connection."); 
+            throw err; 
+        }
     };
-    try { return await attempt(); } catch (err) { if (retries > 0 && !err.isServerError && !err.message.includes("Invalid credentials")) { return await apiCall(payload, retries - 1, silent); } if (!silent) showToast(err.message, true); throw err; }
+    try { 
+        return await attempt(); 
+    } catch (err) { 
+        const errStr = (err && (err.message || String(err))) ? String(err.message || String(err)) : "Network communication error";
+        if (retries > 0 && !err.isServerError && !errStr.includes("Invalid credentials") && !errStr.includes("Invalid or expired session")) { 
+            console.warn(`[API-RETRY] Retrying action: ${payload.action}, retries left: ${retries - 1}`);
+            return await apiCall(payload, retries - 1, silent); 
+        } 
+        if (!silent) showToast(errStr, true); 
+        throw (err instanceof Error ? err : new Error(errStr)); 
+    }
 }
 
-window.onload = () => { const savedToken = sessionStorage.getItem('dt_token'); const savedUser = sessionStorage.getItem('dt_user'); if (savedToken && savedUser) { sessionToken = savedToken; currentUser = JSON.parse(savedUser); routeUser(currentUser.role); } };
-
-document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault(); showLoader("Authenticating...");
-    try {
-        const res = await apiCall({ action: 'login', empCode: document.getElementById('loginEmpCode').value, password: document.getElementById('loginPassword').value });
-        sessionToken = res.token; currentUser = { name: res.name, empCode: document.getElementById('loginEmpCode').value, role: res.role, zones: res.zones };
-        sessionStorage.setItem('dt_token', sessionToken); sessionStorage.setItem('dt_user', JSON.stringify(currentUser));
-        routeUser(res.role);
-    } catch(err) { sessionStorage.clear(); hideLoader(); }
+window.onload = () => { 
+    const savedToken = sessionStorage.getItem('dt_token'); 
+    const savedUser = sessionStorage.getItem('dt_user'); 
+    if (savedToken && savedUser) { 
+        sessionToken = savedToken; 
+        try {
+            currentUser = JSON.parse(savedUser); 
+            routeUser(currentUser.role); 
+        } catch(e) {
+            sessionStorage.clear();
+        }
+    } 
 };
 
+// [MODIFIED] Login handler supporting ForcePassChange and session initialization
+document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault(); 
+    showLoader("Authenticating...");
+    try {
+        const empCode = document.getElementById('loginEmpCode').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const res = await apiCall({ action: 'login', empCode: empCode, password: password });
+        
+        sessionToken = res.token; 
+        currentUser = { name: res.name, empCode: empCode, role: res.role, zones: res.zones };
+        sessionStorage.setItem('dt_token', sessionToken); 
+        sessionStorage.setItem('dt_user', JSON.stringify(currentUser));
+
+        if (res.forcePassChange) {
+            hideLoader();
+            const pModal = new bootstrap.Modal(document.getElementById('passwordChangeModal'));
+            pModal.show();
+        } else {
+            routeUser(res.role);
+        }
+    } catch(err) { 
+        sessionStorage.clear(); 
+        hideLoader(); 
+    }
+};
+
+// [ADDED] Password change submission listener
+document.getElementById('passwordChangeForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const p1 = document.getElementById('newPassword').value;
+    const p2 = document.getElementById('confirmPassword').value;
+    if (p1 !== p2) return showToast("Passwords do not match.", true);
+    if (p1.length < 6) return showToast("Password must be at least 6 characters long.", true);
+
+    showLoader("Updating password...");
+    try {
+        await apiCall({ action: 'changePassword', newPassword: p1 });
+        showToast("Password updated successfully!");
+        const inst = bootstrap.Modal.getInstance(document.getElementById('passwordChangeModal'));
+        if (inst) inst.hide();
+        routeUser(currentUser.role);
+    } catch (err) {
+        showToast(err.message || String(err), true);
+    } finally {
+        hideLoader();
+    }
+};
+
+// [MODIFIED] Role routing restoring full Admin dual-view navigation
 async function routeUser(role) {
-    document.getElementById('loginView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden'); document.getElementById('userDisplay').innerText = `👤 ${currentUser.name}`;
-    const r = String(role).trim().toLowerCase();
+    document.getElementById('loginView').classList.add('hidden'); 
+    document.getElementById('appView').classList.remove('hidden'); 
+    document.getElementById('userDisplay').innerText = `👤 ${currentUser.name} (${currentUser.role || role})`;
+    const r = String(role || '').trim().toLowerCase();
     
-    if(r === 'qc' || r === 'admin') {
-        document.getElementById('navQC').classList.remove('hidden'); document.getElementById('navUser').classList.add('hidden'); switchView('viewQC'); loadQC(1);
+    if (r === 'admin') {
+        // Admin gets both buttons active for seamless switching
+        document.getElementById('navQC').classList.remove('hidden'); 
+        document.getElementById('navUser').classList.remove('hidden'); 
+        switchView('viewQC'); 
+        loadQC(1);
+    } else if (r === 'qc') {
+        document.getElementById('navQC').classList.remove('hidden'); 
+        document.getElementById('navUser').classList.add('hidden'); 
+        switchView('viewQC'); 
+        loadQC(1);
     } else {
-        document.getElementById('navQC').classList.add('hidden'); document.getElementById('navUser').classList.remove('hidden');
+        document.getElementById('navQC').classList.add('hidden'); 
+        document.getElementById('navUser').classList.remove('hidden');
         try {
-            await getDB().catch(e => console.warn("Offline DB disabled")); processSyncQueue(); 
-            showLoader("Initializing Device..."); await new Promise(resolve => setTimeout(resolve, 300));
-            showLoader("Fetching Form Data…"); await initializeApp(); showLoader("Checking Sync Status...");
+            await getDB().catch(e => console.warn("Offline DB disabled")); 
+            processSyncQueue(); 
+            showLoader("Initializing Device..."); 
+            await new Promise(resolve => setTimeout(resolve, 300));
+            showLoader("Fetching Form Data…"); 
+            await initializeApp(); 
+            showLoader("Checking Sync Status...");
             try {
                 const errStats = await apiCall({ action: 'getSurveyorFailedQueue' }, 0, true);
                 if (errStats && errStats.failed > 0) {
-                    const alertEl = document.getElementById('surveyorFailedAlert'); alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`; alertEl.classList.remove('hidden');
+                    const alertEl = document.getElementById('surveyorFailedAlert'); 
+                    alertEl.innerText = `Warning: You have ${errStats.failed} submission(s) that failed server processing. Please contact Admin.`; 
+                    alertEl.classList.remove('hidden');
                 }
             } catch(e) {}
-            hideLoader(); switchView('viewUser'); startGPS();
+            hideLoader(); 
+            switchView('viewUser'); 
+            startGPS();
         } catch(err) {
-            document.getElementById('loader-spinner').classList.add('hidden'); const fallback = document.getElementById('loader-fallback'); document.getElementById('loader-text').innerText = "Initialization Failed";
+            document.getElementById('loader-spinner').classList.add('hidden'); 
+            const fallback = document.getElementById('loader-fallback'); 
+            document.getElementById('loader-text').innerText = "Initialization Failed";
             fallback.innerHTML = `
-                <div class="text-danger mb-3 fw-bold bg-white p-3 rounded shadow-sm text-start" style="word-wrap: break-word; font-size: 0.9rem;"><b>Error:</b> ${err.message}</div>
+                <div class="text-danger mb-3 fw-bold bg-white p-3 rounded shadow-sm text-start" style="word-wrap: break-word; font-size: 0.9rem;"><b>Error:</b> ${escapeHtml(err.message || err)}</div>
                 <div><button class="btn btn-warning fw-bold px-4 me-2" onclick="routeUser('${role}')">Retry Load</button><button class="btn btn-secondary fw-bold px-4" onclick="logout()">Logout</button></div>`;
-            fallback.classList.remove('hidden'); document.getElementById('loader').classList.remove('hidden');
+            fallback.classList.remove('hidden'); 
+            document.getElementById('loader').classList.remove('hidden');
         }
     }
 }
 
+// [MODIFIED] Clean logout terminating server token and clearing listeners/watchers
 function logout() { 
-    sessionStorage.clear(); sessionToken = null; currentUser = null;
-    if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (sessionToken) {
+        apiCall({ action: 'logout' }, 0, true).catch(() => {});
+    }
+    sessionStorage.clear(); 
+    sessionToken = null; 
+    currentUser = null;
+    if (watchId) { 
+        navigator.geolocation.clearWatch(watchId); 
+        watchId = null; 
+    }
     clearTimeout(duplicateCheckTimer);
-    document.getElementById('appView').classList.add('hidden'); document.getElementById('loginView').classList.remove('hidden'); document.getElementById('loginEmpCode').value = ''; 
-    const pwdInput = document.getElementById('loginPassword'); pwdInput.value = ''; pwdInput.type = 'password';
-    document.getElementById('togglePassword').setAttribute('aria-label', 'Show password'); document.getElementById('eyeIcon').innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-    hideLoader(); showToast("Logged out successfully.");
+    document.getElementById('appView').classList.add('hidden'); 
+    document.getElementById('loginView').classList.remove('hidden'); 
+    document.getElementById('loginEmpCode').value = ''; 
+    const pwdInput = document.getElementById('loginPassword'); 
+    pwdInput.value = ''; 
+    pwdInput.type = 'password';
+    document.getElementById('togglePassword').setAttribute('aria-label', 'Show password'); 
+    document.getElementById('eyeIcon').innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    hideLoader(); 
+    showToast("Logged out successfully.");
 }
+
 
 async function fetchMasterData() { if(masterDropdownData.length > 0) return; const data = await apiCall({ action: 'getAppData' }); masterDropdownData = data.dropdownData || []; if(masterDropdownData.length === 0) showToast("Warning: No dropdown data found.", true); }
 function getUnique(data, colIndex, filterFn = () => true) { if (!data || !Array.isArray(data) || data.length === 0) return []; const set = new Set(); data.filter(filterFn).forEach(row => { if(row[colIndex]) set.add(String(row[colIndex]).trim()); }); return Array.from(set).sort(); }
@@ -486,24 +787,71 @@ function startGPS() {
 function updateLocationSuccess(p) { currentLat = p.coords.latitude; currentLng = p.coords.longitude; currentAcc = p.coords.accuracy; document.getElementById('f_latlong').value = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`; document.getElementById('gpsStatus').innerHTML = `<span class="text-muted" style="font-size: 11px;">±${Math.round(currentAcc)} m</span>`; const latlng = [currentLat, currentLng]; map.setView(latlng, 18); if(!marker) marker = L.marker(latlng, { interactive: false }).addTo(map); else marker.setLatLng(latlng); }
 function updateLocationError(err) { document.getElementById('f_latlong').value = ""; document.getElementById('gpsStatus').innerHTML = `<span class="text-danger">GPS Error: ${err.message}. <button type="button" class="btn btn-sm btn-link p-0 fw-bold" onclick="startGPS()">Retry</button></span>`; }
 
+// [MODIFIED] Image processor returning Error objects instead of strings on failure
 function processImage(file, latLongStr) {
     return new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
-        const img = new Image(); img.onload = () => {
-            const canvas = document.createElement('canvas'); let w = img.naturalWidth; let h = img.naturalHeight;
-            const MAX_AREA = 16777216; if ((w * h) > MAX_AREA) { const scaleDown = Math.sqrt(MAX_AREA / (w * h)); w = Math.floor(w * scaleDown); h = Math.floor(h * scaleDown); }
-            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-            const minEdge = Math.min(w, h); let fontSize = Math.max(24, Math.floor(minEdge * 0.03));
-            const localDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
-            const lines = [`GPS: ${latLongStr || 'Missing'}`, `Date: ${localDate}`]; ctx.font = `bold ${fontSize}px sans-serif`;
-            const padding = Math.floor(fontSize * 0.5); const lineSpace = Math.floor(fontSize * 0.2); let maxWidth = 0;
-            lines.forEach(line => { let mw = ctx.measureText(line).width; if(mw > maxWidth) maxWidth = mw; });
-            if (maxWidth + (padding * 2) > w) { fontSize = Math.floor((w - (padding * 2)) / (maxWidth / fontSize)); ctx.font = `bold ${fontSize}px sans-serif`; maxWidth = 0; lines.forEach(line => { let mw = ctx.measureText(line).width; if(mw > maxWidth) maxWidth = mw; }); }
-            const boxWidth = maxWidth + (padding * 2); const boxHeight = (lines.length * fontSize) + ((lines.length - 1) * lineSpace) + (padding * 2);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; ctx.fillRect(padding, h - boxHeight - padding, boxWidth, boxHeight); ctx.fillStyle = '#92D050'; ctx.textBaseline = 'top';
-            let currY = h - boxHeight - padding + padding; lines.forEach(line => { ctx.fillText(line, padding + padding, currY); currY += (fontSize + lineSpace); });
-            resolve(canvas.toDataURL('image/jpeg', 1.0)); URL.revokeObjectURL(img.src);
-        }; img.onerror = () => { reject("Image load failed"); URL.revokeObjectURL(img.src); }; img.src = URL.createObjectURL(file);
+        const img = new Image(); 
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas'); 
+                let w = img.naturalWidth; 
+                let h = img.naturalHeight;
+                const MAX_AREA = 16777216; 
+                if ((w * h) > MAX_AREA) { 
+                    const scaleDown = Math.sqrt(MAX_AREA / (w * h)); 
+                    w = Math.floor(w * scaleDown); 
+                    h = Math.floor(h * scaleDown); 
+                }
+                canvas.width = w; 
+                canvas.height = h; 
+                const ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0, w, h);
+                
+                const minEdge = Math.min(w, h); 
+                let fontSize = Math.max(24, Math.floor(minEdge * 0.03));
+                const localDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
+                const lines = [`GPS: ${latLongStr || 'Missing'}`, `Date: ${localDate}`]; 
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                const padding = Math.floor(fontSize * 0.5); 
+                const lineSpace = Math.floor(fontSize * 0.2); 
+                let maxWidth = 0;
+                lines.forEach(line => { 
+                    let mw = ctx.measureText(line).width; 
+                    if(mw > maxWidth) maxWidth = mw; 
+                });
+                if (maxWidth + (padding * 2) > w) { 
+                    fontSize = Math.floor((w - (padding * 2)) / (maxWidth / fontSize)); 
+                    ctx.font = `bold ${fontSize}px sans-serif`; 
+                    maxWidth = 0; 
+                    lines.forEach(line => { 
+                        let mw = ctx.measureText(line).width; 
+                        if(mw > maxWidth) maxWidth = mw; 
+                    }); 
+                }
+                const boxWidth = maxWidth + (padding * 2); 
+                const boxHeight = (lines.length * fontSize) + ((lines.length - 1) * lineSpace) + (padding * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
+                ctx.fillRect(padding, h - boxHeight - padding, boxWidth, boxHeight); 
+                ctx.fillStyle = '#92D050'; 
+                ctx.textBaseline = 'top';
+                let currY = h - boxHeight - padding + padding; 
+                lines.forEach(line => { 
+                    ctx.fillText(line, padding + padding, currY); 
+                    currY += (fontSize + lineSpace); 
+                });
+                resolve(canvas.toDataURL('image/jpeg', 1.0)); 
+                URL.revokeObjectURL(img.src);
+            } catch (canvasErr) {
+                reject(new Error("Canvas processing error: " + (canvasErr.message || canvasErr)));
+                URL.revokeObjectURL(img.src);
+            }
+        }; 
+        img.onerror = () => { 
+            reject(new Error("Image decoding failed for selected file.")); 
+            URL.revokeObjectURL(img.src); 
+        }; 
+        img.src = URL.createObjectURL(file);
     });
 }
 
@@ -522,55 +870,173 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
 });
 
 function validateForm() {
-    let errors = []; const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder'; const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
-    ['f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_metertype'].forEach(id => { if(!document.getElementById(id).value) errors.push(document.querySelector(`label[for="${id}"]`).innerText.replace('*', '').trim() + " is required."); });
-    if(isFeeder && !document.getElementById('f_feedername').value) errors.push("Feeder Name is required.");
-    if (!isFeeder) { if(!document.getElementById('f_capacity').value) errors.push("DTR Capacity is required."); if(!document.getElementById('f_status').value) errors.push("Installation Status is required."); if (!isNotInstalled) { const mn = document.getElementById('f_meternumber').value; if(!mn) errors.push("New Meter Number is required."); else if(!METER_REGEX.test(mn)) errors.push("Meter Number format invalid."); else if(isMeterDuplicate) errors.push("Meter Number is a duplicate."); else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait."); } }
+    let errors = []; 
+    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder'; 
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+    
+    ['f_zone', 'f_circle', 'f_division', 'f_subdiv', 'f_subname', 'f_metertype'].forEach(id => { 
+        const el = document.getElementById(id);
+        if(!el || !el.value) {
+            const lbl = document.querySelector(`label[for="${id}"]`);
+            errors.push((lbl ? lbl.innerText.replace('*', '').trim() : id) + " is required."); 
+        }
+    });
+    
+    if(isFeeder && !document.getElementById('f_feedername')?.value) errors.push("Feeder Name is required.");
+    if (!isFeeder) { 
+        if(!document.getElementById('f_capacity')?.value) errors.push("DTR Capacity is required."); 
+        if(!document.getElementById('f_status')?.value) errors.push("Installation Status is required."); 
+        if (!isNotInstalled) { 
+            const mn = document.getElementById('f_meternumber')?.value; 
+            if(!mn) errors.push("New Meter Number is required."); 
+            else if(!METER_REGEX.test(mn)) errors.push("Meter Number format invalid."); 
+            else if(isMeterDuplicate) errors.push("Meter Number is a duplicate."); 
+            else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait."); 
+        } 
+    }
     if (!currentLat || !currentLng) errors.push("Live GPS coordinates are missing.");
-    if (!document.getElementById('f_meterImg').files[0]) errors.push("Meter Image is required.");
-    if (!document.getElementById('f_meterDtImg').files[0]) errors.push("Meter with DT Image is required.");
+    if (!document.getElementById('f_meterImg')?.files[0]) errors.push("Meter Image is required.");
+    if (!document.getElementById('f_meterDtImg')?.files[0]) errors.push("Meter with DT Image is required.");
     return errors;
 }
 
 document.getElementById('dtForm').onsubmit = (e) => {
-    e.preventDefault(); const errors = validateForm(); if (errors.length > 0) { showToast("Please fix errors:\n" + errors.join('\n'), true); window.scrollTo(0, 0); return; }
-    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder'; const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed'; const mn = (isFeeder || isNotInstalled) ? 'N/A' : document.getElementById('f_meternumber').value;
-    document.getElementById('confirmModalBody').innerHTML = `<ul class="list-unstyled mb-0 small"><li><b>Substation:</b> ${document.getElementById('f_subname').value}</li><li><b>Feeder:</b> ${document.getElementById('f_feedername').value || 'N/A'}</li><li><b>Meter Type:</b> ${document.getElementById('f_metertype').value}</li><li><b>Meter Number:</b> <span class="bg-warning px-1 fw-bold text-dark">${mn}</span></li><li><b>GPS:</b> ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}</li></ul><div class="mt-3 d-flex gap-2 border-top pt-2"><img src="${document.getElementById('prev_meterImg').src}" style="height:80px; border-radius:4px;"><img src="${document.getElementById('prev_meterDtImg').src}" style="height:80px; border-radius:4px;"></div>`;
+    e.preventDefault(); 
+    const errors = validateForm(); 
+    if (errors.length > 0) { 
+        showToast("Please fix errors:\n" + errors.join('\n'), true); 
+        window.scrollTo(0, 0); 
+        return; 
+    }
+    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder'; 
+    const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed'; 
+    const mn = (isFeeder || isNotInstalled) ? 'N/A' : (document.getElementById('f_meternumber')?.value || 'N/A');
+    
+    const prevMeterSrc = document.getElementById('prev_meterImg')?.src || '';
+    const prevMeterDtSrc = document.getElementById('prev_meterDtImg')?.src || '';
+
+    document.getElementById('confirmModalBody').innerHTML = `
+        <ul class="list-unstyled mb-0 small">
+            <li><b>Substation:</b> ${escapeHtml(document.getElementById('f_subname')?.value)}</li>
+            <li><b>Feeder:</b> ${escapeHtml(document.getElementById('f_feedername')?.value || 'N/A')}</li>
+            <li><b>Meter Type:</b> ${escapeHtml(document.getElementById('f_metertype')?.value)}</li>
+            <li><b>Meter Number:</b> <span class="bg-warning px-1 fw-bold text-dark">${escapeHtml(mn)}</span></li>
+            <li><b>GPS:</b> ${Number(currentLat).toFixed(6)}, ${Number(currentLng).toFixed(6)}</li>
+        </ul>
+        <div class="mt-3 d-flex gap-2 border-top pt-2">
+            ${prevMeterSrc ? `<img src="${prevMeterSrc}" style="height:80px; border-radius:4px;" alt="Meter Preview">` : ''}
+            ${prevMeterDtSrc ? `<img src="${prevMeterDtSrc}" style="height:80px; border-radius:4px;" alt="Meter DT Preview">` : ''}
+        </div>`;
     new bootstrap.Modal(document.getElementById('confirmModal')).show();
 };
 
 document.getElementById('btnFinalSubmit').onclick = async () => {
-    const modalInst = bootstrap.Modal.getInstance(document.getElementById('confirmModal')); if(modalInst) modalInst.hide(); setTimeout(async () => { await executeSubmit(); }, 150);
+    const modalInst = bootstrap.Modal.getInstance(document.getElementById('confirmModal')); 
+    if(modalInst) modalInst.hide(); 
+    setTimeout(async () => { await executeSubmit(); }, 150);
 };
 
+// [MODIFIED] Fully shielded executeSubmit with milestone logging, timeouts, and try/catch/finally
 async function executeSubmit() {
-    const submitBtn = document.getElementById('btnSubmitSurvey'); submitBtn.disabled = true; submitBtn.innerText = "Processing...";
+    const submitBtn = document.getElementById('btnSubmitSurvey'); 
+    submitBtn.disabled = true; 
+    submitBtn.innerText = "Processing...";
+    
     try {
-        showLoader("Preparing submission..."); const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`; showLoader("Processing images...");
-        const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
-        const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
-        const p_feederPt = await processImage(document.getElementById('f_feederPtImg').files[0], finalLatLong);
-        const p_dtMark = await processImage(document.getElementById('f_dtBoxMarkImg').files[0], finalLatLong);
-        const p_dtSeal = await processImage(document.getElementById('f_dtBoxSealImg').files[0], finalLatLong);
-        const p_dtPing = await processImage(document.getElementById('f_dtMeterPingImg').files[0], finalLatLong);
-        const p_sld = await processImage(document.getElementById('f_jointVisitSldImg').files[0], finalLatLong);
+        console.log("[SUBMIT-STEP 1/5] Validating GPS...");
+        showLoader("Preparing submission..."); 
+        if (!currentLat || !currentLng) {
+            throw new Error("Live GPS coordinates missing. Tap 'Retry GPS'.");
+        }
+        const finalLatLong = `${Number(currentLat).toFixed(6)}, ${Number(currentLng).toFixed(6)}`; 
         
-        const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder'; const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+        console.log("[SUBMIT-STEP 2/5] Watermarking attachments...");
+        showLoader("Processing images...");
+        const img1Base64 = await processImage(document.getElementById('f_meterImg')?.files[0], finalLatLong);
+        const img2Base64 = await processImage(document.getElementById('f_meterDtImg')?.files[0], finalLatLong);
+        const p_feederPt = await processImage(document.getElementById('f_feederPtImg')?.files[0], finalLatLong);
+        const p_dtMark = await processImage(document.getElementById('f_dtBoxMarkImg')?.files[0], finalLatLong);
+        const p_dtSeal = await processImage(document.getElementById('f_dtBoxSealImg')?.files[0], finalLatLong);
+        const p_dtPing = await processImage(document.getElementById('f_dtMeterPingImg')?.files[0], finalLatLong);
+        const p_sld = await processImage(document.getElementById('f_jointVisitSldImg')?.files[0], finalLatLong);
         
+        const meterTypeVal = document.getElementById('f_metertype')?.value || '';
+        const isFeeder = meterTypeVal.toLowerCase() === 'feeder'; 
+        const statusVal = document.getElementById('f_status')?.value || '';
+        const isNotInstalled = statusVal.trim().toLowerCase() === 'not installed';
+        
+        console.log("[SUBMIT-STEP 3/5] Constructing payload...");
         const payload = {
-            action: 'submit', reqId: generateUUID(),
-            zone: document.getElementById('f_zone').value, circle: document.getElementById('f_circle').value, division: document.getElementById('f_division').value, subdiv: document.getElementById('f_subdiv').value, subName: document.getElementById('f_subname').value, subCode: document.getElementById('f_subcode').value, feederName: document.getElementById('f_feedername').value, feederCode: document.getElementById('f_feedercode').value, qrCode: document.getElementById('f_qrcode').value, meterType: document.getElementById('f_metertype').value,
-            dtrCapacity: document.getElementById('f_capacity').disabled ? "" : document.getElementById('f_capacity').value, meterNumber: (isFeeder || isNotInstalled) ? "" : document.getElementById('f_meternumber').value, installStatus: document.getElementById('f_status').disabled ? "" : document.getElementById('f_status').value, 
-            latLong: finalLatLong, meterImageBase64: img1Base64, meterDtImageBase64: img2Base64,
-            feederPtCapacity: isFeeder ? document.getElementById('f_feederPtCapacity').value : "", feederMf: isFeeder ? document.getElementById('f_feederMf').value : "",
-            dtName: !isFeeder ? document.getElementById('f_dtName').value : "", dtBoxNumber: !isFeeder ? document.getElementById('f_dtBoxNumber').value : "", dtBoxSealNumber: !isFeeder ? document.getElementById('f_dtBoxSealNumber').value : "",
-            feederPtImgStr: p_feederPt, dtBoxMarkImgStr: p_dtMark, dtBoxSealImgStr: p_dtSeal, dtMeterPingImgStr: p_dtPing, jointVisitSldImgStr: p_sld
+            action: 'submit', 
+            reqId: generateUUID(),
+            zone: document.getElementById('f_zone')?.value || '', 
+            circle: document.getElementById('f_circle')?.value || '', 
+            division: document.getElementById('f_division')?.value || '', 
+            subdiv: document.getElementById('f_subdiv')?.value || '', 
+            subName: document.getElementById('f_subname')?.value || '', 
+            subCode: document.getElementById('f_subcode')?.value || '', 
+            feederName: document.getElementById('f_feedername')?.value || '', 
+            feederCode: document.getElementById('f_feedercode')?.value || '', 
+            qrCode: document.getElementById('f_qrcode')?.value || '', 
+            meterType: meterTypeVal,
+            dtrCapacity: isFeeder ? "" : (document.getElementById('f_capacity')?.value || ''), 
+            meterNumber: (isFeeder || isNotInstalled) ? "" : (document.getElementById('f_meternumber')?.value || ''), 
+            installStatus: isFeeder ? "" : statusVal, 
+            latLong: finalLatLong, 
+            meterImageBase64: img1Base64, 
+            meterDtImageBase64: img2Base64,
+            feederPtCapacity: isFeeder ? (document.getElementById('f_feederPtCapacity')?.value || '') : "", 
+            feederMf: isFeeder ? (document.getElementById('f_feederMf')?.value || '') : "",
+            dtName: !isFeeder ? (document.getElementById('f_dtName')?.value || '') : "", 
+            dtBoxNumber: !isFeeder ? (document.getElementById('f_dtBoxNumber')?.value || '') : "", 
+            dtBoxSealNumber: !isFeeder ? (document.getElementById('f_dtBoxSealNumber')?.value || '') : "",
+            feederPtImgStr: p_feederPt, 
+            dtBoxMarkImgStr: p_dtMark, 
+            dtBoxSealImgStr: p_dtSeal, 
+            dtMeterPingImgStr: p_dtPing, 
+            jointVisitSldImgStr: p_sld
         };
         
-        let savedLocally = false; submitBtn.innerText = "Saving locally..."; showLoader("Saving locally...");
-        try { await saveToQueue(payload); savedLocally = true; } catch (localErr) { submitBtn.innerText = "Uploading directly..."; showToast("Offline disabled. Uploading directly...", true); showLoader("Uploading to server..."); try { await apiCall(payload, 0); savedLocally = true; } catch (serverErr) { throw new Error("Could not save locally AND server rejected it: " + serverErr.message); } }
-        if (savedLocally) { saveHierarchyToStorage(); resetEntireForm(); processSyncQueue(); }
-    } catch(err) { showToast(err.message, true); } finally { submitBtn.disabled = false; submitBtn.innerText = "Submit Final Survey"; hideLoader(); }
+        console.log("[SUBMIT-STEP 4/5] Saving to offline queue or transmitting directly...");
+        let savedLocally = false; 
+        submitBtn.innerText = "Saving locally..."; 
+        showLoader("Saving locally...");
+        
+        try { 
+            await saveToQueue(payload); 
+            savedLocally = true; 
+            console.log("[SUBMIT-STEP 4/5] Stored in local offline database.");
+        } catch (localErr) { 
+            console.warn("[SUBMIT-WARN] IndexedDB write failed, falling back to direct network upload:", localErr);
+            submitBtn.innerText = "Uploading directly..."; 
+            showToast("Offline DB unavailable. Uploading directly...", false); 
+            showLoader("Uploading to server..."); 
+            try { 
+                await apiCall(payload, 0); 
+                savedLocally = true; 
+                console.log("[SUBMIT-STEP 4/5] Direct upload successful.");
+            } catch (serverErr) { 
+                const errMsg = serverErr.message || String(serverErr) || "Server upload rejected";
+                throw new Error("Could not save locally AND direct upload failed: " + errMsg); 
+            } 
+        }
+        
+        console.log("[SUBMIT-STEP 5/5] Finalizing submission state...");
+        if (savedLocally) { 
+            saveHierarchyToStorage(); 
+            resetEntireForm(); 
+            processSyncQueue(); 
+            showToast("Survey submitted successfully!", false);
+        }
+    } catch(err) { 
+        const displayErr = (err && (err.message || String(err))) ? String(err.message || String(err)) : "Submission failed.";
+        console.error("[SUBMIT-ERROR]", displayErr, err);
+        showToast("Submission Error: " + displayErr, true); 
+    } finally { 
+        submitBtn.disabled = false; 
+        submitBtn.innerText = "Submit Final Survey"; 
+        hideLoader(); 
+    }
 }
 
 function resetEntireForm() {
@@ -584,29 +1050,75 @@ function resetEntireForm() {
     showToast("Submitted successfully, form cleared."); window.scrollTo({top: 0, behavior: 'smooth'}); 
 }
 
+// [MODIFIED] loadQC with XSS defense and safe pagination
 async function loadQC(page = 1) {
-    qcCurrentPage = page; showLoader("Loading QC Data...");
+    qcCurrentPage = page; 
+    showLoader("Loading QC Data...");
     try {
-        const filters = { zone: document.getElementById('qc_zone').value, circle: document.getElementById('qc_circle').value, division: document.getElementById('qc_division').value, subdiv: document.getElementById('qc_subdiv').value, fromDate: document.getElementById('qc_fromDate').value, toDate: document.getElementById('qc_toDate').value };
+        const filters = { 
+            zone: document.getElementById('qc_zone')?.value || 'ALL', 
+            circle: document.getElementById('qc_circle')?.value || 'ALL', 
+            division: document.getElementById('qc_division')?.value || 'ALL', 
+            subdiv: document.getElementById('qc_subdiv')?.value || 'ALL', 
+            fromDate: document.getElementById('qc_fromDate')?.value || '', 
+            toDate: document.getElementById('qc_toDate')?.value || '' 
+        };
         const res = await apiCall({ action: 'getQCData', page: qcCurrentPage, limit: 50, filters: filters });
-        rawQCData = res.data || []; const tbody = document.getElementById('qcTableBody'); tbody.innerHTML = '';
-        if(rawQCData.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center fw-bold py-4 text-muted">No pending items found.</td></tr>'; } else { rawQCData.forEach((row, idx) => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${row.subName || 'Unknown'}</b><br><small class="text-muted">${row.feederName || 'N/A'}</small></td><td>${row.surveyor}<br><small class="text-muted">${row.empCode}</small></td><td>${new Date(row.date).toLocaleDateString()}</td><td><button class="btn btn-sm btn-primary fw-bold px-3" onclick="openQCModal(${idx})">Review</button></td>`; tbody.appendChild(tr); }); }
-        document.getElementById('qcPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`; document.getElementById('btnQCPrev').disabled = (res.page === 1); document.getElementById('btnQCNext').disabled = (rawQCData.length < 50);
-    } catch(err) { showToast(err.message, true); } hideLoader();
+        rawQCData = res.data || []; 
+        const tbody = document.getElementById('qcTableBody'); 
+        tbody.innerHTML = '';
+        if(rawQCData.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center fw-bold py-4 text-muted">No pending items found.</td></tr>'; 
+        } else { 
+            rawQCData.forEach((row, idx) => { 
+                const tr = document.createElement('tr'); 
+                tr.innerHTML = `
+                    <td><b>${escapeHtml(row.subName || 'Unknown')}</b><br><small class="text-muted">${escapeHtml(row.feederName || 'N/A')}</small></td>
+                    <td>${escapeHtml(row.surveyor || '')}<br><small class="text-muted">${escapeHtml(row.empCode || '')}</small></td>
+                    <td>${escapeHtml(new Date(row.date).toLocaleDateString())}</td>
+                    <td><button class="btn btn-sm btn-primary fw-bold px-3" style="min-height: 44px;" onclick="openQCModal(${idx})">Review</button></td>`; 
+                tbody.appendChild(tr); 
+            }); 
+        }
+        document.getElementById('qcPagingInfo').innerText = `Page ${res.page || 1} (Total: ${res.total || 0})`; 
+        document.getElementById('btnQCPrev').disabled = (res.page === 1); 
+        document.getElementById('btnQCNext').disabled = (rawQCData.length < 50);
+    } catch(err) { 
+        showToast(err.message || String(err), true); 
+    } finally {
+        hideLoader();
+    }
 }
 
 function changeQCPage(dir) { loadQC(qcCurrentPage + dir); }
 function resetQCFilters() { ['qc_zone', 'qc_circle', 'qc_division', 'qc_subdiv', 'qc_fromDate', 'qc_toDate'].forEach(id => { const el = document.getElementById(id); if(el) el.value = el.tagName === 'SELECT' ? 'ALL' : ''; }); loadQC(1); }
 
+// [MODIFIED] openQCModal with XSS prevention and safe image rendering
 function openQCModal(idx) {
-    activeQCRowIdx = idx; const data = rawQCData[idx]; const isFeeder = data.meterType === 'Feeder';
+    activeQCRowIdx = idx; 
+    const data = rawQCData[idx]; 
+    const isFeeder = String(data.meterType).toLowerCase() === 'feeder';
+    
     document.getElementById('qcModalContent').innerHTML = `
         <div class="row">
             <div class="col-md-5 mb-3">
                 <h6 class="fw-bold border-bottom pb-2">Edit Details</h6>
-                <label class="small fw-bold">Meter No:</label><input type="text" id="qc_meterNumber" class="form-control mb-2" value="${data.meterNumber || ''}" ${isFeeder ? 'readonly' : ''}>
-                <div class="${isFeeder ? '' : 'hidden'}"><label class="small fw-bold">Feeder PT Capacity:</label><input type="text" id="qc_feederPtCapacity" class="form-control mb-2" value="${data.feederPtCapacity || ''}"><label class="small fw-bold">Feeder MF:</label><input type="text" id="qc_feederMf" class="form-control mb-2" value="${data.feederMf || ''}"></div>
-                <div class="${isFeeder ? 'hidden' : ''}"><label class="small fw-bold">DT Name:</label><input type="text" id="qc_dtName" class="form-control mb-2" value="${data.dtName || ''}"><label class="small fw-bold">DT Box No:</label><input type="text" id="qc_dtBoxNumber" class="form-control mb-2" value="${data.dtBoxNumber || ''}"><label class="small fw-bold">DT Box Seal No:</label><input type="text" id="qc_dtBoxSealNumber" class="form-control mb-2" value="${data.dtBoxSealNumber || ''}"></div>
+                <label class="small fw-bold">Meter No:</label>
+                <input type="text" id="qc_meterNumber" class="form-control mb-2" value="${escapeHtml(data.meterNumber || '')}" ${isFeeder ? 'readonly' : ''}>
+                <div class="${isFeeder ? '' : 'hidden'}">
+                    <label class="small fw-bold">Feeder PT Capacity:</label>
+                    <input type="text" id="qc_feederPtCapacity" class="form-control mb-2" value="${escapeHtml(data.feederPtCapacity || '')}">
+                    <label class="small fw-bold">Feeder MF:</label>
+                    <input type="text" id="qc_feederMf" class="form-control mb-2" value="${escapeHtml(data.feederMf || '')}">
+                </div>
+                <div class="${isFeeder ? 'hidden' : ''}">
+                    <label class="small fw-bold">DT Name:</label>
+                    <input type="text" id="qc_dtName" class="form-control mb-2" value="${escapeHtml(data.dtName || '')}">
+                    <label class="small fw-bold">DT Box No:</label>
+                    <input type="text" id="qc_dtBoxNumber" class="form-control mb-2" value="${escapeHtml(data.dtBoxNumber || '')}">
+                    <label class="small fw-bold">DT Box Seal No:</label>
+                    <input type="text" id="qc_dtBoxSealNumber" class="form-control mb-2" value="${escapeHtml(data.dtBoxSealNumber || '')}">
+                </div>
             </div>
             <div class="col-md-7 mb-3 border-start">
                 <h6 class="fw-bold border-bottom pb-2">Image Gallery</h6>
@@ -614,26 +1126,90 @@ function openQCModal(idx) {
             </div>
         </div>
     `;
-    const gallery = document.getElementById('qcGallery'); const imgs = { "Meter": data.meterImgId, "Meter DT": data.meterDtImgId, "Feeder PT": isFeeder ? data.feederPtImgId : null, "Marking": !isFeeder ? data.dtBoxMarkingImgId : null, "Seal": !isFeeder ? data.dtBoxSealImgId : null, "Ping": !isFeeder ? data.dtMeterPingImgId : null, "SLD": data.jointVisitSldImgId };
-    for (const [title, id] of Object.entries(imgs)) { if (!id) continue; const div = document.createElement('div'); div.className = 'col-6'; const img = document.createElement('img'); img.className = 'img-fluid border rounded shadow-sm w-100 mb-1'; img.style.cssText = 'height:120px; object-fit:cover; cursor:pointer;'; img.src = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w2000'; img.onclick = () => window.open('https://drive.google.com/uc?id=' + id, '_blank'); apiCall({ action: 'getImageBase64', fileId: id }).then(res => { if(res) img.src = res; }).catch(e => {}); const lbl = document.createElement('div'); lbl.className = 'small fw-bold text-center'; lbl.innerText = title; div.appendChild(img); div.appendChild(lbl); gallery.appendChild(div); }
-    document.getElementById('qcRejectReason').classList.remove('hidden'); document.getElementById('qcRejectReason').value = '';
+    const gallery = document.getElementById('qcGallery'); 
+    const imgs = { 
+        "Meter": data.meterImgId, 
+        "Meter DT": data.meterDtImgId, 
+        "Feeder PT": isFeeder ? data.feederPtImgId : null, 
+        "Marking": !isFeeder ? data.dtBoxMarkingImgId : null, 
+        "Seal": !isFeeder ? data.dtBoxSealImgId : null, 
+        "Ping": !isFeeder ? data.dtMeterPingImgId : null, 
+        "SLD": data.jointVisitSldImgId 
+    };
+    for (const [title, id] of Object.entries(imgs)) { 
+        if (!id) continue; 
+        const div = document.createElement('div'); 
+        div.className = 'col-6'; 
+        const img = document.createElement('img'); 
+        img.className = 'img-fluid border rounded shadow-sm w-100 mb-1'; 
+        img.style.cssText = 'height:120px; object-fit:cover; cursor:pointer;'; 
+        img.src = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w2000'; 
+        img.onclick = () => window.open('https://drive.google.com/uc?id=' + id, '_blank'); 
+        apiCall({ action: 'getImageBase64', fileId: id }).then(res => { if(res) img.src = res; }).catch(() => {}); 
+        const lbl = document.createElement('div'); 
+        lbl.className = 'small fw-bold text-center'; 
+        lbl.innerText = title; 
+        div.appendChild(img); 
+        div.appendChild(lbl); 
+        gallery.appendChild(div); 
+    }
+    document.getElementById('qcRejectReason').classList.remove('hidden'); 
+    document.getElementById('qcRejectReason').value = '';
     
     const footer = document.querySelector('#qcModal .modal-footer .w-100');
-    if(!document.getElementById('btnDeleteQC')) { const btnDel = document.createElement('button'); btnDel.id = 'btnDeleteQC'; btnDel.className = 'btn btn-danger px-4 fw-bold me-auto'; btnDel.innerText = 'Delete'; footer.insertBefore(btnDel, footer.children[1]); }
+    if(!document.getElementById('btnDeleteQC')) { 
+        const btnDel = document.createElement('button'); 
+        btnDel.id = 'btnDeleteQC'; 
+        btnDel.className = 'btn btn-danger px-4 fw-bold me-auto'; 
+        btnDel.innerText = 'Delete'; 
+        footer.insertBefore(btnDel, footer.children[1]); 
+    }
     
-    document.getElementById('btnApproveQC').replaceWith(document.getElementById('btnApproveQC').cloneNode(true)); document.getElementById('btnRejectQC').replaceWith(document.getElementById('btnRejectQC').cloneNode(true)); document.getElementById('btnDeleteQC').replaceWith(document.getElementById('btnDeleteQC').cloneNode(true));
+    document.getElementById('btnApproveQC').replaceWith(document.getElementById('btnApproveQC').cloneNode(true)); 
+    document.getElementById('btnRejectQC').replaceWith(document.getElementById('btnRejectQC').cloneNode(true)); 
+    document.getElementById('btnDeleteQC').replaceWith(document.getElementById('btnDeleteQC').cloneNode(true));
     
     document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
     document.getElementById('btnRejectQC').onclick = () => submitQCAction('Rejected', document.getElementById('qcRejectReason').value);
-    document.getElementById('btnDeleteQC').onclick = () => { if(!confirm('Permanently Delete this record and move images to trash?')) return; const reason = document.getElementById('qcRejectReason').value; if(!reason) return showToast("Reason required for deletion.", true); apiCall({ action: 'deleteRecord', uid: data.uid, reqId: data.reqId, reason: reason }).then(res => { showToast("Deleted."); bootstrap.Modal.getInstance(document.getElementById('qcModal')).hide(); loadQC(qcCurrentPage); }).catch(e => showToast(e.message, true)); };
+    document.getElementById('btnDeleteQC').onclick = () => { 
+        if(!confirm('Permanently Delete this record and move images to trash?')) return; 
+        const reason = document.getElementById('qcRejectReason').value; 
+        if(!reason) return showToast("Reason required for deletion.", true); 
+        apiCall({ action: 'deleteRecord', uid: data.uid, reqId: data.reqId, reason: reason })
+            .then(() => { 
+                showToast("Record deleted."); 
+                bootstrap.Modal.getInstance(document.getElementById('qcModal'))?.hide(); 
+                loadQC(qcCurrentPage); 
+            })
+            .catch(e => showToast(e.message, true)); 
+    };
     new bootstrap.Modal(document.getElementById('qcModal')).show();
 }
 
 async function submitQCAction(status, reason = '') {
     if (status === 'Rejected' && (!reason || reason.trim().length < 3)) return showToast("A rejection reason is required.", true);
-    const data = rawQCData[activeQCRowIdx]; showLoader(`Marking as ${status}...`);
-    try { const manual = { meterNumber: document.getElementById('qc_meterNumber').value, dtName: document.getElementById('qc_dtName')?.value, dtBoxNumber: document.getElementById('qc_dtBoxNumber')?.value, dtBoxSealNumber: document.getElementById('qc_dtBoxSealNumber')?.value, feederPtCapacity: document.getElementById('qc_feederPtCapacity')?.value, feederMf: document.getElementById('qc_feederMf')?.value }; await apiCall({ action: 'submitQC', uid: data.uid, status: status, reason: reason, updatedManual: manual }); showToast(`Submission successfully ${status}!`); bootstrap.Modal.getInstance(document.getElementById('qcModal')).hide(); loadQC(qcCurrentPage); } catch(err) { showToast(err.message, true); } hideLoader();
+    const data = rawQCData[activeQCRowIdx]; 
+    showLoader(`Marking as ${status}...`);
+    try { 
+        const manual = { 
+            meterNumber: document.getElementById('qc_meterNumber')?.value, 
+            dtName: document.getElementById('qc_dtName')?.value, 
+            dtBoxNumber: document.getElementById('qc_dtBoxNumber')?.value, 
+            dtBoxSealNumber: document.getElementById('qc_dtBoxSealNumber')?.value, 
+            feederPtCapacity: document.getElementById('qc_feederPtCapacity')?.value, 
+            feederMf: document.getElementById('qc_feederMf')?.value 
+        }; 
+        await apiCall({ action: 'submitQC', uid: data.uid, status: status, reason: reason, updatedManual: manual }); 
+        showToast(`Submission successfully ${status}!`); 
+        bootstrap.Modal.getInstance(document.getElementById('qcModal'))?.hide(); 
+        loadQC(qcCurrentPage); 
+    } catch(err) { 
+        showToast(err?.message || String(err), true); 
+    } finally {
+        hideLoader(); 
+    }
 }
+
 </script>
 </body>
 </html>
