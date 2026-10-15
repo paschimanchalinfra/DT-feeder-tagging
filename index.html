@@ -71,7 +71,12 @@
     <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400'" alt="Company Logo" class="img-fluid mb-4" style="max-height: 80px; width: auto; max-width: 100%;">
+                <!-- [MODIFIED] Embedded SVG logo to prevent 404 Drive errors -->
+                <svg class="mb-4" viewBox="0 0 400 100" width="100%" height="80" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="400" height="100" rx="10" fill="#002060"/>
+                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#92D050" font-family="Arial, sans-serif" font-weight="bold" font-size="42">IntelliSmart</text>
+                    <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" letter-spacing="2">PORTAL</text>
+                </svg>
                 
                 <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
                 <form id="loginForm">
@@ -102,7 +107,10 @@
         <nav class="navbar navbar-dark shadow-sm">
             <div class="container-fluid d-flex flex-nowrap align-items-center">
                 <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
-                    <img src="https://drive.google.com/uc?export=view&id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90" onerror="this.src='https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w100'" height="35" class="me-2" alt="Logo">
+                    <!-- [MODIFIED] Embedded SVG Navbar Logo -->
+                    <svg viewBox="0 0 150 40" height="35" class="me-2 rounded bg-white px-1" xmlns="http://www.w3.org/2000/svg">
+                        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#002060" font-family="Arial, sans-serif" font-weight="bold" font-size="18">IntelliSmart</text>
+                    </svg>
                     Portal
                 </a>
                 
@@ -111,8 +119,8 @@
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
                     <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
                     
-                    <button id="navQC" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewQC'); loadQC(1);">QC Panel</button>
-                    <button id="navReport" class="btn btn-sm btn-info me-2 fw-bold hidden px-3 py-2" style="background-color: white; color: var(--primary-color);" onclick="switchView('viewReport'); loadReportPortal(1);">Report</button>
+                    <!-- [MODIFIED] Stage 3: Replaced QC/Report buttons with single Admin Panel button -->
+                    <button id="navAdmin" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewAdmin'); loadAdminSubmissions(1);">Admin Panel</button>
                     
                     <button class="btn btn-sm btn-outline-light fw-bold px-3 py-2" onclick="logout()">Logout</button>
                 </div>
@@ -166,7 +174,78 @@
                                     <small class="text-muted d-block mt-1" style="font-size: 11px;">2 letters + 7 to 9 digits (max 11)</small>
                                     <span id="meterNoMsg" class="hidden"></span>
                                 </div>
-                                <div class="col-12 col-md-6">
+
+                                <!-- [ADDED] Feeder Specific Fields -->
+                                <div class="col-12 col-md-4 field-feeder">
+                                    <label for="f_feederPtCapacity" class="small text-muted fw-bold">Feeder PT Capacity <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_feederPtCapacity" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4 field-feeder">
+                                    <label for="f_feederMf" class="small text-muted fw-bold">Feeder MF <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_feederMf" class="form-control">
+                                </div>
+
+                                <!-- [ADDED] DT Specific Fields -->
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtName" class="small text-muted fw-bold">DT Name / Location Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_dtName" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtrEnergized" class="small text-muted fw-bold">DTR Energized Or Not <span class="text-danger">*</span></label>
+                                    <select id="f_dtrEnergized" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtrBoxCtRatio" class="small text-muted fw-bold">DTR Box CT Ratio <span class="text-danger">*</span></label>
+                                    <select id="f_dtrBoxCtRatio" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtrBoxMf" class="small text-muted fw-bold">DTR Box MF <span class="text-danger">*</span></label>
+                                    <select id="f_dtrBoxMf" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtBoxNumber" class="small text-muted fw-bold">DT Box Number <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_dtBoxNumber" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtBoxStatus" class="small text-muted fw-bold">DT Box Status <span class="text-danger">*</span></label>
+                                    <select id="f_dtBoxStatus" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtBoxSealStatus" class="small text-muted fw-bold">DT Box Seal Status <span class="text-danger">*</span></label>
+                                    <select id="f_dtBoxSealStatus" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtBoxSealNumber" class="small text-muted fw-bold">DT Box Seal Number <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_dtBoxSealNumber" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4 field-dt">
+                                    <label for="f_dtMeterPingStatus" class="small text-muted fw-bold">DT Meter Ping Status <span class="text-danger">*</span></label>
+                                    <select id="f_dtMeterPingStatus" class="form-select"><option value="">Select</option></select>
+                                </div>
+
+                                <!-- [ADDED] Always Visible New Fields -->
+                                <div class="col-12 col-md-6 field-always">
+                                    <label for="f_dtrPmCode" class="small text-muted fw-bold">DTR PM Module Code</label>
+                                    <input type="text" id="f_dtrPmCode" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-6 field-always">
+                                    <label for="f_dtrPmName" class="small text-muted fw-bold">DTR PM Module Name</label>
+                                    <input type="text" id="f_dtrPmName" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-4 field-always">
+                                    <label for="f_rectificationReq" class="small text-muted fw-bold">Any Rectification Required <span class="text-danger">*</span></label>
+                                    <select id="f_rectificationReq" class="form-select"><option value="">Select</option></select>
+                                </div>
+                                <div class="col-12 col-md-8 field-always">
+                                    <label for="f_jointVisitName" class="small text-muted fw-bold">Joint Visit Linman / JE Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="f_jointVisitName" class="form-control">
+                                </div>
+                                <div class="col-12 field-always">
+                                    <label for="f_remark" class="small text-muted fw-bold">Any Remark</label>
+                                    <textarea id="f_remark" class="form-control" rows="2"></textarea>
+                                </div>
+                                
+                                <div class="col-12 col-md-6 mt-3">
                                     <label for="f_latlong" class="small text-muted fw-bold">Latitude, Longitude <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <input type="text" id="f_latlong" class="form-control locked-field" placeholder="Waiting for GPS..." readonly>
@@ -186,13 +265,40 @@
                             <div class="row g-3 mb-4">
                                 <div class="col-12 col-md-6">
                                     <label for="f_meterImg" class="small text-muted fw-bold">Meter Image <span class="text-danger">*</span></label>
-                                    <input type="file" id="f_meterImg" class="form-control" accept="image/*" capture="environment">
+                                    <input type="file" id="f_meterImg" class="form-control img-input" accept="image/*" capture="environment">
                                     <img id="prev_meterImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <label for="f_meterDtImg" class="small text-muted fw-bold">Meter with DT Image <span class="text-danger">*</span></label>
-                                    <input type="file" id="f_meterDtImg" class="form-control" accept="image/*" capture="environment">
+                                    <input type="file" id="f_meterDtImg" class="form-control img-input" accept="image/*" capture="environment">
                                     <img id="prev_meterDtImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
+                                </div>
+                                
+                                <!-- [ADDED] New Images -->
+                                <div class="col-12 col-md-6 field-feeder">
+                                    <label for="f_feederPtImg" class="small text-muted fw-bold">Feeder PT Photo <span class="text-danger">*</span></label>
+                                    <input type="file" id="f_feederPtImg" class="form-control img-input" accept="image/*" capture="environment">
+                                    <img id="prev_feederPtImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
+                                </div>
+                                <div class="col-12 col-md-6 field-dt">
+                                    <label for="f_dtBoxMarkingImg" class="small text-muted fw-bold">DT Box Marking Photo <span class="text-danger">*</span></label>
+                                    <input type="file" id="f_dtBoxMarkingImg" class="form-control img-input" accept="image/*" capture="environment">
+                                    <img id="prev_dtBoxMarkingImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
+                                </div>
+                                <div class="col-12 col-md-6 field-dt">
+                                    <label for="f_dtBoxSealImg" class="small text-muted fw-bold">DT Box Seal Photo <span class="text-danger">*</span></label>
+                                    <input type="file" id="f_dtBoxSealImg" class="form-control img-input" accept="image/*" capture="environment">
+                                    <img id="prev_dtBoxSealImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
+                                </div>
+                                <div class="col-12 col-md-6 field-dt">
+                                    <label for="f_dtMeterPingImg" class="small text-muted fw-bold">DT Meter Ping Screenshot <span class="text-danger">*</span></label>
+                                    <input type="file" id="f_dtMeterPingImg" class="form-control img-input" accept="image/*" capture="environment">
+                                    <img id="prev_dtMeterPingImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
+                                </div>
+                                <div class="col-12 col-md-6 field-always">
+                                    <label for="f_jointVisitSldImg" class="small text-muted fw-bold">Joint Visit Sld Photo <span class="text-danger">*</span></label>
+                                    <input type="file" id="f_jointVisitSldImg" class="form-control img-input" accept="image/*" capture="environment">
+                                    <img id="prev_jointVisitSldImg" class="img-thumbnail mt-2 hidden" style="max-height: 100px;">
                                 </div>
                             </div>
 
@@ -219,124 +325,159 @@
                 </div>
             </div>
 
-            <!-- QC DASHBOARD -->
-            <div id="viewQC" class="hidden" style="width: 100%; margin: 0 auto;">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                    <h4 class="qc-title mb-2 mb-md-0" style="color: var(--primary-color);">🛡️ QC Dashboard</h4>
-                </div>
-                
-                <div class="card shadow-sm border-0 bg-white">
-                    <div class="card-body p-3">
-                        <div class="row g-2 mb-4">
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="qc_zone" class="form-select"><option value="ALL">All Zones</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="qc_circle" class="form-select"><option value="ALL">All Circles</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="qc_division" class="form-select"><option value="ALL">All Divisions</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="qc_subdiv" class="form-select"><option value="ALL">All Sub Divs</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="qc_fromDate" class="form-control"></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="qc_toDate" class="form-control"></div>
-
-                            <div class="col-12 mt-2 text-end">
-                                <button class="btn px-4 btn-outline-secondary me-2" onclick="resetQCFilters()">Reset</button>
-                                <button class="btn px-4 text-white" style="background-color: var(--primary-color);" onclick="loadQC(1)">Apply Filters</button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-hover qc-table mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Feeder Info</th>
-                                        <th>Submitted By</th>
-                                        <th>Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="qcTableBody"></tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span id="qcPagingInfo" class="small text-muted fw-bold"></span>
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary" id="btnQCPrev" onclick="changeQCPage(-1)">Previous</button>
-                                <button class="btn btn-sm btn-outline-primary ms-1" id="btnQCNext" onclick="changeQCPage(1)">Next</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- QC Review Modal -->
-            <div class="modal fade" id="qcModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
-                            <h5 class="modal-title fw-bold">Review Submission Details</h5>
-                            <button type="button" class="btn-close btn-close-white" id="fallbackModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body bg-light p-4" id="qcModalContent"></div>
-                        <div class="modal-footer" style="background-color: #f1f3f5;">
-                            <input type="text" id="qcRejectReason" class="form-control mb-2 hidden" placeholder="Enter reason for rejection (Required)">
-                            <div class="w-100 d-flex justify-content-end gap-2">
-                                <button type="button" class="btn btn-secondary fw-bold" id="btnFallbackCloseModal" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-danger px-4 fw-bold" id="btnRejectQC">Reject</button>
-                                <button type="button" class="btn btn-accent px-4 fw-bold" id="btnApproveQC">Approve</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- REPORT PORTAL VIEW -->
-            <div id="viewReport" class="hidden" style="width: 100%; margin: 0 auto;">
+            <!-- [MODIFIED] STAGE 3: UNIFIED ADMIN DASHBOARD -->
+            <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
-                        <h5 class="mb-2 mb-md-0 fw-bold">Report Portal</h5>
-                        <div class="d-flex w-100 w-md-auto gap-2">
-                            <button class="btn btn-light btn-sm fw-bold w-100 w-md-auto" style="color: var(--primary-color);" onclick="loadReportPortal(1)">VIEW / APPLY</button>
-                            <button class="btn btn-outline-light btn-sm fw-bold w-100 w-md-auto" onclick="resetReportFilters()">RESET</button>
-                            <button class="btn btn-accent btn-sm fw-bold shadow w-100 w-md-auto" onclick="exportReportCSV()">EXPORT CSV</button>
+                        <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
+                        <button class="btn btn-sm btn-accent fw-bold px-3 shadow-sm" onclick="exportReportCSV()">Export Data (CSV)</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="nav nav-tabs px-3 pt-3 fw-bold" id="adminTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-submissions" data-bs-toggle="tab" data-bs-target="#pane-submissions" type="button" role="tab" onclick="loadAdminSubmissions(1)">Submissions</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-users" data-bs-toggle="tab" data-bs-target="#pane-users" type="button" role="tab" onclick="loadAdminUsers()">User Management</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-summary" data-bs-toggle="tab" data-bs-target="#pane-summary" type="button" role="tab" onclick="loadAdminSummary()">Summary</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content p-3" id="adminTabsContent">
+                            <!-- TAB: SUBMISSIONS -->
+                            <div class="tab-pane fade show active" id="pane-submissions" role="tabpanel">
+                                <div class="row g-2 mb-3 pb-3 border-bottom align-items-end">
+                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="adm_zone" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="adm_circle" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="adm_division" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="adm_subdiv" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation</label><select id="adm_subname" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="adm_fromDate" class="form-control"></div>
+                                    <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="adm_toDate" class="form-control"></div>
+                                    <div class="col-12 col-md-8 mt-2 text-end">
+                                        <button class="btn btn-outline-secondary px-4 fw-bold me-2" onclick="resetAdminFilters()">Reset</button>
+                                        <button class="btn btn-primary px-4 fw-bold" style="background-color: var(--primary-color);" onclick="loadAdminSubmissions(1)">Apply</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive border rounded">
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Action</th><th>Date</th><th>UID</th><th>Surveyor</th>
+                                                <th>Zone</th><th>Substation</th><th>Feeder</th><th>Meter No</th>
+                                                <th>QC Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminSubmissionsTable"></tbody>
+                                    </table>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span id="admPagingInfo" class="small text-muted fw-bold"></span>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary" id="btnAdmPrev" onclick="changeAdminPage(-1)">Previous</button>
+                                        <button class="btn btn-sm btn-outline-primary ms-1" id="btnAdmNext" onclick="changeAdminPage(1)">Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- TAB: USERS -->
+                            <div class="tab-pane fade" id="pane-users" role="tabpanel">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h6 class="fw-bold mb-0 pt-1">Portal Users</h6>
+                                    <button class="btn btn-sm btn-accent fw-bold px-3" onclick="openUserModal()">+ Add User</button>
+                                </div>
+                                <div class="table-responsive border rounded">
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Action</th><th>Name</th><th>Emp Code</th><th>Role</th>
+                                                <th>Status</th><th>Zones</th><th>Failed Auth</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="adminUsersTable"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- TAB: SUMMARY -->
+                            <div class="tab-pane fade" id="pane-summary" role="tabpanel">
+                                <div class="row g-3" id="adminSummaryCards">
+                                    <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm"><div class="small text-muted fw-bold">Total Surveys</div><h4 class="mb-0 text-primary" id="admSumTotal">0</h4></div></div>
+                                    <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #198754;"><div class="small text-muted fw-bold">Approved</div><h4 class="mb-0 text-success" id="admSumApp">0</h4></div></div>
+                                    <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #dc3545;"><div class="small text-muted fw-bold">Rejected</div><h4 class="mb-0 text-danger" id="admSumRej">0</h4></div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body p-3">
-                        
-                        <div class="row g-3 mb-4" id="reportSummaryCards">
-                            <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm"><div class="small text-muted fw-bold">Total</div><h4 class="mb-0 text-primary" id="sumTotal">0</h4></div></div>
-                            <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #198754;"><div class="small text-muted fw-bold">Approved</div><h4 class="mb-0 text-success" id="sumApp">0</h4></div></div>
-                            <div class="col-4"><div class="p-3 bg-light summary-card shadow-sm" style="border-color: #dc3545;"><div class="small text-muted fw-bold">Rejected</div><h4 class="mb-0 text-danger" id="sumRej">0</h4></div></div>
-                        </div>
+                </div>
+            </div>
 
-                        <div class="row g-2 mb-3 pb-3 border-bottom bg-light p-2 rounded align-items-end">
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="rpt_zone" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="rpt_circle" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="rpt_division" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="rpt_subdiv" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="rpt_subname" class="form-select cascade-trigger"><option value="ALL">ALL</option></select></div>
-                            
-                            <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="rpt_fromDate" class="form-control"></div>
-                            <div class="col-12 col-md-3 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="rpt_toDate" class="form-control"></div>
+            <!-- Admin Review/Delete Modal -->
+            <div class="modal fade" id="adminReviewModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
+                            <h5 class="modal-title fw-bold">Review Submission: <span id="revUid"></span></h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-
-                        <div class="table-responsive border rounded">
-                            <table class="table table-striped table-hover mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th><th>Unique ID</th><th>Surveyor</th>
-                                        <th>Zone</th><th>Circle</th><th>Division</th><th>Sub Div</th><th>Substation</th>
-                                        <th>Feeder Name</th><th>Meter Type</th><th>Capacity</th><th>Meter No.</th>
-                                        <th>Install Status</th><th>QC Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportTableBody"></tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span id="reportPagingInfo" class="small text-muted fw-bold"></span>
+                        <div class="modal-body bg-light p-4" id="adminReviewContent"></div>
+                        <div class="modal-footer justify-content-between" style="background-color: #f1f3f5;">
                             <div>
-                                <button class="btn btn-sm btn-outline-primary" id="btnRptPrev" onclick="changeReportPage(-1)">Previous</button>
-                                <button class="btn btn-sm btn-outline-primary ms-1" id="btnRptNext" onclick="changeReportPage(1)">Next</button>
+                                <input type="text" id="admDeleteReason" class="form-control d-inline-block w-auto mb-2 mb-md-0" placeholder="Reason for deletion (Req)" style="min-width: 250px;">
+                                <button type="button" class="btn btn-danger fw-bold ms-2" onclick="executeAdminDelete()">🗑️ Delete Record</button>
                             </div>
+                            <div>
+                                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-warning fw-bold px-4" onclick="executeAdminQC('Rejected')">Reject</button>
+                                <button type="button" class="btn btn-accent fw-bold px-4" onclick="executeAdminQC('Approved')">Approve</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Modal -->
+            <div class="modal fade" id="userManageModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
+                            <h5 class="modal-title fw-bold" id="userModalTitle">Manage User</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <form id="userManageForm">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Employee Code (Login ID)</label>
+                                    <input type="text" class="form-control" id="u_empCode" required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Name</label><input type="text" class="form-control" id="u_name" required></div>
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Mobile</label><input type="text" class="form-control" id="u_mobile"></div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Designation</label><input type="text" class="form-control" id="u_designation"></div>
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Role</label>
+                                        <select class="form-select" id="u_role" required><option value="User">User</option><option value="Admin">Admin</option></select>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Status</label>
+                                        <select class="form-select" id="u_status" required><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+                                    </div>
+                                    <div class="col-6"><label class="form-label small fw-bold text-muted">Zones (Comma separated)</label><input type="text" class="form-control" id="u_zones" value="All"></div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="u_unlock">
+                                    <label class="form-check-label fw-bold text-danger" for="u_unlock">Unlock account & reset failed attempts</label>
+                                </div>
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-warning fw-bold btn-sm" id="btnResetPass" onclick="executeAdminResetPass()">Reset Password</button>
+                                    <button type="submit" class="btn btn-accent fw-bold px-4">Save User</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -396,7 +537,7 @@ function hideLoader() {
 }
 
 function switchView(viewId) {
-    ['viewUser', 'viewQC', 'viewReport'].forEach(v => {
+    ['viewUser', 'viewAdmin'].forEach(v => {
         const el = document.getElementById(v);
         if(el) el.classList.add('hidden');
     });
@@ -592,6 +733,9 @@ document.getElementById('loginForm').onsubmit = async (e) => {
         routeUser(res.role);
     } catch(err) {
         sessionStorage.clear();
+        // [MODIFIED] Added visible error message so the user knows WHY login failed
+        showToast(err.message || "Login failed.", true);
+    } finally {
         hideLoader();
     }
 };
@@ -603,15 +747,13 @@ async function routeUser(role) {
     
     const r = String(role).trim().toLowerCase();
     
-    if(r === 'qc' || r === 'admin') {
-        document.getElementById('navQC').classList.remove('hidden'); 
-        document.getElementById('navReport').classList.remove('hidden'); 
+    if(r === 'admin') {
+        document.getElementById('navAdmin').classList.remove('hidden'); 
         document.getElementById('navUser').classList.add('hidden'); 
-        switchView('viewQC'); 
-        loadQC(1);
+        switchView('viewAdmin'); 
+        loadAdminSubmissions(1);
     } else {
-        document.getElementById('navQC').classList.add('hidden'); 
-        document.getElementById('navReport').classList.add('hidden'); 
+        document.getElementById('navAdmin').classList.add('hidden'); 
         document.getElementById('navUser').classList.remove('hidden');
         
         try {
@@ -746,23 +888,45 @@ function setupCascading(prefix, includeAllOption) {
     });
 }
 
+// [MODIFIED] Added dynamic header lookup for the 7 new dropdowns
 async function initializeApp() {
     await fetchMasterData();
     populateDropdown('f_metertype', getUnique(masterDropdownData, 9));
     populateDropdown('f_capacity', getUnique(masterDropdownData, 10));
     populateDropdown('f_status', getUnique(masterDropdownData, 11));
     setupCascading('f', false);
+    
+    if (masterDropdownData.length > 0) {
+        const headers = masterDropdownData[0] || [];
+        const getIdx = (name) => headers.findIndex(h => String(h).trim().toLowerCase() === name.toLowerCase());
+        
+        const mapDropdown = (id, headerName) => {
+            const idx = getIdx(headerName);
+            if (idx >= 0) populateDropdown(id, getUnique(masterDropdownData, idx));
+        };
+
+        mapDropdown('f_dtrEnergized', 'DTR Energized Or Not');
+        mapDropdown('f_dtrBoxCtRatio', 'DTR Box CT Ratio');
+        mapDropdown('f_dtrBoxMf', 'DTR Box MF');
+        mapDropdown('f_dtBoxStatus', 'DT Box Status');
+        mapDropdown('f_dtBoxSealStatus', 'DT Box Seal Status');
+        mapDropdown('f_dtMeterPingStatus', 'DT Meter Ping Status');
+        mapDropdown('f_rectificationReq', 'Any Rectification Required');
+    }
 }
 
+// [MODIFIED] Added visibility toggle for the new Feeder and DT specific fields
 function updateMeterNumberVisibility() {
-    const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
+    const meterType = document.getElementById('f_metertype').value.toLowerCase();
+    const isFeeder = meterType === 'feeder';
+    const isDT = meterType === 'dt';
     const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
     
     const div = document.getElementById('div_meternumber');
     const f_meternumber = document.getElementById('f_meternumber');
     const msgEl = document.getElementById('meterNoMsg');
     
-    if (isFeeder || isNotInstalled) {
+    if (isFeeder || isNotInstalled || (!isFeeder && !isDT)) {
         div.style.display = 'none';
         if (isNotInstalled) f_meternumber.value = '';
         msgEl.className = 'hidden';
@@ -771,16 +935,35 @@ function updateMeterNumberVisibility() {
     } else {
         div.style.display = 'block';
     }
+
+    // Toggle Field Groups
+    document.querySelectorAll('.field-feeder').forEach(el => el.style.display = isFeeder ? 'block' : 'none');
+    document.querySelectorAll('.field-dt').forEach(el => el.style.display = isDT ? 'block' : 'none');
+    
+    // Clear hidden inputs automatically to prevent invalid submissions
+    if (!isFeeder) {
+        ['f_feederPtCapacity', 'f_feederMf'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        const ptImg = document.getElementById('f_feederPtImg'); if (ptImg) ptImg.value = '';
+        document.getElementById('prev_feederPtImg').classList.add('hidden');
+    }
+    if (!isDT) {
+        ['f_dtName', 'f_dtrEnergized', 'f_dtrBoxCtRatio', 'f_dtrBoxMf', 'f_dtBoxNumber', 'f_dtBoxStatus', 'f_dtBoxSealStatus', 'f_dtBoxSealNumber', 'f_dtMeterPingStatus']
+            .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        ['f_dtBoxMarkingImg', 'f_dtBoxSealImg', 'f_dtMeterPingImg'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+        ['prev_dtBoxMarkingImg', 'prev_dtBoxSealImg', 'prev_dtMeterPingImg'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    }
 }
 
 document.getElementById('f_metertype').addEventListener('change', function() {
     const isFeeder = this.value.toLowerCase() === 'feeder';
+    const isDT = this.value.toLowerCase() === 'dt';
+    
     ['div_capacity', 'div_status'].forEach(id => {
-        document.getElementById(id).style.display = isFeeder ? 'none' : 'block';
+        document.getElementById(id).style.display = isFeeder || (!isFeeder && !isDT) ? 'none' : 'block';
     });
     
     ['f_capacity', 'f_status'].forEach(id => {
-        if(isFeeder) document.getElementById(id).value = '';
+        if(isFeeder || (!isFeeder && !isDT)) document.getElementById(id).value = '';
     });
     updateMeterNumberVisibility();
 });
@@ -926,16 +1109,22 @@ function processImage(file, latLongStr) {
             resolve(canvas.toDataURL('image/jpeg', 1.0)); 
             URL.revokeObjectURL(img.src);
         };
-        img.onerror = () => { reject("Image load failed"); URL.revokeObjectURL(img.src); };
+        // [MODIFIED] Rejects with an actual Error object to prevent "undefined" messages upstream
+        img.onerror = () => { reject(new Error("Image load failed. Please retake the photo.")); URL.revokeObjectURL(img.src); };
         img.src = URL.createObjectURL(file);
     });
 }
 
-document.getElementById('f_meterImg').addEventListener('change', function() {
-    if(this.files[0]) { document.getElementById('prev_meterImg').src = URL.createObjectURL(this.files[0]); document.getElementById('prev_meterImg').classList.remove('hidden'); }
-});
-document.getElementById('f_meterDtImg').addEventListener('change', function() {
-    if(this.files[0]) { document.getElementById('prev_meterDtImg').src = URL.createObjectURL(this.files[0]); document.getElementById('prev_meterDtImg').classList.remove('hidden'); }
+// [MODIFIED] Dynamic listener for all image inputs
+document.querySelectorAll('.img-input').forEach(input => {
+    input.addEventListener('change', function() {
+        const prevId = 'prev_' + this.id.replace('f_', '');
+        const prevEl = document.getElementById(prevId);
+        if(this.files[0] && prevEl) { 
+            prevEl.src = URL.createObjectURL(this.files[0]); 
+            prevEl.classList.remove('hidden'); 
+        }
+    });
 });
 
 document.getElementById('f_meternumber').addEventListener('input', function(e) {
@@ -1025,7 +1214,25 @@ function validateForm() {
             else if(isMeterDuplicate) errors.push("Meter Number is a duplicate.");
             else if(!isMeterDuplicateChecked) errors.push("Still verifying Meter Number availability, please wait.");
         }
+        // [ADDED] DT validation
+        ['f_dtName', 'f_dtrEnergized', 'f_dtrBoxCtRatio', 'f_dtrBoxMf', 'f_dtBoxNumber', 'f_dtBoxStatus', 'f_dtBoxSealStatus', 'f_dtBoxSealNumber', 'f_dtMeterPingStatus'].forEach(id => {
+            if(!document.getElementById(id).value) errors.push(document.querySelector(`label[for="${id}"]`).innerText.replace('*', '').trim() + " is required.");
+        });
+        if(!document.getElementById('f_dtBoxMarkingImg').files[0]) errors.push("DT Box Marking Photo is required.");
+        if(!document.getElementById('f_dtBoxSealImg').files[0]) errors.push("DT Box Seal Photo is required.");
+        if(!document.getElementById('f_dtMeterPingImg').files[0]) errors.push("DT Meter Ping Screenshot is required.");
+    } else {
+        // [ADDED] Feeder validation
+        ['f_feederPtCapacity', 'f_feederMf'].forEach(id => {
+            if(!document.getElementById(id).value) errors.push(document.querySelector(`label[for="${id}"]`).innerText.replace('*', '').trim() + " is required.");
+        });
+        if(!document.getElementById('f_feederPtImg').files[0]) errors.push("Feeder PT Photo is required.");
     }
+
+    // [ADDED] Always visible mandatory fields
+    if(!document.getElementById('f_rectificationReq').value) errors.push("Rectification Required field is mandatory.");
+    if(!document.getElementById('f_jointVisitName').value) errors.push("Joint Visit Name is mandatory.");
+    if(!document.getElementById('f_jointVisitSldImg').files[0]) errors.push("Joint Visit Sld Photo is required.");
 
     if (!currentLat || !currentLng) errors.push("Live GPS coordinates are missing.");
     if (!document.getElementById('f_meterImg').files[0]) errors.push("Meter Image is required.");
@@ -1085,11 +1292,17 @@ async function executeSubmit() {
         const finalLatLong = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
         
         showLoader("Processing images...");
-        const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
-        const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
-        
         const isFeeder = document.getElementById('f_metertype').value.toLowerCase() === 'feeder';
         const isNotInstalled = document.getElementById('f_status').value.trim().toLowerCase() === 'not installed';
+
+        // [MODIFIED] Process all 7 possible images
+        const img1Base64 = await processImage(document.getElementById('f_meterImg').files[0], finalLatLong);
+        const img2Base64 = await processImage(document.getElementById('f_meterDtImg').files[0], finalLatLong);
+        const imgFeederPt = isFeeder ? await processImage(document.getElementById('f_feederPtImg').files[0], finalLatLong) : "";
+        const imgDtBoxMarking = !isFeeder ? await processImage(document.getElementById('f_dtBoxMarkingImg').files[0], finalLatLong) : "";
+        const imgDtBoxSeal = !isFeeder ? await processImage(document.getElementById('f_dtBoxSealImg').files[0], finalLatLong) : "";
+        const imgDtMeterPing = !isFeeder ? await processImage(document.getElementById('f_dtMeterPingImg').files[0], finalLatLong) : "";
+        const imgJointVisitSld = await processImage(document.getElementById('f_jointVisitSldImg').files[0], finalLatLong);
         
         const payload = {
             action: 'submit', reqId: generateUUID(),
@@ -1101,7 +1314,27 @@ async function executeSubmit() {
             dtrCapacity: document.getElementById('f_capacity').disabled ? "" : document.getElementById('f_capacity').value, 
             meterNumber: (isFeeder || isNotInstalled) ? "" : document.getElementById('f_meternumber').value,
             installStatus: document.getElementById('f_status').disabled ? "" : document.getElementById('f_status').value, 
-            latLong: finalLatLong, meterImageBase64: img1Base64, meterDtImageBase64: img2Base64
+            latLong: finalLatLong, meterImageBase64: img1Base64, meterDtImageBase64: img2Base64,
+            // [ADDED] New manual/dropdown fields
+            feederPtCapacity: isFeeder ? document.getElementById('f_feederPtCapacity').value : "",
+            feederMf: isFeeder ? document.getElementById('f_feederMf').value : "",
+            dtName: !isFeeder ? document.getElementById('f_dtName').value : "",
+            dtrPmCode: document.getElementById('f_dtrPmCode').value,
+            dtrPmName: document.getElementById('f_dtrPmName').value,
+            dtrEnergized: !isFeeder ? document.getElementById('f_dtrEnergized').value : "",
+            dtrBoxCtRatio: !isFeeder ? document.getElementById('f_dtrBoxCtRatio').value : "",
+            dtrBoxMf: !isFeeder ? document.getElementById('f_dtrBoxMf').value : "",
+            dtBoxNumber: !isFeeder ? document.getElementById('f_dtBoxNumber').value : "",
+            dtBoxStatus: !isFeeder ? document.getElementById('f_dtBoxStatus').value : "",
+            dtBoxSealStatus: !isFeeder ? document.getElementById('f_dtBoxSealStatus').value : "",
+            dtBoxSealNumber: !isFeeder ? document.getElementById('f_dtBoxSealNumber').value : "",
+            dtMeterPingStatus: !isFeeder ? document.getElementById('f_dtMeterPingStatus').value : "",
+            rectificationReq: document.getElementById('f_rectificationReq').value,
+            jointVisitName: document.getElementById('f_jointVisitName').value,
+            remark: document.getElementById('f_remark').value,
+            // [ADDED] New images
+            imgFeederPtBase64: imgFeederPt, imgDtBoxMarkingBase64: imgDtBoxMarking, 
+            imgDtBoxSealBase64: imgDtBoxSeal, imgDtMeterPingBase64: imgDtMeterPing, imgJointVisitSldBase64: imgJointVisitSld
         };
         
         let savedLocally = false;
@@ -1127,11 +1360,12 @@ async function executeSubmit() {
             processSyncQueue();
         }
     } catch(err) {
-        showToast(err.message, true);
+        // [MODIFIED] Safely handles string literals or missing message properties
+        showToast(err.message || err.toString(), true);
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerText = "Submit Final Survey";
-        hideLoader();
+        hideLoader(); // Loader is guaranteed to hide in the finally block
     }
 }
 
@@ -1170,225 +1404,234 @@ function resetEntireForm() {
 }
 
 // -------------------------------------------------------------
-// RESTORED QC DASHBOARD LOGIC
+// [MODIFIED] STAGE 3: ADMIN DASHBOARD LOGIC
 // -------------------------------------------------------------
 
-async function loadQC(page = 1) {
-    qcCurrentPage = page;
-    showLoader("Loading QC Data...");
+let adminCurrentPage = 1;
+let adminUsersData = [];
+
+async function loadAdminSubmissions(page = 1) {
+    adminCurrentPage = page;
+    showLoader("Loading Submissions...");
     try {
         const filters = {
-            zone: document.getElementById('qc_zone').value,
-            circle: document.getElementById('qc_circle').value,
-            division: document.getElementById('qc_division').value,
-            subdiv: document.getElementById('qc_subdiv').value,
-            fromDate: document.getElementById('qc_fromDate').value,
-            toDate: document.getElementById('qc_toDate').value
+            zone: document.getElementById('adm_zone')?.value || 'ALL', circle: document.getElementById('adm_circle')?.value || 'ALL',
+            division: document.getElementById('adm_division')?.value || 'ALL', subdiv: document.getElementById('adm_subdiv')?.value || 'ALL',
+            subname: document.getElementById('adm_subname')?.value || 'ALL',
+            fromDate: document.getElementById('adm_fromDate')?.value || '', toDate: document.getElementById('adm_toDate')?.value || ''
         };
-        const res = await apiCall({ action: 'getQCData', page: qcCurrentPage, limit: 50, filters: filters });
-        
-        rawQCData = res.data || [];
-        const tbody = document.getElementById('qcTableBody');
-        tbody.innerHTML = '';
-        
-        if(rawQCData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center fw-bold py-4 text-muted">No pending items found.</td></tr>';
-        } else {
-            rawQCData.forEach((row, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${row.subName || 'Unknown'}</b><br><small class="text-muted">${row.feederName || 'N/A'}</small></td>
-                    <td>${row.surveyor}<br><small class="text-muted">${row.empCode}</small></td>
-                    <td>${new Date(row.date).toLocaleDateString()}</td>
-                    <td><button class="btn btn-sm btn-primary fw-bold px-3" onclick="openQCModal(${idx})">Review</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-        
-        document.getElementById('qcPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`;
-        document.getElementById('btnQCPrev').disabled = (res.page === 1);
-        document.getElementById('btnQCNext').disabled = (rawQCData.length < 50);
-        
-    } catch(err) {
-        showToast(err.message, true);
-    }
-    hideLoader();
-}
-
-function changeQCPage(dir) {
-    loadQC(qcCurrentPage + dir);
-}
-
-function resetQCFilters() {
-    ['qc_zone', 'qc_circle', 'qc_division', 'qc_subdiv', 'qc_fromDate', 'qc_toDate'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.value = el.tagName === 'SELECT' ? 'ALL' : '';
-    });
-    loadQC(1);
-}
-
-function openQCModal(idx) {
-    activeQCRowIdx = idx;
-    const data = rawQCData[idx];
-    document.getElementById('qcModalContent').innerHTML = `
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <h6 class="fw-bold border-bottom pb-2">Asset Info</h6>
-                <p class="mb-1"><b>Substation:</b> ${data.subName}</p>
-                <p class="mb-1"><b>Feeder:</b> ${data.feederName || 'N/A'}</p>
-                <p class="mb-1"><b>Meter Type:</b> ${data.meterType}</p>
-                <p class="mb-1"><b>Meter No:</b> <span class="bg-warning px-1 rounded fw-bold text-dark">${data.meterNumber || 'N/A'}</span></p>
-                <p class="mb-1"><b>Status:</b> ${data.installStatus || 'N/A'}</p>
-                <p class="mb-1"><b>GPS:</b> <small>${data.latLong}</small></p>
-            </div>
-            <div class="col-md-6 mb-3 border-start">
-                <h6 class="fw-bold border-bottom pb-2">Images</h6>
-                <img src="https://drive.google.com/thumbnail?id=${data.meterImgId}&sz=w800" class="img-fluid mb-2 border rounded shadow-sm w-100" style="max-height: 200px; object-fit: cover; cursor: pointer;" onclick="window.open('https://drive.google.com/uc?id=${data.meterImgId}', '_blank')">
-                <img src="https://drive.google.com/thumbnail?id=${data.meterDtImgId}&sz=w800" class="img-fluid border rounded shadow-sm w-100" style="max-height: 200px; object-fit: cover; cursor: pointer;" onclick="window.open('https://drive.google.com/uc?id=${data.meterDtImgId}', '_blank')">
-            </div>
-        </div>
-    `;
-    
-    const reasonInput = document.getElementById('qcRejectReason');
-    reasonInput.classList.add('hidden');
-    reasonInput.value = '';
-    
-    // Wire up buttons explicitly preventing stacked listeners
-    const btnApprove = document.getElementById('btnApproveQC');
-    const btnReject = document.getElementById('btnRejectQC');
-    
-    btnApprove.replaceWith(btnApprove.cloneNode(true));
-    btnReject.replaceWith(btnReject.cloneNode(true));
-    
-    document.getElementById('btnApproveQC').onclick = () => submitQCAction('Approved');
-    document.getElementById('btnRejectQC').onclick = () => {
-        const input = document.getElementById('qcRejectReason');
-        if (input.classList.contains('hidden')) {
-            input.classList.remove('hidden');
-            input.focus();
-        } else {
-            submitQCAction('Rejected', input.value);
-        }
-    };
-    
-    const modal = new bootstrap.Modal(document.getElementById('qcModal'));
-    modal.show();
-}
-
-async function submitQCAction(status, reason = '') {
-    if (status === 'Rejected' && (!reason || reason.trim().length < 3)) {
-        showToast("A rejection reason is required.", true);
-        return;
-    }
-    const data = rawQCData[activeQCRowIdx];
-    showLoader(`Marking as ${status}...`);
-    try {
-        await apiCall({ action: 'submitQC', uid: data.uid, status: status, reason: reason });
-        showToast(`Submission successfully ${status}!`);
-        const modal = bootstrap.Modal.getInstance(document.getElementById('qcModal'));
-        if (modal) modal.hide();
-        loadQC(qcCurrentPage);
-    } catch(err) {
-        showToast(err.message, true);
-    }
-    hideLoader();
-}
-
-
-// -------------------------------------------------------------
-// RESTORED REPORT PORTAL LOGIC
-// -------------------------------------------------------------
-
-async function loadReportPortal(page = 1) {
-    rptCurrentPage = page;
-    showLoader("Loading Report Data...");
-    try {
-        const filters = {
-            zone: document.getElementById('rpt_zone').value,
-            circle: document.getElementById('rpt_circle').value,
-            division: document.getElementById('rpt_division').value,
-            subdiv: document.getElementById('rpt_subdiv').value,
-            subname: document.getElementById('rpt_subname').value,
-            fromDate: document.getElementById('rpt_fromDate').value,
-            toDate: document.getElementById('rpt_toDate').value
-        };
-        const res = await apiCall({ action: 'getReportData', page: rptCurrentPage, limit: 50, filters: filters });
+        // Re-using the secure getReportData endpoint which fetches all details
+        const res = await apiCall({ action: 'getReportData', page: adminCurrentPage, limit: 50, filters: filters });
         
         fullReportData = res.data || [];
-        const tbody = document.getElementById('reportTableBody');
+        const tbody = document.getElementById('adminSubmissionsTable');
         tbody.innerHTML = '';
         
-        let app = 0, rej = 0, total = 0;
-        
         if(fullReportData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="14" class="text-center fw-bold py-4 text-muted">No records found matching filters.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center fw-bold py-4 text-muted">No records found.</td></tr>';
         } else {
-            fullReportData.forEach(row => {
-                total++;
-                if(row.qcStatus === 'Approved') app++;
-                if(row.qcStatus === 'Rejected') rej++;
-                
+            fullReportData.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td><button class="btn btn-sm btn-primary fw-bold" onclick="openAdminReviewModal(${idx})">Review</button></td>
                     <td>${new Date(row.date).toLocaleDateString()}</td>
                     <td><b>${row.uid}</b></td>
                     <td>${row.surveyor}</td>
                     <td>${row.zone || ''}</td>
-                    <td>${row.circle || ''}</td>
-                    <td>${row.division || ''}</td>
-                    <td>${row.subdiv || ''}</td>
                     <td>${row.subName || ''}</td>
-                    <td>${row.feederName || ''}</td>
-                    <td>${row.meterType || ''}</td>
-                    <td>${row.dtrCapacity || ''}</td>
-                    <td class="fw-bold">${row.meterNumber || ''}</td>
-                    <td>${row.installStatus || ''}</td>
+                    <td>${row.feederName || 'N/A'}</td>
+                    <td class="fw-bold">${row.meterNumber || 'N/A'}</td>
                     <td><span class="badge ${row.qcStatus === 'Approved' ? 'bg-success' : (row.qcStatus === 'Rejected' ? 'bg-danger' : 'bg-warning text-dark')}">${row.qcStatus}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
+        document.getElementById('admPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`;
+        document.getElementById('btnAdmPrev').disabled = (res.page === 1);
+        document.getElementById('btnAdmNext').disabled = (fullReportData.length < 50);
         
-        document.getElementById('sumTotal').innerText = res.total || total;
-        document.getElementById('sumApp').innerText = app;
-        document.getElementById('sumRej').innerText = rej;
-        
-        document.getElementById('reportPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`;
-        document.getElementById('btnRptPrev').disabled = (res.page === 1);
-        document.getElementById('btnRptNext').disabled = (fullReportData.length < 50);
-        
-    } catch(err) {
-        showToast(err.message, true);
-    }
+        // Update summary if on page 1
+        if(page === 1) { document.getElementById('admSumTotal').innerText = res.total; loadAdminSummary(); }
+    } catch(err) { showToast(err.message, true); }
     hideLoader();
 }
 
-function changeReportPage(dir) {
-    loadReportPortal(rptCurrentPage + dir);
+function changeAdminPage(dir) { loadAdminSubmissions(adminCurrentPage + dir); }
+function resetAdminFilters() {
+    ['adm_zone', 'adm_circle', 'adm_division', 'adm_subdiv', 'adm_subname'].forEach(id => { const el = document.getElementById(id); if(el) el.value = 'ALL'; });
+    ['adm_fromDate', 'adm_toDate'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    loadAdminSubmissions(1);
 }
 
-function resetReportFilters() {
-    ['rpt_zone', 'rpt_circle', 'rpt_division', 'rpt_subdiv', 'rpt_subname'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.value = 'ALL';
+function openAdminReviewModal(idx) {
+    activeQCRowIdx = idx;
+    const d = fullReportData[idx];
+    document.getElementById('revUid').innerText = d.uid;
+    document.getElementById('admDeleteReason').value = '';
+    
+    let html = `<div class="row"><div class="col-md-6 mb-3"><h6 class="fw-bold border-bottom pb-2">Details</h6>`;
+    html += `<p class="mb-1 small"><b>Surveyor:</b> ${d.surveyor} (${d.empCode})</p>`;
+    html += `<p class="mb-1 small"><b>Zone/Substation:</b> ${d.zone} / ${d.subName}</p>`;
+    html += `<p class="mb-1 small"><b>Meter Type:</b> ${d.meterType}</p>`;
+    html += `<p class="mb-1 small"><b>Meter No:</b> <span class="bg-warning px-1 fw-bold text-dark">${d.meterNumber || 'N/A'}</span></p>`;
+    html += `<p class="mb-1 small"><b>GPS:</b> ${d.latLong}</p>`;
+    html += `<p class="mb-1 small"><b>QC Status:</b> ${d.qcStatus} ${d.qcBy ? `(by \${d.qcBy})` : ''}</p>`;
+    if(d.rejectReason) html += `<p class="mb-1 small text-danger"><b>Reject Reason:</b> ${d.rejectReason}</p>`;
+    html += `</div><div class="col-md-6 mb-3 border-start"><h6 class="fw-bold border-bottom pb-2">Images</h6><div class="d-flex flex-wrap gap-2">`;
+    
+    const imgs = [
+        { id: d.meterImgId, label: 'Meter' }, { id: d.meterDtImgId, label: 'Meter DT' },
+        { id: d.feederPtImgId, label: 'Feeder PT' }, { id: d.dtBoxMarkingImgId, label: 'Box Mark' },
+        { id: d.dtBoxSealImgId, label: 'Seal' }, { id: d.dtMeterPingImgId, label: 'Ping' }, { id: d.jointVisitSldImgId, label: 'SLD' }
+    ];
+    
+    imgs.forEach(img => {
+        if(img.id) {
+            html += `<div style="width:48%; text-align:center;"><img src="https://drive.google.com/thumbnail?id=${img.id}&sz=w400" class="img-fluid border rounded shadow-sm mb-1" style="height:120px; object-fit:cover; cursor:pointer;" onclick="window.open('https://drive.google.com/uc?id=${img.id}', '_blank')"><div class="small fw-bold text-muted">${img.label}</div></div>`;
+        }
     });
-    document.getElementById('rpt_fromDate').value = '';
-    document.getElementById('rpt_toDate').value = '';
-    loadReportPortal(1);
+    
+    html += `</div></div></div>`;
+    document.getElementById('adminReviewContent').innerHTML = html;
+    new bootstrap.Modal(document.getElementById('adminReviewModal')).show();
+}
+
+async function executeAdminQC(status) {
+    const d = fullReportData[activeQCRowIdx];
+    let reason = '';
+    if(status === 'Rejected') {
+        reason = prompt("Enter reason for rejection (Required):");
+        if(!reason || reason.trim().length < 3) return showToast("Rejection reason required.", true);
+    }
+    showLoader(`Marking as ${status}...`);
+    try {
+        await apiCall({ action: 'submitQC', uid: d.uid, status: status, reason: reason });
+        showToast(`Submission successfully ${status}!`);
+        bootstrap.Modal.getInstance(document.getElementById('adminReviewModal'))?.hide();
+        loadAdminSubmissions(adminCurrentPage);
+    } catch(err) { showToast(err.message, true); }
+    hideLoader();
+}
+
+async function executeAdminDelete() {
+    const d = fullReportData[activeQCRowIdx];
+    const reason = document.getElementById('admDeleteReason').value;
+    if(!reason || reason.trim().length < 5) return showToast("Please enter a valid reason for deletion in the text box (min 5 chars).", true);
+    
+    if(!confirm(`WARNING: This will permanently delete UID ${d.uid} and move its images to Drive Trash. Continue?`)) return;
+    
+    showLoader("Deleting and trashing images...");
+    try {
+        const res = await apiCall({ action: 'adminDeleteSubmission', uid: d.uid, reason: reason });
+        showToast(res.message || "Deleted.");
+        bootstrap.Modal.getInstance(document.getElementById('adminReviewModal'))?.hide();
+        loadAdminSubmissions(adminCurrentPage);
+    } catch(err) { showToast(err.message, true); }
+    hideLoader();
+}
+
+async function loadAdminUsers() {
+    showLoader("Loading Users...");
+    try {
+        const res = await apiCall({ action: 'adminGetUsers' });
+        adminUsersData = res.users || [];
+        const tbody = document.getElementById('adminUsersTable');
+        tbody.innerHTML = '';
+        
+        adminUsersData.forEach(u => {
+            const isLocked = u.lockoutUntil && new Date(u.lockoutUntil) > new Date();
+            tbody.innerHTML += `<tr>
+                <td><button class="btn btn-sm btn-outline-primary" onclick="openUserModal('${u.empCode}')">Edit</button></td>
+                <td class="fw-bold">${u.name}</td><td>${u.empCode}</td>
+                <td><span class="badge ${u.role==='Admin'?'bg-danger':'bg-secondary'}">${u.role}</span></td>
+                <td><span class="badge ${u.status==='Active'?'bg-success':'bg-warning text-dark'}">${u.status}</span></td>
+                <td><small>${u.zones}</small></td>
+                <td>${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts}${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
+            </tr>`;
+        });
+    } catch(err) { showToast(err.message, true); }
+    hideLoader();
+}
+
+function openUserModal(empCode = null) {
+    document.getElementById('userManageForm').reset();
+    document.getElementById('btnResetPass').style.display = empCode ? 'inline-block' : 'none';
+    const ecInput = document.getElementById('u_empCode');
+    
+    if (empCode) {
+        document.getElementById('userModalTitle').innerText = "Edit User";
+        ecInput.readOnly = true; ecInput.classList.add('locked-field');
+        const u = adminUsersData.find(x => x.empCode === empCode);
+        if(u) {
+            ecInput.value = u.empCode; document.getElementById('u_name').value = u.name;
+            document.getElementById('u_mobile').value = u.mobile; document.getElementById('u_designation').value = u.designation;
+            document.getElementById('u_role').value = (u.role.toUpperCase()==='QC'?'User':u.role);
+            document.getElementById('u_status').value = u.status; document.getElementById('u_zones').value = u.zones;
+        }
+    } else {
+        document.getElementById('userModalTitle').innerText = "Add New User";
+        ecInput.readOnly = false; ecInput.classList.remove('locked-field');
+    }
+    new bootstrap.Modal(document.getElementById('userManageModal')).show();
+}
+
+document.getElementById('userManageForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+        empCode: document.getElementById('u_empCode').value, name: document.getElementById('u_name').value,
+        mobile: document.getElementById('u_mobile').value, designation: document.getElementById('u_designation').value,
+        role: document.getElementById('u_role').value, status: document.getElementById('u_status').value,
+        zones: document.getElementById('u_zones').value, unlock: document.getElementById('u_unlock').checked
+    };
+    
+    showLoader("Saving user...");
+    try {
+        const res = await apiCall({ action: 'adminSaveUser', userData: data });
+        showToast(res.message);
+        bootstrap.Modal.getInstance(document.getElementById('userManageModal'))?.hide();
+        loadAdminUsers();
+    } catch(err) { showToast(err.message, true); }
+    hideLoader();
+};
+
+async function executeAdminResetPass() {
+    const empCode = document.getElementById('u_empCode').value;
+    if(!confirm(`Reset password for ${empCode} to default?`)) return;
+    
+    showLoader("Resetting password...");
+    try {
+        const res = await apiCall({ action: 'adminResetPassword', targetEmpCode: empCode });
+        showToast(res.message);
+        bootstrap.Modal.getInstance(document.getElementById('userManageModal'))?.hide();
+        loadAdminUsers();
+    } catch(err) { showToast(err.message, true); }
+    hideLoader();
+}
+
+async function loadAdminSummary() {
+    try {
+        const res = await apiCall({ action: 'getReportData', page: 1, limit: 9999, filters: {} });
+        let app = 0, rej = 0;
+        (res.data || []).forEach(row => {
+            if(row.qcStatus === 'Approved') app++;
+            if(row.qcStatus === 'Rejected') rej++;
+        });
+        document.getElementById('admSumApp').innerText = app;
+        document.getElementById('admSumRej').innerText = rej;
+    } catch(e) {}
 }
 
 async function exportReportCSV() {
     showLoader("Preparing CSV Export...");
     try {
         const filters = {
-            zone: document.getElementById('rpt_zone').value,
-            circle: document.getElementById('rpt_circle').value,
-            division: document.getElementById('rpt_division').value,
-            subdiv: document.getElementById('rpt_subdiv').value,
-            subname: document.getElementById('rpt_subname').value,
-            fromDate: document.getElementById('rpt_fromDate').value,
-            toDate: document.getElementById('rpt_toDate').value
+            zone: document.getElementById('adm_zone').value,
+            circle: document.getElementById('adm_circle').value,
+            division: document.getElementById('adm_division').value,
+            subdiv: document.getElementById('adm_subdiv').value,
+            subname: document.getElementById('adm_subname').value,
+            fromDate: document.getElementById('adm_fromDate').value,
+            toDate: document.getElementById('adm_toDate').value
         };
         const res = await apiCall({ action: 'getReportData', page: 1, limit: 9999, filters: filters, export: true });
         const data = res.data || [];
@@ -1399,14 +1642,28 @@ async function exportReportCSV() {
             return;
         }
         
-        let csv = 'Date,UID,Surveyor,Zone,Circle,Division,Sub Div,Substation,Feeder Name,Meter Type,Capacity,Meter No,Install Status,QC Status,QC By,QC Date,Reject Reason,LatLong\n';
+        // CSV Headers - Includes standard fields, dynamic JSON details, and all images
+        let csv = 'Date,UID,Surveyor,Zone,Circle,Division,Sub Div,Substation,Feeder Name,Meter Type,Capacity,Meter No,Install Status,QC Status,QC By,QC Date,Reject Reason,LatLong,' + 
+                  'Feeder PT Capacity,Feeder MF,DT Name,DTR PM Code,DTR PM Name,DTR Energized,DTR Box CT Ratio,DTR Box MF,DT Box Number,DT Box Status,DT Box Seal Status,DT Box Seal Number,DT Meter Ping Status,Rectification Req,Joint Visit Name,Remark,' +
+                  'Meter Img,Meter DT Img,Feeder PT Img,DT Box Mark Img,DT Box Seal Img,DT Meter Ping Img,Joint Visit SLD Img\n';
+                  
         data.forEach(row => {
             const clean = (str) => '"' + String(str || '').replace(/"/g, '""') + '"';
+            const link = (id) => id ? `"https://drive.google.com/uc?id=${id}"` : '""';
+            
             csv += [
                 clean(new Date(row.date).toLocaleString()), clean(row.uid), clean(row.surveyor),
                 clean(row.zone), clean(row.circle), clean(row.division), clean(row.subdiv), clean(row.subName),
                 clean(row.feederName), clean(row.meterType), clean(row.dtrCapacity), clean(row.meterNumber),
-                clean(row.installStatus), clean(row.qcStatus), clean(row.qcBy), clean(row.qcDate), clean(row.rejectReason), clean(row.latLong)
+                clean(row.installStatus), clean(row.qcStatus), clean(row.qcBy), clean(row.qcDate), clean(row.rejectReason), clean(row.latLong),
+                
+                clean(row.feederPtCapacity), clean(row.feederMf), clean(row.dtName), clean(row.dtrPmCode), clean(row.dtrPmName),
+                clean(row.dtrEnergized), clean(row.dtrBoxCtRatio), clean(row.dtrBoxMf), clean(row.dtBoxNumber), clean(row.dtBoxStatus),
+                clean(row.dtBoxSealStatus), clean(row.dtBoxSealNumber), clean(row.dtMeterPingStatus), clean(row.rectificationReq),
+                clean(row.jointVisitName), clean(row.remark),
+                
+                link(row.meterImgId), link(row.meterDtImgId), link(row.feederPtImgId), link(row.dtBoxMarkingImgId), 
+                link(row.dtBoxSealImgId), link(row.dtMeterPingImgId), link(row.jointVisitSldImgId)
             ].join(',') + '\n';
         });
         
@@ -1414,7 +1671,7 @@ async function exportReportCSV() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Report_Export_${new Date().getTime()}.csv`;
+        a.download = `DT_Full_Report_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
         a.click();
         URL.revokeObjectURL(url);
     } catch(err) {
