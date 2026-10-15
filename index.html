@@ -69,11 +69,8 @@
     <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <svg class="mb-4" viewBox="0 0 400 100" width="100%" height="80" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="400" height="100" rx="10" fill="#002060"/>
-                    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#92D050" font-family="Arial, sans-serif" font-weight="bold" font-size="42">IntelliSmart</text>
-                    <text x="50%" y="85%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" letter-spacing="2">PORTAL</text>
-                </svg>
+                <!-- Branding updated based on provided image -->
+                <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400" class="mb-4 img-fluid rounded" alt="Portal Logo" style="max-height: 80px;">
                 
                 <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
                 <form id="loginForm">
@@ -104,9 +101,8 @@
         <nav class="navbar navbar-dark shadow-sm">
             <div class="container-fluid d-flex flex-nowrap align-items-center">
                 <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
-                    <svg viewBox="0 0 150 40" height="35" class="me-2 rounded bg-white px-1" xmlns="http://www.w3.org/2000/svg">
-                        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#002060" font-family="Arial, sans-serif" font-weight="bold" font-size="18">IntelliSmart</text>
-                    </svg>
+                    <!-- Branding updated based on provided image -->
+                    <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w200" height="35" class="me-2 rounded bg-white px-1" alt="Portal Logo">
                     Portal
                 </a>
                 
@@ -319,7 +315,7 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
-                        <button class="btn btn-sm btn-accent fw-bold px-3 shadow-sm" onclick="exportReportCSV()">Export Data (CSV)</button>
+                        <!-- CSV Download button has been removed from here -->
                     </div>
                     <div class="card-body p-0">
                         <ul class="nav nav-tabs px-3 pt-3 fw-bold" id="adminTabs" role="tablist">
@@ -883,23 +879,14 @@ async function initializeApp() {
     populateDropdown('f_status', getUnique(masterDropdownData, 11));
     setupCascading('f', false);
     
-    if (masterDropdownData.length > 0) {
-        const headers = masterDropdownData[0] || [];
-        const getIdx = (name) => headers.findIndex(h => String(h).trim().toLowerCase() === name.toLowerCase());
-        
-        const mapDropdown = (id, headerName) => {
-            const idx = getIdx(headerName);
-            if (idx >= 0) populateDropdown(id, getUnique(masterDropdownData, idx));
-        };
-
-        mapDropdown('f_dtrEnergized', 'DTR Energized Or Not');
-        mapDropdown('f_dtrBoxCtRatio', 'DTR Box CT Ratio');
-        mapDropdown('f_dtrBoxMf', 'DTR Box MF');
-        mapDropdown('f_dtBoxStatus', 'DT Box Status');
-        mapDropdown('f_dtBoxSealStatus', 'DT Box Seal Status');
-        mapDropdown('f_dtMeterPingStatus', 'DT Meter Ping Status');
-        mapDropdown('f_rectificationReq', 'Any Rectification Required');
-    }
+    // Fixed dropdowns based on accurate index numbers from the screenshot layout
+    populateDropdown('f_dtrEnergized', getUnique(masterDropdownData, 12));
+    populateDropdown('f_dtrBoxCtRatio', getUnique(masterDropdownData, 13));
+    populateDropdown('f_dtrBoxMf', getUnique(masterDropdownData, 14));
+    populateDropdown('f_dtBoxStatus', getUnique(masterDropdownData, 15));
+    populateDropdown('f_dtBoxSealStatus', getUnique(masterDropdownData, 16));
+    populateDropdown('f_dtMeterPingStatus', getUnique(masterDropdownData, 17));
+    populateDropdown('f_rectificationReq', getUnique(masterDropdownData, 18));
 }
 
 function updateMeterNumberVisibility() {
@@ -1579,6 +1566,11 @@ async function loadAdminSummary() {
     // Empty block - QC Summary removed
 }
 
+// Function exportReportCSV() has been intentionally commented out 
+// as requested to remove it from the system/admin view, but 
+// kept here without deleting to follow the strict rule.
+
+/*
 async function exportReportCSV() {
     showLoader("Preparing CSV Export...");
     try {
@@ -1636,6 +1628,7 @@ async function exportReportCSV() {
     }
     hideLoader();
 }
+*/
 </script>
 </body>
 </html>
