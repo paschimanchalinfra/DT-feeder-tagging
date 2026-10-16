@@ -43,7 +43,6 @@
         .toast-container { z-index: 1055; pointer-events: none; }
         .toast { pointer-events: auto; }
 
-        /* Animation for Pending Sync Badge */
         @keyframes pulseAlert {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
@@ -113,7 +112,6 @@
                 </a>
                 
                 <div class="ms-auto nav-actions">
-                    <!-- Changed to a clickable manual force-sync button -->
                     <button id="syncBadge" class="btn btn-sm btn-warning text-dark me-2 hidden fw-bold shadow-sm" style="font-size: 0.9rem;" onclick="processSyncQueue(true)">
                         ⏳ <span id="syncCount">0</span> Pending (Tap to Sync)
                     </button>
@@ -625,7 +623,6 @@ async function removeFromQueue(reqId) {
     });
 }
 
-// Updated updateSyncBadge logic to support manual button clicks & animation
 function updateSyncBadge(count) {
     const badge = document.getElementById('syncBadge');
     const countSpan = document.getElementById('syncCount');
@@ -641,44 +638,52 @@ function updateSyncBadge(count) {
     }
 }
 
-// Upgraded with isManual parameter to provide visual feedback if clicked
 async function processSyncQueue(isManual = false) {
     if (isSyncing) {
         if (isManual) showToast("Sync already in progress...", true);
         return;
     }
     try {
-        const queue = await getQueue();
+        let queue = await getQueue();
         updateSyncBadge(queue.length);
+        
         if (queue.length === 0) {
             if (isManual) showToast("No pending uploads.");
             return;
         }
         isSyncing = true;
         
-        if (isManual) showLoader("Force syncing pending uploads...");
+        if (isManual) showLoader(`Syncing ${queue.length} pending survey(s)...`);
 
         for (const item of queue) {
             try {
                 await apiCall(item, 0, true); 
                 await removeFromQueue(item.reqId); 
+                
+                // Refresh queue length mid-sync so you see the number go down live!
+                const remaining = await getQueue();
+                updateSyncBadge(remaining.length);
+                if (isManual && remaining.length > 0) document.getElementById('loader-text').innerText = `Syncing... (${remaining.length} left)`;
+                
             } catch (e) {
                 if (e.isServerError) {
-                    showToast(`Sync failed permanently for a record: ${e.message}`, true);
-                    await removeFromQueue(item.reqId); // Prevents 1 broken form from permanently locking queue
+                    showToast(`Server rejected a record permanently: ${e.message}`, true);
+                    await removeFromQueue(item.reqId); // Removes broken records so queue doesn't lock forever
                 } else {
-                    console.warn(`Sync paused due to network: ${e.message}`);
-                    if (isManual) showToast("Network issue detected. Will keep trying in background.", true);
-                    break;
+                    console.warn(`Sync paused due to network/timeout: ${e.message}`);
+                    if (isManual) showToast("Network Timeout. Synced partial data, will keep retrying.", true);
+                    break; // Stops processing to let network recover
                 }
             }
         }
     } catch (dbErr) {
+        console.error(dbErr);
     } finally {
         isSyncing = false;
         if (isManual) {
             hideLoader();
-            showToast("Sync cycle complete.");
+            const finalQ = await getQueue().catch(()=>[]);
+            if (finalQ.length === 0) showToast("All pending surveys synced successfully!");
         }
         try { const finalQueue = await getQueue(); updateSyncBadge(finalQueue.length); } catch(e) {}
     }
@@ -854,7 +859,7 @@ function setupCascading(prefix, includeAllOption) {
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
-        const el = document.getElementById(`${prefix}_key`);
+        const el = document.getElementById(`${prefix}_${key}`);
         if(!el) return;
 
         el.addEventListener('change', () => {
@@ -1049,8 +1054,8 @@ function processImage(file, latLongStr) {
             let w = img.naturalWidth; 
             let h = img.naturalHeight;
             
-            // REDUCED FOR MOBILE STABILITY AND PAYLOAD LIMITS (approx 1080p limit)
-            const MAX_AREA = 2073600; 
+            // EXTREME COMPRESSION FOR GUARANTEED SYNC (Approx 1024x768 KB Limit)
+            const MAX_AREA = 786432; 
             if ((w * h) > MAX_AREA) {
                 const scaleDown = Math.sqrt(MAX_AREA / (w * h));
                 w = Math.floor(w * scaleDown);
@@ -1108,8 +1113,8 @@ function processImage(file, latLongStr) {
                 currY += (fontSize + lineSpace);
             });
             
-            // COMPRESSED TO 70% JPEG QUALITY (Fixes mobile upload limits)
-            resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+            // COMPRESS TO 50% QUALITY (~40-80KB sizes for instant zero-lag upload)
+            resolve(canvas.toDataURL('image/jpeg', 0.5)); 
             URL.revokeObjectURL(img.src);
         };
         img.onerror = () => { reject(new Error("Image load failed. Please retake the photo.")); URL.revokeObjectURL(img.src); };
@@ -1406,10 +1411,6 @@ function resetEntireForm() {
     window.scrollTo({top: 0, behavior: 'smooth'}); 
 }
 
-// ==========================================
-// ADMIN DASHBOARD LOGIC
-// ==========================================
-
 let adminCurrentPage = 1;
 let adminUsersData = [];
 
@@ -1544,7 +1545,7 @@ function filterAdminUsers() {
             <td><span class="badge ${u.role==='Admin'?'bg-danger':'bg-secondary'}">${escapeHTML(u.role)}</span></td>
             <td><span class="badge ${u.status==='Active'?'bg-success':'bg-warning text-dark'}">${escapeHTML(u.status)}</span></td>
             <td><small>${escapeHTML(u.zones)}</small></td>
-            <td>${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts}${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
+            <td>${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts} ${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
         </tr>`;
     });
 }
@@ -1606,23 +1607,9 @@ async function executeAdminResetPass() {
 
 async function loadAdminSummary() {}
 
-// ==============================================
-// BACKGROUND EVENT LISTENERS FOR SMART SYNC
-// ==============================================
-
-// 1. Auto-recover when network comes back online
-window.addEventListener('online', () => {
-    showToast("Network connection restored. Checking for pending sync...");
-    // 2 second delay ensures the connection fully stabilizes before firing
-    setTimeout(() => processSyncQueue(false), 2000); 
-});
-
-// 2. Auto-recover when user unlocks phone or switches back to tab
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        processSyncQueue(false);
-    }
-});
+// Network Listeners to Auto-Trigger Sync Background Loop
+window.addEventListener('online', () => { setTimeout(() => processSyncQueue(false), 2000); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { processSyncQueue(false); } });
 
 </script>
 </body>
