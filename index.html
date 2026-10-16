@@ -1145,7 +1145,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             if (res.exists) {
                 isMeterDuplicate = true;
                 msgEl.className = 'small text-danger fw-bold mt-1 d-block';
-                msgEl.innerText = `❌ Duplicate: Exists (UID: ${res.uid}, by ${res.surveyor}, on ${res.date})`;
+                msgEl.innerText = `❌ Duplicate: Exists (New Meter Number: ${val}, by ${res.surveyor}, on ${res.date})`;
             } else {
                 isMeterDuplicate = false;
                 msgEl.className = 'small text-success fw-bold mt-1 d-block';
