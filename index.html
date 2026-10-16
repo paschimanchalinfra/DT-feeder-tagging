@@ -69,7 +69,6 @@
     <div id="loginView" style="max-width: 400px; margin: 10vh auto; padding: 0 15px;">
         <div class="card shadow-lg border-0">
             <div class="card-body p-4 text-center">
-                <!-- Branding updated based on provided image -->
                 <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w400" class="mb-4 img-fluid rounded" alt="Portal Logo" style="max-height: 80px;">
                 
                 <h4 class="mb-4 fw-bold" style="color: var(--primary-color) !important;">Login Portal</h4>
@@ -101,7 +100,6 @@
         <nav class="navbar navbar-dark shadow-sm">
             <div class="container-fluid d-flex flex-nowrap align-items-center">
                 <a class="navbar-brand d-flex align-items-center fw-bold me-3" href="#">
-                    <!-- Branding updated based on provided image -->
                     <img src="https://drive.google.com/thumbnail?id=1y8y6Iu1dTfHJwQ_L96en0SBCNZUoTa90&sz=w200" height="35" class="me-2 rounded bg-white px-1" alt="Portal Logo">
                     Portal
                 </a>
@@ -315,7 +313,6 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
                         <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
-                        <!-- CSV Download button has been removed from here -->
                     </div>
                     <div class="card-body p-0">
                         <ul class="nav nav-tabs px-3 pt-3 fw-bold" id="adminTabs" role="tablist">
@@ -879,7 +876,6 @@ async function initializeApp() {
     populateDropdown('f_status', getUnique(masterDropdownData, 11));
     setupCascading('f', false);
     
-    // Fixed dropdowns based on accurate index numbers from the screenshot layout
     populateDropdown('f_dtrEnergized', getUnique(masterDropdownData, 12));
     populateDropdown('f_dtrBoxCtRatio', getUnique(masterDropdownData, 13));
     populateDropdown('f_dtrBoxMf', getUnique(masterDropdownData, 14));
@@ -898,6 +894,7 @@ function updateMeterNumberVisibility() {
     const div = document.getElementById('div_meternumber');
     const f_meternumber = document.getElementById('f_meternumber');
     const msgEl = document.getElementById('meterNoMsg');
+    const submitBtn = document.getElementById('btnSubmitSurvey');
     
     if (isFeeder || isNotInstalled || (!isFeeder && !isDT)) {
         div.style.display = 'none';
@@ -905,6 +902,7 @@ function updateMeterNumberVisibility() {
         msgEl.className = 'hidden';
         isMeterDuplicate = false;
         isMeterDuplicateChecked = true; 
+        submitBtn.disabled = false; // Safe to submit if hidden
     } else {
         div.style.display = 'block';
     }
@@ -1019,7 +1017,8 @@ function processImage(file, latLongStr) {
             let w = img.naturalWidth; 
             let h = img.naturalHeight;
             
-            const MAX_AREA = 16777216;
+            // REDUCED FOR MOBILE STABILITY AND PAYLOAD LIMITS (approx 1080p limit)
+            const MAX_AREA = 2073600; 
             if ((w * h) > MAX_AREA) {
                 const scaleDown = Math.sqrt(MAX_AREA / (w * h));
                 w = Math.floor(w * scaleDown);
@@ -1077,7 +1076,8 @@ function processImage(file, latLongStr) {
                 currY += (fontSize + lineSpace);
             });
             
-            resolve(canvas.toDataURL('image/jpeg', 1.0)); 
+            // COMPRESSED TO 70% JPEG QUALITY (Fixes mobile upload limits)
+            resolve(canvas.toDataURL('image/jpeg', 0.7)); 
             URL.revokeObjectURL(img.src);
         };
         img.onerror = () => { reject(new Error("Image load failed. Please retake the photo.")); URL.revokeObjectURL(img.src); };
@@ -1103,6 +1103,8 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
     
     const val = this.value;
     const msgEl = document.getElementById('meterNoMsg');
+    const submitBtn = document.getElementById('btnSubmitSurvey');
+    
     isMeterDuplicate = false; 
     isMeterDuplicateChecked = false;
     
@@ -1111,6 +1113,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
     
     if (!val || isFeeder || isNotInstalled) {
         msgEl.className = 'hidden';
+        submitBtn.disabled = false;
         return;
     }
 
@@ -1120,11 +1123,13 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
         if (val.length >= 2 && !/^[A-Z]{2}/.test(val)) reason = "Must start with 2 letters.";
         else if (val.length > 2 && /[^0-9]/.test(val.substring(2))) reason = "Only digits allowed after first 2 letters.";
         msgEl.innerText = `❌ Invalid: ${reason}`;
+        submitBtn.disabled = true; // Lock Submit Button
         return; 
     }
 
     msgEl.className = 'small text-secondary fw-bold mt-1 d-block';
     msgEl.innerText = '✅ Format valid. Checking availability...';
+    submitBtn.disabled = true; // Lock Submit Button while checking
     
     clearTimeout(duplicateCheckTimer);
     const checkId = ++currentCheckReqId;
@@ -1135,6 +1140,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             isMeterDuplicate = true; isMeterDuplicateChecked = true;
             msgEl.className = 'small text-danger fw-bold mt-1 d-block';
             msgEl.innerText = '❌ Already exists in your offline queue.';
+            submitBtn.disabled = true; // Keep Locked
             return;
         }
         try {
@@ -1146,10 +1152,12 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
                 isMeterDuplicate = true;
                 msgEl.className = 'small text-danger fw-bold mt-1 d-block';
                 msgEl.innerText = `❌ Duplicate: Exists (New Meter Number: ${val}, by ${res.surveyor}, on ${res.date})`;
+                submitBtn.disabled = true; // Keep Locked
             } else {
                 isMeterDuplicate = false;
                 msgEl.className = 'small text-success fw-bold mt-1 d-block';
                 msgEl.innerText = '✅ Meter number is available!';
+                submitBtn.disabled = false; // UNLOCK SUBMIT BUTTON
             }
         } catch(err) {
             if (currentCheckReqId !== checkId) return;
@@ -1157,6 +1165,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             msgEl.innerText = '⚠️ Cannot verify offline (local checks passed).';
             isMeterDuplicate = false; 
             isMeterDuplicateChecked = true;
+            submitBtn.disabled = false; // Unlock for offline work
         }
     }, 500);
 });
@@ -1356,6 +1365,7 @@ function resetEntireForm() {
     document.getElementById('meterNoMsg').className = 'hidden';
     isMeterDuplicate = false;
     isMeterDuplicateChecked = false;
+    document.getElementById('btnSubmitSurvey').disabled = false;
     
     document.getElementById('f_metertype').dispatchEvent(new Event('change'));
     document.getElementById('f_status').dispatchEvent(new Event('change'));
@@ -1562,73 +1572,8 @@ async function executeAdminResetPass() {
     hideLoader();
 }
 
-async function loadAdminSummary() {
-    // Empty block - QC Summary removed
-}
+async function loadAdminSummary() {}
 
-// Function exportReportCSV() has been intentionally commented out 
-// as requested to remove it from the system/admin view, but 
-// kept here without deleting to follow the strict rule.
-
-/*
-async function exportReportCSV() {
-    showLoader("Preparing CSV Export...");
-    try {
-        const filters = {
-            zone: document.getElementById('adm_zone').value,
-            circle: document.getElementById('adm_circle').value,
-            division: document.getElementById('adm_division').value,
-            subdiv: document.getElementById('adm_subdiv').value,
-            subname: document.getElementById('adm_subname').value,
-            fromDate: document.getElementById('adm_fromDate').value,
-            toDate: document.getElementById('adm_toDate').value
-        };
-        const res = await apiCall({ action: 'getReportData', page: 1, limit: 9999, filters: filters, export: true });
-        const data = res.data || [];
-        
-        if (data.length === 0) {
-            showToast("No data to export.", true);
-            hideLoader();
-            return;
-        }
-        
-        let csv = 'Date,UID,Surveyor,Zone,Circle,Division,Sub Div,Substation,Feeder Name,Meter Type,Capacity,Meter No,Install Status,LatLong,' + 
-                  'Feeder PT Capacity,Feeder MF,DT Name,DTR PM Code,DTR PM Name,DTR Energized,DTR Box CT Ratio,DTR Box MF,DT Box Number,DT Box Status,DT Box Seal Status,DT Box Seal Number,DT Meter Ping Status,Rectification Req,Joint Visit Name,Remark,' +
-                  'Meter Img,Meter DT Img,Feeder PT Img,DT Box Mark Img,DT Box Seal Img,DT Meter Ping Img,Joint Visit SLD Img\n';
-                  
-        data.forEach(row => {
-            const clean = (str) => '"' + String(str || '').replace(/"/g, '""') + '"';
-            const link = (id) => id ? `"https://drive.google.com/uc?id=${id}"` : '""';
-            
-            csv += [
-                clean(new Date(row.date).toLocaleString()), clean(row.uid), clean(row.surveyor),
-                clean(row.zone), clean(row.circle), clean(row.division), clean(row.subdiv), clean(row.subName),
-                clean(row.feederName), clean(row.meterType), clean(row.dtrCapacity), clean(row.meterNumber),
-                clean(row.installStatus), clean(row.latLong),
-                
-                clean(row.feederPtCapacity), clean(row.feederMf), clean(row.dtName), clean(row.dtrPmCode), clean(row.dtrPmName),
-                clean(row.dtrEnergized), clean(row.dtrBoxCtRatio), clean(row.dtrBoxMf), clean(row.dtBoxNumber), clean(row.dtBoxStatus),
-                clean(row.dtBoxSealStatus), clean(row.dtBoxSealNumber), clean(row.dtMeterPingStatus), clean(row.rectificationReq),
-                clean(row.jointVisitName), clean(row.remark),
-                
-                link(row.meterImgId), link(row.meterDtImgId), link(row.feederPtImgId), link(row.dtBoxMarkingImgId), 
-                link(row.dtBoxSealImgId), link(row.dtMeterPingImgId), link(row.jointVisitSldImgId)
-            ].join(',') + '\n';
-        });
-        
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `DT_Full_Report_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch(err) {
-        showToast("Export failed: " + err.message, true);
-    }
-    hideLoader();
-}
-*/
 </script>
 </body>
 </html>
