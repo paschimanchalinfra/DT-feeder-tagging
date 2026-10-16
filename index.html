@@ -42,6 +42,14 @@
         
         .toast-container { z-index: 1055; pointer-events: none; }
         .toast { pointer-events: auto; }
+
+        /* Animation for Pending Sync Badge */
+        @keyframes pulseAlert {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+        .pulse-animation { animation: pulseAlert 2s infinite; }
         
         @media (max-width: 768px) {
             #dtForm .btn-submit { width: 100% !important; margin-bottom: 8px; }
@@ -105,7 +113,11 @@
                 </a>
                 
                 <div class="ms-auto nav-actions">
-                    <span id="syncBadge" class="badge bg-warning text-dark me-2 hidden fw-bold" style="font-size: 0.9rem;"></span>
+                    <!-- Changed to a clickable manual force-sync button -->
+                    <button id="syncBadge" class="btn btn-sm btn-warning text-dark me-2 hidden fw-bold shadow-sm" style="font-size: 0.9rem;" onclick="processSyncQueue(true)">
+                        ⏳ <span id="syncCount">0</span> Pending (Tap to Sync)
+                    </button>
+                    
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
                     <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
                     <button id="navAdmin" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewAdmin'); loadAdminSubmissions(1);">Admin Panel</button>
@@ -613,34 +625,50 @@ async function removeFromQueue(reqId) {
     });
 }
 
+// Updated updateSyncBadge logic to support manual button clicks & animation
 function updateSyncBadge(count) {
     const badge = document.getElementById('syncBadge');
-    if (!badge) return;
+    const countSpan = document.getElementById('syncCount');
+    if (!badge || !countSpan) return;
+    
     if (count > 0) {
         badge.classList.remove('hidden');
-        badge.innerText = `⏳ ${count} Pending Upload(s)`;
+        badge.classList.add('pulse-animation');
+        countSpan.innerText = count;
     } else {
         badge.classList.add('hidden');
+        badge.classList.remove('pulse-animation');
     }
 }
 
-async function processSyncQueue() {
-    if (isSyncing) return;
+// Upgraded with isManual parameter to provide visual feedback if clicked
+async function processSyncQueue(isManual = false) {
+    if (isSyncing) {
+        if (isManual) showToast("Sync already in progress...", true);
+        return;
+    }
     try {
         const queue = await getQueue();
         updateSyncBadge(queue.length);
-        if (queue.length === 0) return;
+        if (queue.length === 0) {
+            if (isManual) showToast("No pending uploads.");
+            return;
+        }
         isSyncing = true;
+        
+        if (isManual) showLoader("Force syncing pending uploads...");
+
         for (const item of queue) {
             try {
                 await apiCall(item, 0, true); 
                 await removeFromQueue(item.reqId); 
             } catch (e) {
                 if (e.isServerError) {
-                    showToast(`Sync failed permanently: ${e.message}`, true);
-                    await removeFromQueue(item.reqId); 
+                    showToast(`Sync failed permanently for a record: ${e.message}`, true);
+                    await removeFromQueue(item.reqId); // Prevents 1 broken form from permanently locking queue
                 } else {
                     console.warn(`Sync paused due to network: ${e.message}`);
+                    if (isManual) showToast("Network issue detected. Will keep trying in background.", true);
                     break;
                 }
             }
@@ -648,6 +676,10 @@ async function processSyncQueue() {
     } catch (dbErr) {
     } finally {
         isSyncing = false;
+        if (isManual) {
+            hideLoader();
+            showToast("Sync cycle complete.");
+        }
         try { const finalQueue = await getQueue(); updateSyncBadge(finalQueue.length); } catch(e) {}
     }
 }
@@ -822,7 +854,7 @@ function setupCascading(prefix, includeAllOption) {
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
     triggers.forEach((key, idx) => {
-        const el = document.getElementById(`${prefix}_${key}`);
+        const el = document.getElementById(`${prefix}_key`);
         if(!el) return;
 
         el.addEventListener('change', () => {
@@ -1573,6 +1605,24 @@ async function executeAdminResetPass() {
 }
 
 async function loadAdminSummary() {}
+
+// ==============================================
+// BACKGROUND EVENT LISTENERS FOR SMART SYNC
+// ==============================================
+
+// 1. Auto-recover when network comes back online
+window.addEventListener('online', () => {
+    showToast("Network connection restored. Checking for pending sync...");
+    // 2 second delay ensures the connection fully stabilizes before firing
+    setTimeout(() => processSyncQueue(false), 2000); 
+});
+
+// 2. Auto-recover when user unlocks phone or switches back to tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        processSyncQueue(false);
+    }
+});
 
 </script>
 </body>
