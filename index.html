@@ -112,7 +112,6 @@
                 </a>
                 
                 <div class="ms-auto nav-actions">
-                    <!-- Updated badge with openQueueModal and shorter text to fit mobile -->
                     <button id="syncBadge" class="btn btn-sm btn-warning text-dark me-2 hidden fw-bold shadow-sm" style="font-size: 0.9rem; white-space: nowrap;" onclick="openQueueModal()">
                         ⏳ <span id="syncCount">0</span> Pending
                     </button>
@@ -324,21 +323,25 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header" style="background-color: #ffc107;">
-                            <h5 class="modal-title fw-bold text-dark">Pending Uploads</h5>
+                            <h5 class="modal-title fw-bold text-dark">Pending Uploads Manager</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body bg-light text-center p-4">
-                            <h4 class="fw-bold text-danger mb-3" id="queueModalCount">0 Pending</h4>
-                            <p class="text-muted small mb-4">These surveys are saved locally on your device and are waiting to be sent to the server.</p>
+                            <h4 class="fw-bold text-danger mb-2" id="queueModalCount">0 Pending</h4>
+                            <p class="text-muted small mb-4">Stuck because of heavy photos? Use the rescue tool below to automatically compress them and sync instantly without losing any data!</p>
                             
-                            <button type="button" class="btn btn-success btn-lg w-100 fw-bold mb-3 shadow-sm" onclick="startManualSync()">
-                                🔄 Sync Now
+                            <!-- Rescue & Auto-Fix Button -->
+                            <button type="button" class="btn btn-primary btn-lg w-100 fw-bold mb-3 shadow-sm" style="background-color: var(--primary-color);" onclick="rescueAndSyncStuckForms()">
+                                🛠️ Rescue & Auto-Fix Stuck Forms
+                            </button>
+
+                            <button type="button" class="btn btn-success w-100 fw-bold mb-3 shadow-sm" onclick="startManualSync()">
+                                🔄 Normal Sync Now
                             </button>
                             
                             <div class="border-top pt-3 mt-2">
-                                <p class="small text-muted mb-2">If your uploads have been permanently stuck for a long time, the files may be corrupted. <b>Clearing them will delete the pending data.</b></p>
-                                <button type="button" class="btn btn-outline-danger fw-bold w-100" onclick="clearEntireQueue()">
-                                    🗑️ Delete Stuck Uploads
+                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold w-100" onclick="clearEntireQueue()">
+                                    🗑️ Delete Stuck Uploads (If you wish to discard)
                                 </button>
                             </div>
                         </div>
@@ -666,7 +669,6 @@ function updateSyncBadge(count) {
     }
 }
 
-// Opens the visual Queue Management Modal
 async function openQueueModal() {
     try {
         const q = await getQueue().catch(()=>[]);
@@ -681,16 +683,88 @@ async function openQueueModal() {
     }
 }
 
-// Triggered by the "Sync Now" button inside the modal
 function startManualSync() {
     const m = bootstrap.Modal.getInstance(document.getElementById('queueModal'));
     if (m) m.hide();
     processSyncQueue(true);
 }
 
-// Triggered by the "Delete Stuck Uploads" button inside the modal
+// ----------------------------------------------------
+// AUTOMATIC STUCK QUEUE RESCUE & COMPRESSION ENGINE
+// ----------------------------------------------------
+function compressBase64Image(base64Str) {
+    return new Promise((resolve) => {
+        if (!base64Str || !base64Str.startsWith('data:image')) {
+            resolve(base64Str);
+            return;
+        }
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.naturalWidth;
+            let h = img.naturalHeight;
+            const MAX_AREA = 786432; // 1024x768 resolution limit
+            if ((w * h) > MAX_AREA) {
+                const scaleDown = Math.sqrt(MAX_AREA / (w * h));
+                w = Math.floor(w * scaleDown);
+                h = Math.floor(h * scaleDown);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.5)); // 50% JPEG quality (~40-80KB)
+            URL.revokeObjectURL(img.src);
+        };
+        img.onerror = () => resolve(base64Str);
+        img.src = base64Str;
+    });
+}
+
+async function rescueAndSyncStuckForms() {
+    const m = bootstrap.Modal.getInstance(document.getElementById('queueModal'));
+    if (m) m.hide();
+    
+    showLoader("Rescuing & re-compressing pending forms...");
+    try {
+        const queue = await getQueue();
+        if (queue.length === 0) {
+            hideLoader();
+            showToast("No pending forms to rescue.");
+            return;
+        }
+
+        for (let i = 0; i < queue.length; i++) {
+            let item = queue[i];
+            showLoader(`Rescuing form ${i + 1} of ${queue.length}...`);
+            
+            // Re-compress all attached images to safe KB sizes
+            if (item.meterImageBase64) item.meterImageBase64 = await compressBase64Image(item.meterImageBase64);
+            if (item.meterDtImageBase64) item.meterDtImageBase64 = await compressBase64Image(item.meterDtImageBase64);
+            if (item.imgFeederPtBase64) item.imgFeederPtBase64 = await compressBase64Image(item.imgFeederPtBase64);
+            if (item.imgDtBoxMarkingBase64) item.imgDtBoxMarkingBase64 = await compressBase64Image(item.imgDtBoxMarkingBase64);
+            if (item.imgDtBoxSealBase64) item.imgDtBoxSealBase64 = await compressBase64Image(item.imgDtBoxSealBase64);
+            if (item.imgDtMeterPingBase64) item.imgDtMeterPingBase64 = await compressBase64Image(item.imgDtMeterPingBase64);
+            if (item.imgJointVisitSldBase64) item.imgJointVisitSldBase64 = await compressBase64Image(item.imgJointVisitSldBase64);
+            
+            // Save the repaired lightweight item back to IndexedDB
+            await saveToQueue(item);
+        }
+
+        hideLoader();
+        showToast("All pending forms successfully rescued and compressed!");
+        
+        // Kick off the auto-sync queue right away
+        processSyncQueue(true);
+    } catch (err) {
+        hideLoader();
+        showToast("Error rescuing forms: " + err.message, true);
+    }
+}
+// ----------------------------------------------------
+
 async function clearEntireQueue() {
-    if (!confirm("⚠️ WARNING: Are you absolutely sure you want to DELETE all pending surveys? This data will be permanently lost.")) return;
+    if (!confirm("⚠️ WARNING: Are you sure you want to DELETE all pending surveys? This data will be permanently lost.")) return;
     
     try {
         const db = await getDB();
@@ -703,7 +777,6 @@ async function clearEntireQueue() {
                 updateSyncBadge(0);
                 showToast("Pending queue cleared completely.", true);
                 
-                // Clear any locked validation states on the current form
                 isMeterDuplicate = false;
                 isMeterDuplicateChecked = true;
                 const msgEl = document.getElementById('meterNoMsg');
@@ -742,7 +815,6 @@ async function processSyncQueue(isManual = false) {
                 await apiCall(item, 0, true); 
                 await removeFromQueue(item.reqId); 
                 
-                // Refresh queue length mid-sync so you see the number go down live!
                 const remaining = await getQueue();
                 updateSyncBadge(remaining.length);
                 if (isManual && remaining.length > 0) document.getElementById('loader-text').innerText = `Syncing... (${remaining.length} left)`;
@@ -750,11 +822,11 @@ async function processSyncQueue(isManual = false) {
             } catch (e) {
                 if (e.isServerError) {
                     showToast(`Server rejected a record permanently: ${e.message}`, true);
-                    await removeFromQueue(item.reqId); // Removes broken records so queue doesn't lock forever
+                    await removeFromQueue(item.reqId);
                 } else {
                     console.warn(`Sync paused due to network/timeout: ${e.message}`);
                     if (isManual) showToast("Network Timeout. Synced partial data, will keep retrying.", true);
-                    break; // Stops processing to let network recover
+                    break;
                 }
             }
         }
@@ -1021,7 +1093,7 @@ function updateMeterNumberVisibility() {
         msgEl.className = 'hidden';
         isMeterDuplicate = false;
         isMeterDuplicateChecked = true; 
-        submitBtn.disabled = false; // Safe to submit if hidden
+        submitBtn.disabled = false;
     } else {
         div.style.display = 'block';
     }
@@ -1136,7 +1208,6 @@ function processImage(file, latLongStr) {
             let w = img.naturalWidth; 
             let h = img.naturalHeight;
             
-            // EXTREME COMPRESSION FOR GUARANTEED SYNC (Approx 1024x768 KB Limit)
             const MAX_AREA = 786432; 
             if ((w * h) > MAX_AREA) {
                 const scaleDown = Math.sqrt(MAX_AREA / (w * h));
@@ -1195,7 +1266,6 @@ function processImage(file, latLongStr) {
                 currY += (fontSize + lineSpace);
             });
             
-            // COMPRESS TO 50% QUALITY (~40-80KB sizes for instant zero-lag upload)
             resolve(canvas.toDataURL('image/jpeg', 0.5)); 
             URL.revokeObjectURL(img.src);
         };
@@ -1242,13 +1312,13 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
         if (val.length >= 2 && !/^[A-Z]{2}/.test(val)) reason = "Must start with 2 letters.";
         else if (val.length > 2 && /[^0-9]/.test(val.substring(2))) reason = "Only digits allowed after first 2 letters.";
         msgEl.innerText = `❌ Invalid: ${reason}`;
-        submitBtn.disabled = true; // Lock Submit Button
+        submitBtn.disabled = true;
         return; 
     }
 
     msgEl.className = 'small text-secondary fw-bold mt-1 d-block';
     msgEl.innerText = '✅ Format valid. Checking availability...';
-    submitBtn.disabled = true; // Lock Submit Button while checking
+    submitBtn.disabled = true;
     
     clearTimeout(duplicateCheckTimer);
     const checkId = ++currentCheckReqId;
@@ -1259,7 +1329,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             isMeterDuplicate = true; isMeterDuplicateChecked = true;
             msgEl.className = 'small text-danger fw-bold mt-1 d-block';
             msgEl.innerText = '❌ Already exists in your offline queue.';
-            submitBtn.disabled = true; // Keep Locked
+            submitBtn.disabled = true;
             return;
         }
         try {
@@ -1271,12 +1341,12 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
                 isMeterDuplicate = true;
                 msgEl.className = 'small text-danger fw-bold mt-1 d-block';
                 msgEl.innerText = `❌ Duplicate: Exists (New Meter Number: ${val}, by ${res.surveyor}, on ${res.date})`;
-                submitBtn.disabled = true; // Keep Locked
+                submitBtn.disabled = true;
             } else {
                 isMeterDuplicate = false;
                 msgEl.className = 'small text-success fw-bold mt-1 d-block';
                 msgEl.innerText = '✅ Meter number is available!';
-                submitBtn.disabled = false; // UNLOCK SUBMIT BUTTON
+                submitBtn.disabled = false;
             }
         } catch(err) {
             if (currentCheckReqId !== checkId) return;
@@ -1284,7 +1354,7 @@ document.getElementById('f_meternumber').addEventListener('input', function(e) {
             msgEl.innerText = '⚠️ Cannot verify offline (local checks passed).';
             isMeterDuplicate = false; 
             isMeterDuplicateChecked = true;
-            submitBtn.disabled = false; // Unlock for offline work
+            submitBtn.disabled = false;
         }
     }, 500);
 });
