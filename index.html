@@ -112,8 +112,9 @@
                 </a>
                 
                 <div class="ms-auto nav-actions">
-                    <button id="syncBadge" class="btn btn-sm btn-warning text-dark me-2 hidden fw-bold shadow-sm" style="font-size: 0.9rem;" onclick="processSyncQueue(true)">
-                        ⏳ <span id="syncCount">0</span> Pending (Tap to Sync)
+                    <!-- Updated badge with openQueueModal and shorter text to fit mobile -->
+                    <button id="syncBadge" class="btn btn-sm btn-warning text-dark me-2 hidden fw-bold shadow-sm" style="font-size: 0.9rem; white-space: nowrap;" onclick="openQueueModal()">
+                        ⏳ <span id="syncCount">0</span> Pending
                     </button>
                     
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
@@ -313,6 +314,33 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Edit</button>
                             <button type="button" class="btn btn-accent px-4 fw-bold" id="btnFinalSubmit">Confirm and Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Management Modal -->
+            <div class="modal fade" id="queueModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header" style="background-color: #ffc107;">
+                            <h5 class="modal-title fw-bold text-dark">Pending Uploads</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-light text-center p-4">
+                            <h4 class="fw-bold text-danger mb-3" id="queueModalCount">0 Pending</h4>
+                            <p class="text-muted small mb-4">These surveys are saved locally on your device and are waiting to be sent to the server.</p>
+                            
+                            <button type="button" class="btn btn-success btn-lg w-100 fw-bold mb-3 shadow-sm" onclick="startManualSync()">
+                                🔄 Sync Now
+                            </button>
+                            
+                            <div class="border-top pt-3 mt-2">
+                                <p class="small text-muted mb-2">If your uploads have been permanently stuck for a long time, the files may be corrupted. <b>Clearing them will delete the pending data.</b></p>
+                                <button type="button" class="btn btn-outline-danger fw-bold w-100" onclick="clearEntireQueue()">
+                                    🗑️ Delete Stuck Uploads
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -635,6 +663,60 @@ function updateSyncBadge(count) {
     } else {
         badge.classList.add('hidden');
         badge.classList.remove('pulse-animation');
+    }
+}
+
+// Opens the visual Queue Management Modal
+async function openQueueModal() {
+    try {
+        const q = await getQueue().catch(()=>[]);
+        document.getElementById('queueModalCount').innerText = `${q.length} Pending Survey(s)`;
+        
+        const modalEl = document.getElementById('queueModal');
+        let m = bootstrap.Modal.getInstance(modalEl);
+        if (!m) m = new bootstrap.Modal(modalEl);
+        m.show();
+    } catch(e) {
+        showToast("Error opening queue: " + e.message, true);
+    }
+}
+
+// Triggered by the "Sync Now" button inside the modal
+function startManualSync() {
+    const m = bootstrap.Modal.getInstance(document.getElementById('queueModal'));
+    if (m) m.hide();
+    processSyncQueue(true);
+}
+
+// Triggered by the "Delete Stuck Uploads" button inside the modal
+async function clearEntireQueue() {
+    if (!confirm("⚠️ WARNING: Are you absolutely sure you want to DELETE all pending surveys? This data will be permanently lost.")) return;
+    
+    try {
+        const db = await getDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.oncomplete = async () => {
+                const m = bootstrap.Modal.getInstance(document.getElementById('queueModal'));
+                if (m) m.hide();
+                
+                updateSyncBadge(0);
+                showToast("Pending queue cleared completely.", true);
+                
+                // Clear any locked validation states on the current form
+                isMeterDuplicate = false;
+                isMeterDuplicateChecked = true;
+                const msgEl = document.getElementById('meterNoMsg');
+                if (msgEl) msgEl.className = 'hidden';
+                document.getElementById('btnSubmitSurvey').disabled = false;
+                
+                resolve();
+            };
+            tx.onerror = () => reject(tx.error);
+            tx.objectStore(STORE_NAME).clear();
+        });
+    } catch (e) {
+        showToast("Failed to clear queue: " + e.message, true);
     }
 }
 
@@ -1545,7 +1627,7 @@ function filterAdminUsers() {
             <td><span class="badge ${u.role==='Admin'?'bg-danger':'bg-secondary'}">${escapeHTML(u.role)}</span></td>
             <td><span class="badge ${u.status==='Active'?'bg-success':'bg-warning text-dark'}">${escapeHTML(u.status)}</span></td>
             <td><small>${escapeHTML(u.zones)}</small></td>
-            <td>${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts} ${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
+            <td>${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts}${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
         </tr>`;
     });
 }
