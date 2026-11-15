@@ -35,6 +35,7 @@
         td { font-size: 0.875rem; white-space: nowrap; vertical-align: middle; }
         .card-header { background-color: var(--primary-color); color: white; }
         .form-control, .form-select, .btn { min-height: 44px; }
+        .edit-modal-field { min-height: 36px !important; font-size: 0.875rem; }
         input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; color: var(--primary-color); font-weight: 600; border: 1px dashed #adb5bd; }
         .btn-accent { background-color: var(--accent-color) !important; color: var(--primary-color) !important; font-weight: bold; border: none; }
         .btn-accent:hover { background-color: #7ebd45 !important; color: white !important; }
@@ -349,18 +350,19 @@
                 </div>
             </div>
 
-            <!-- ADMIN DASHBOARD -->
+            <!-- ADMIN / REPORT DASHBOARD -->
             <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
                     <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
+                        <h5 class="mb-0 fw-bold" id="adminDashboardTitle">Admin Dashboard</h5>
+                        <span class="badge bg-light text-dark fw-bold" id="adminPortalScopeBadge">Connected: Master Sheet</span>
                     </div>
                     <div class="card-body p-0">
                         <ul class="nav nav-tabs px-3 pt-3 fw-bold" id="adminTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="tab-submissions" data-bs-toggle="tab" data-bs-target="#pane-submissions" type="button" role="tab" onclick="loadAdminSubmissions(1)">Submissions</button>
                             </li>
-                            <li class="nav-item" role="presentation">
+                            <li class="nav-item" id="navItemUsers" role="presentation">
                                 <button class="nav-link" id="tab-users" data-bs-toggle="tab" data-bs-target="#pane-users" type="button" role="tab" onclick="loadAdminUsers()">User Management</button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -376,7 +378,7 @@
                                     <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="adm_circle" class="form-select"><option value="ALL">ALL</option></select></div>
                                     <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="adm_division" class="form-select"><option value="ALL">ALL</option></select></div>
                                     <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="adm_subdiv" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation</label><select id="adm_subname" class="form-select"><option value="ALL">ALL</option></select></div>
+                                    <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="adm_subname" class="form-select"><option value="ALL">ALL</option></select></div>
                                     <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="adm_fromDate" class="form-control"></div>
                                     <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="adm_toDate" class="form-control"></div>
                                     <div class="col-12 col-md-8 mt-2 text-end">
@@ -438,21 +440,22 @@
                 </div>
             </div>
 
-            <!-- Admin Review/Delete Modal -->
+            <!-- Admin / Report Review & Edit Modal -->
             <div class="modal fade" id="adminReviewModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header text-white" style="background-color: var(--primary-color);">
-                            <h5 class="modal-title fw-bold">Review Submission: <span id="revUid"></span></h5>
+                            <h5 class="modal-title fw-bold">Edit / Review Submission: <span id="revUid"></span> <span id="revSourceBadge" class="badge bg-warning text-dark ms-2">Master</span></h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body bg-light p-4" id="adminReviewContent"></div>
                         <div class="modal-footer justify-content-between" style="background-color: #f1f3f5;">
-                            <div>
+                            <div id="admDeleteSection">
                                 <input type="text" id="admDeleteReason" class="form-control d-inline-block w-auto mb-2 mb-md-0" placeholder="Reason for deletion (Req)" style="min-width: 250px;">
                                 <button type="button" class="btn btn-danger fw-bold ms-2" onclick="executeAdminDelete()">🗑️ Delete Record</button>
                             </div>
-                            <div>
+                            <div class="ms-auto">
+                                <button type="button" class="btn btn-accent fw-bold px-4 me-2" id="btnSaveMasterEdit" onclick="executeAdminEdit()">💾 Save Changes</button>
                                 <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>
@@ -481,7 +484,11 @@
                                 <div class="row g-2 mb-3">
                                     <div class="col-6"><label class="form-label small fw-bold text-muted">Designation</label><input type="text" class="form-control" id="u_designation"></div>
                                     <div class="col-6"><label class="form-label small fw-bold text-muted">Role</label>
-                                        <select class="form-select" id="u_role" required><option value="User">User</option><option value="Admin">Admin</option></select>
+                                        <select class="form-select" id="u_role" required>
+                                            <option value="User">User</option>
+                                            <option value="Report">Report</option>
+                                            <option value="Admin">Admin</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row g-2 mb-3">
@@ -912,6 +919,23 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     }
 };
 
+async function initAdminOrReportFilters() {
+    await fetchMasterData();
+    setupCascading('adm', true);
+    const userZonesRaw = String(currentUser.zones || 'All').trim();
+    if (userZonesRaw.toUpperCase() !== 'ALL') {
+        const allowed = userZonesRaw.split(',').map(z => z.trim().toUpperCase());
+        const zoneSel = document.getElementById('adm_zone');
+        if (zoneSel) {
+            Array.from(zoneSel.options).forEach(opt => {
+                if (opt.value !== 'ALL' && !allowed.includes(opt.value.toUpperCase())) {
+                    opt.remove();
+                }
+            });
+        }
+    }
+}
+
 async function routeUser(role) {
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('appView').classList.remove('hidden');
@@ -919,10 +943,35 @@ async function routeUser(role) {
     
     const r = String(role).trim().toLowerCase();
     
-    if(r === 'admin') {
-        document.getElementById('navAdmin').classList.remove('hidden'); 
+    if(r === 'admin' || r === 'report') {
+        const isReportOnly = (r === 'report');
+        const navAdminBtn = document.getElementById('navAdmin');
+        navAdminBtn.innerText = isReportOnly ? 'Report Portal' : 'Admin Panel';
+        navAdminBtn.classList.remove('hidden'); 
         document.getElementById('navUser').classList.add('hidden'); 
-        switchView('viewAdmin'); 
+
+        const titleEl = document.getElementById('adminDashboardTitle');
+        if (titleEl) titleEl.innerText = isReportOnly ? 'Report Portal (Master Editor)' : 'Admin Dashboard';
+
+        const navItemUsers = document.getElementById('navItemUsers');
+        if (navItemUsers) {
+            if (isReportOnly) navItemUsers.classList.add('hidden');
+            else navItemUsers.classList.remove('hidden');
+        }
+
+        const admDelSec = document.getElementById('admDeleteSection');
+        if (admDelSec) {
+            if (isReportOnly) admDelSec.classList.add('hidden');
+            else admDelSec.classList.remove('hidden');
+        }
+
+        switchView('viewAdmin');
+        showLoader("Loading Filter Master...");
+        try {
+            await initAdminOrReportFilters();
+        } catch(e) {
+            console.warn("Filter init warning:", e.message);
+        }
         loadAdminSubmissions(1);
     } else {
         document.getElementById('navAdmin').classList.add('hidden'); 
@@ -1618,7 +1667,7 @@ let adminUsersData = [];
 
 async function loadAdminSubmissions(page = 1) {
     adminCurrentPage = page;
-    showLoader("Loading Submissions...");
+    showLoader("Loading Master Submissions...");
     try {
         const filters = {
             zone: document.getElementById('adm_zone')?.value || 'ALL', circle: document.getElementById('adm_circle')?.value || 'ALL',
@@ -1638,7 +1687,7 @@ async function loadAdminSubmissions(page = 1) {
             fullReportData.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><button class="btn btn-sm btn-primary fw-bold" onclick="openAdminReviewModal(${idx})">Review</button></td>
+                    <td><button class="btn btn-sm btn-primary fw-bold" onclick="openAdminReviewModal(${idx})">Review / Edit</button></td>
                     <td>${new Date(row.date).toLocaleDateString()}</td>
                     <td><b>${escapeHTML(row.uid)}</b></td>
                     <td>${escapeHTML(row.surveyor)}</td>
@@ -1661,24 +1710,96 @@ async function loadAdminSubmissions(page = 1) {
 
 function changeAdminPage(dir) { loadAdminSubmissions(adminCurrentPage + dir); }
 function resetAdminFilters() {
-    ['adm_zone', 'adm_circle', 'adm_division', 'adm_subdiv', 'adm_subname'].forEach(id => { const el = document.getElementById(id); if(el) el.value = 'ALL'; });
+    const zoneEl = document.getElementById('adm_zone');
+    if (zoneEl) {
+        zoneEl.value = 'ALL';
+        zoneEl.dispatchEvent(new Event('change'));
+    }
+    ['adm_circle', 'adm_division', 'adm_subdiv', 'adm_subname'].forEach(id => { const el = document.getElementById(id); if(el) el.value = 'ALL'; });
     ['adm_fromDate', 'adm_toDate'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     loadAdminSubmissions(1);
+}
+
+function buildEditSelectHtml(id, colIdx, currentVal) {
+    const valStr = String(currentVal || '').trim();
+    const opts = getUnique(masterDropdownData, colIdx);
+    const list = [...opts];
+    if (valStr && !list.some(v => v.toLowerCase() === valStr.toLowerCase())) {
+        list.unshift(valStr);
+    }
+    let optionsHtml = `<option value="">-- Select / Empty --</option>`;
+    list.forEach(v => {
+        const selected = (v.toLowerCase() === valStr.toLowerCase()) ? 'selected' : '';
+        optionsHtml += `<option value="${escapeHTML(v)}" ${selected}>${escapeHTML(v)}</option>`;
+    });
+    return `<select id="${id}" class="form-select form-select-sm edit-modal-field">${optionsHtml}</select>`;
+}
+
+function buildEditInputHtml(id, currentVal, isTextarea = false) {
+    const valStr = escapeHTML(currentVal || '');
+    if (isTextarea) {
+        return `<textarea id="${id}" class="form-control form-control-sm" rows="2">${valStr}</textarea>`;
+    }
+    return `<input type="text" id="${id}" class="form-control form-control-sm edit-modal-field" value="${valStr}">`;
 }
 
 function openAdminReviewModal(idx) {
     activeReviewIdx = idx;
     const d = fullReportData[idx];
     document.getElementById('revUid').innerText = escapeHTML(d.uid);
+    const srcBadge = document.getElementById('revSourceBadge');
+    if (srcBadge) srcBadge.innerText = escapeHTML(d._source || 'Master');
     document.getElementById('admDeleteReason').value = '';
     
-    let html = `<div class="row"><div class="col-md-6 mb-3"><h6 class="fw-bold border-bottom pb-2">Details</h6>`;
-    html += `<p class="mb-1 small"><b>Surveyor:</b> ${escapeHTML(d.surveyor)} (${escapeHTML(d.empCode)})</p>`;
-    html += `<p class="mb-1 small"><b>Zone/Substation:</b> ${escapeHTML(d.zone)} / ${escapeHTML(d.subName)}</p>`;
-    html += `<p class="mb-1 small"><b>Meter Type:</b> ${escapeHTML(d.meterType)}</p>`;
-    html += `<p class="mb-1 small"><b>Meter No:</b> <span class="bg-warning px-1 fw-bold text-dark">${escapeHTML(d.meterNumber) || 'N/A'}</span></p>`;
-    html += `<p class="mb-1 small"><b>GPS:</b> ${escapeHTML(d.latLong)}</p>`;
-    html += `</div><div class="col-md-6 mb-3 border-start"><h6 class="fw-bold border-bottom pb-2">Images</h6><div class="d-flex flex-wrap gap-2">`;
+    let html = `<div class="row">
+        <div class="col-lg-8 mb-3">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h6 class="fw-bold mb-0">Edit Entry Details (Connected to ${escapeHTML(d._source || 'Master')})</h6>
+                <span class="small text-muted"><b>Surveyor:</b> ${escapeHTML(d.surveyor)} (${escapeHTML(d.empCode)}) | <b>Date:</b> ${escapeHTML(d.date)}</span>
+            </div>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Zone</label>${buildEditInputHtml('ed_zone', d.zone)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Circle</label>${buildEditInputHtml('ed_circle', d.circle)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Division</label>${buildEditInputHtml('ed_division', d.division)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Sub Division</label>${buildEditInputHtml('ed_subdiv', d.subdiv)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Substation Name</label>${buildEditInputHtml('ed_subName', d.subName)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Substation Code</label>${buildEditInputHtml('ed_subCode', d.subCode)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Feeder Name</label>${buildEditInputHtml('ed_feederName', d.feederName)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Feeder Code</label>${buildEditInputHtml('ed_feederCode', d.feederCode)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">New Meter QR Code</label>${buildEditInputHtml('ed_qrCode', d.qrCode)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Meter Type</label>${buildEditSelectHtml('ed_meterType', 9, d.meterType)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DTR Capacity (KVA)</label>${buildEditSelectHtml('ed_dtrCapacity', 10, d.dtrCapacity)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Installation Status</label>${buildEditSelectHtml('ed_installStatus', 11, d.installStatus)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">New Meter Number</label>${buildEditInputHtml('ed_meterNumber', d.meterNumber)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Name / Location</label>${buildEditInputHtml('ed_dtName', d.dtName)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Latitude, Longitude</label>${buildEditInputHtml('ed_latLong', d.latLong)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Feeder PT Capacity</label>${buildEditInputHtml('ed_feederPtCapacity', d.feederPtCapacity)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Feeder MF</label>${buildEditInputHtml('ed_feederMf', d.feederMf)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DTR Energized</label>${buildEditSelectHtml('ed_dtrEnergized', 12, d.dtrEnergized)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DTR Box CT Ratio</label>${buildEditSelectHtml('ed_dtrBoxCtRatio', 13, d.dtrBoxCtRatio)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DTR Box MF</label>${buildEditSelectHtml('ed_dtrBoxMf', 14, d.dtrBoxMf)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Box Number</label>${buildEditInputHtml('ed_dtBoxNumber', d.dtBoxNumber)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Box Status</label>${buildEditSelectHtml('ed_dtBoxStatus', 15, d.dtBoxStatus)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Box Seal Status</label>${buildEditSelectHtml('ed_dtBoxSealStatus', 16, d.dtBoxSealStatus)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Box Seal Number</label>${buildEditInputHtml('ed_dtBoxSealNumber', d.dtBoxSealNumber)}</div>
+
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">DT Meter Ping Status</label>${buildEditSelectHtml('ed_dtMeterPingStatus', 17, d.dtMeterPingStatus)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Rectification Required</label>${buildEditSelectHtml('ed_rectificationReq', 18, d.rectificationReq)}</div>
+                <div class="col-6 col-md-4"><label class="small text-muted fw-bold">Joint Visit Lineman/JE</label>${buildEditInputHtml('ed_jointVisitName', d.jointVisitName)}</div>
+
+                <div class="col-6 col-md-6"><label class="small text-muted fw-bold">DTR PM Module Code</label>${buildEditInputHtml('ed_dtrPmCode', d.dtrPmCode)}</div>
+                <div class="col-6 col-md-6"><label class="small text-muted fw-bold">DTR PM Module Name</label>${buildEditInputHtml('ed_dtrPmName', d.dtrPmName)}</div>
+                <div class="col-12"><label class="small text-muted fw-bold">Remark</label>${buildEditInputHtml('ed_remark', d.remark, true)}</div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-3 border-start">
+            <h6 class="fw-bold border-bottom pb-2">Attached Images</h6>
+            <div class="d-flex flex-wrap gap-2">`;
     
     const imgs = [
         { id: d.meterImgId, label: 'Meter' }, { id: d.meterDtImgId, label: 'Meter DT' },
@@ -1695,6 +1816,65 @@ function openAdminReviewModal(idx) {
     html += `</div></div></div>`;
     document.getElementById('adminReviewContent').innerHTML = html;
     new bootstrap.Modal(document.getElementById('adminReviewModal')).show();
+}
+
+async function executeAdminEdit() {
+    const d = fullReportData[activeReviewIdx];
+    if (!d) return;
+
+    const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    };
+
+    const updatedData = {
+        zone: getVal('ed_zone'),
+        circle: getVal('ed_circle'),
+        division: getVal('ed_division'),
+        subdiv: getVal('ed_subdiv'),
+        subName: getVal('ed_subName'),
+        subCode: getVal('ed_subCode'),
+        feederName: getVal('ed_feederName'),
+        feederCode: getVal('ed_feederCode'),
+        qrCode: getVal('ed_qrCode'),
+        meterType: getVal('ed_meterType'),
+        dtrCapacity: getVal('ed_dtrCapacity'),
+        installStatus: getVal('ed_installStatus'),
+        meterNumber: getVal('ed_meterNumber').toUpperCase(),
+        dtName: getVal('ed_dtName'),
+        latLong: getVal('ed_latLong'),
+        feederPtCapacity: getVal('ed_feederPtCapacity'),
+        feederMf: getVal('ed_feederMf'),
+        dtrEnergized: getVal('ed_dtrEnergized'),
+        dtrBoxCtRatio: getVal('ed_dtrBoxCtRatio'),
+        dtrBoxMf: getVal('ed_dtrBoxMf'),
+        dtBoxNumber: getVal('ed_dtBoxNumber'),
+        dtBoxStatus: getVal('ed_dtBoxStatus'),
+        dtBoxSealStatus: getVal('ed_dtBoxSealStatus'),
+        dtBoxSealNumber: getVal('ed_dtBoxSealNumber'),
+        dtMeterPingStatus: getVal('ed_dtMeterPingStatus'),
+        rectificationReq: getVal('ed_rectificationReq'),
+        jointVisitName: getVal('ed_jointVisitName'),
+        dtrPmCode: getVal('ed_dtrPmCode'),
+        dtrPmName: getVal('ed_dtrPmName'),
+        remark: getVal('ed_remark')
+    };
+
+    showLoader("Saving changes to Master sheet...");
+    try {
+        const res = await apiCall({
+            action: 'updateMasterSubmission',
+            uid: d.uid,
+            source: d._source || 'Master',
+            updatedData: updatedData
+        });
+        showToast(res.message || "Record updated successfully in Master sheet.");
+        bootstrap.Modal.getInstance(document.getElementById('adminReviewModal'))?.hide();
+        loadAdminSubmissions(adminCurrentPage);
+    } catch (err) {
+        showToast(err.message, true);
+    }
+    hideLoader();
 }
 
 async function executeAdminDelete() {
@@ -1741,10 +1921,11 @@ function filterAdminUsers() {
     
     filteredUsers.forEach(u => {
         const isLocked = u.lockoutUntil && new Date(u.lockoutUntil) > new Date();
+        const roleBadgeClass = u.role==='Admin' ? 'bg-danger' : (u.role==='Report' ? 'bg-primary' : 'bg-secondary');
         tbody.innerHTML += `<tr>
             <td><button class="btn btn-sm btn-outline-primary" onclick="openUserModal('${u.empCode}')">Edit</button></td>
             <td class="fw-bold">${escapeHTML(u.name)}</td><td>${escapeHTML(u.empCode)}</td><td>${escapeHTML(u.mobile)}</td>
-            <td><span class="badge ${u.role==='Admin'?'bg-danger':'bg-secondary'}">${escapeHTML(u.role)}</span></td>
+            <td><span class="badge ${roleBadgeClass}">${escapeHTML(u.role)}</span></td>
             <td><span class="badge ${u.status==='Active'?'bg-success':'bg-warning text-dark'}">${escapeHTML(u.status)}</span></td>
             <td><small>${escapeHTML(u.zones)}</small></td>
             <td class="hidden">${u.failedAttempts > 0 ? `<span class="text-danger fw-bold">${u.failedAttempts}${isLocked?'(LOCKED)':''}</span>` : '0'}</td>
