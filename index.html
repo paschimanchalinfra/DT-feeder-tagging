@@ -39,7 +39,6 @@
         input[readonly].locked-field { background-color: #e9ecef !important; cursor: not-allowed; color: var(--primary-color); font-weight: 600; border: 1px dashed #adb5bd; }
         .btn-accent { background-color: var(--accent-color) !important; color: var(--primary-color) !important; font-weight: bold; border: none; }
         .btn-accent:hover { background-color: #7ebd45 !important; color: white !important; }
-        .summary-card { border-left: 5px solid var(--primary-color); border-radius: 8px; }
         
         .toast-container { z-index: 1055; pointer-events: none; }
         .toast { pointer-events: auto; }
@@ -119,7 +118,7 @@
                     
                     <span class="text-light me-3 small fw-bold" id="userDisplay"></span>
                     <button id="navUser" class="btn btn-sm btn-outline-light me-2 hidden fw-bold px-3 py-2" onclick="switchView('viewUser')">Form Entry</button>
-                    <button id="navAdmin" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="switchView('viewAdmin'); loadAdminSubmissions(1);">Admin Panel</button>
+                    <button id="navAdmin" class="btn btn-sm btn-warning me-2 fw-bold hidden px-3 py-2" style="background-color: var(--accent-color); border-color: var(--accent-color); color: var(--primary-color);" onclick="handlePortalNavClick()">Admin Panel</button>
                     <button class="btn btn-sm btn-outline-light fw-bold px-3 py-2" onclick="logout()">Logout</button>
                 </div>
             </div>
@@ -350,97 +349,132 @@
                 </div>
             </div>
 
-            <!-- ADMIN / REPORT DASHBOARD -->
+            <!-- ADMIN (USER MANAGEMENT) & REPORT (MASTER EDITOR) PORTALS -->
             <div id="viewAdmin" class="hidden" style="width: 100%; margin: 0 auto;">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center py-3 gap-2">
                         <h5 class="mb-0 fw-bold" id="adminDashboardTitle">Admin Dashboard</h5>
-                        <span class="badge bg-light text-dark fw-bold" id="adminPortalScopeBadge">Connected: Master Sheet</span>
+                        <div class="d-flex flex-wrap align-items-center gap-2" id="reportHeaderActions">
+                            <button type="button" class="btn btn-sm btn-outline-light fw-bold" onclick="downloadFilteredMasterCsv()">📥 Export CSV</button>
+                            <button type="button" class="btn btn-sm btn-accent fw-bold" onclick="openBulkCsvModal()">📤 Bulk Update CSV (UID)</button>
+                            <span class="badge bg-light text-dark fw-bold" id="adminPortalScopeBadge">Connected: Master Sheet</span>
+                        </div>
                     </div>
-                    <div class="card-body p-0">
-                        <ul class="nav nav-tabs px-3 pt-3 fw-bold" id="adminTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="tab-submissions" data-bs-toggle="tab" data-bs-target="#pane-submissions" type="button" role="tab" onclick="loadAdminSubmissions(1)">Submissions</button>
-                            </li>
-                            <li class="nav-item" id="navItemUsers" role="presentation">
-                                <button class="nav-link" id="tab-users" data-bs-toggle="tab" data-bs-target="#pane-users" type="button" role="tab" onclick="loadAdminUsers()">User Management</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="tab-summary" data-bs-toggle="tab" data-bs-target="#pane-summary" type="button" role="tab" onclick="loadAdminSummary()">Summary</button>
-                            </li>
-                        </ul>
-                        
-                        <div class="tab-content p-3" id="adminTabsContent">
-                            <!-- TAB: SUBMISSIONS -->
-                            <div class="tab-pane fade show active" id="pane-submissions" role="tabpanel">
-                                <div class="row g-2 mb-3 pb-3 border-bottom align-items-end">
-                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="adm_zone" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="adm_circle" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="adm_division" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="adm_subdiv" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="adm_subname" class="form-select"><option value="ALL">ALL</option></select></div>
-                                    <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="adm_fromDate" class="form-control"></div>
-                                    <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="adm_toDate" class="form-control"></div>
-                                    <div class="col-12 col-md-8 mt-2 text-end">
-                                        <button class="btn btn-outline-secondary px-4 fw-bold me-2" onclick="resetAdminFilters()">Reset</button>
-                                        <button class="btn btn-primary px-4 fw-bold" style="background-color: var(--primary-color);" onclick="loadAdminSubmissions(1)">Apply</button>
-                                    </div>
-                                </div>
-                                
-                                <div class="table-responsive border rounded">
-                                    <table class="table table-striped table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Action</th><th>Date</th><th>UID</th><th>Surveyor</th>
-                                                <th>Zone</th><th>Substation</th><th>Feeder</th><th>Meter No</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="adminSubmissionsTable"></tbody>
-                                    </table>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span id="admPagingInfo" class="small text-muted fw-bold"></span>
-                                    <div>
-                                        <button class="btn btn-sm btn-outline-primary" id="btnAdmPrev" onclick="changeAdminPage(-1)">Previous</button>
-                                        <button class="btn btn-sm btn-outline-primary ms-1" id="btnAdmNext" onclick="changeAdminPage(1)">Next</button>
-                                    </div>
+                    <div class="card-body p-3">
+                        <!-- REPORT PORTAL PANEL (SUBMISSIONS + FILTERS + BULK CSV) -->
+                        <div id="pane-submissions">
+                            <div class="row g-2 mb-3 pb-3 border-bottom align-items-end">
+                                <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Zone</label><select id="adm_zone" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Circle</label><select id="adm_circle" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Division</label><select id="adm_division" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-6 col-md-2"><label class="small text-muted fw-bold">Sub Div</label><select id="adm_subdiv" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-12 col-md-4"><label class="small text-muted fw-bold">Substation Name</label><select id="adm_subname" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-12 col-md-4 mt-2"><label class="small text-muted fw-bold">Feeder Name Master</label><select id="adm_feedername" class="form-select"><option value="ALL">ALL</option></select></div>
+                                <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">From Date</label><input type="date" id="adm_fromDate" class="form-control"></div>
+                                <div class="col-6 col-md-2 mt-2"><label class="small text-muted fw-bold">To Date</label><input type="date" id="adm_toDate" class="form-control"></div>
+                                <div class="col-12 col-md-4 mt-2 text-end">
+                                    <button class="btn btn-outline-secondary px-4 fw-bold me-2" onclick="resetAdminFilters()">Reset</button>
+                                    <button class="btn btn-primary px-4 fw-bold" style="background-color: var(--primary-color);" onclick="loadAdminSubmissions(1)">Apply</button>
                                 </div>
                             </div>
                             
-                            <!-- TAB: USERS -->
-                            <div class="tab-pane fade" id="pane-users" role="tabpanel">
-                                <div class="d-flex flex-wrap justify-content-between mb-3 align-items-center gap-2">
-                                    <h6 class="fw-bold mb-0 pt-1">Portal Users</h6>
-                                    <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
-                                        <input type="text" id="adminUserSearch" class="form-control form-control-sm" placeholder="Search Name or Mobile..." onkeyup="filterAdminUsers()" style="max-width: 200px;">
-                                        <button class="btn btn-sm btn-accent fw-bold px-3 text-nowrap" onclick="openUserModal()">+ Add User</button>
-                                    </div>
-                                </div>
-                                <div class="table-responsive border rounded">
-                                    <table class="table table-striped table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Action</th><th>Name</th><th>Emp Code</th><th>Mobile</th><th>Role</th>
-                                                <th>Status</th><th>Zones</th><th class="hidden">Failed Auth</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="adminUsersTable"></tbody>
-                                    </table>
+                            <div class="table-responsive border rounded">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th><th>Date</th><th>UID</th><th>Surveyor</th>
+                                            <th>Zone</th><th>Substation</th><th>Feeder</th><th>Meter No</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminSubmissionsTable"></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span id="admPagingInfo" class="small text-muted fw-bold"></span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" id="btnAdmPrev" onclick="changeAdminPage(-1)">Previous</button>
+                                    <button class="btn btn-sm btn-outline-primary ms-1" id="btnAdmNext" onclick="changeAdminPage(1)">Next</button>
                                 </div>
                             </div>
-
-                            <!-- TAB: SUMMARY -->
-                            <div class="tab-pane fade" id="pane-summary" role="tabpanel">
-                                <div class="row g-3" id="adminSummaryCards">
-                                    <div class="col-12"><div class="p-3 bg-light summary-card shadow-sm"><div class="small text-muted fw-bold">Total Surveys Submitted</div><h4 class="mb-0 text-primary" id="admSumTotal">0</h4></div></div>
+                        </div>
+                        
+                        <!-- ADMIN PORTAL PANEL (USER MANAGEMENT ONLY) -->
+                        <div id="pane-users" class="hidden">
+                            <div class="d-flex flex-wrap justify-content-between mb-3 align-items-center gap-2">
+                                <h6 class="fw-bold mb-0 pt-1">Portal Users</h6>
+                                <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
+                                    <input type="text" id="adminUserSearch" class="form-control form-control-sm" placeholder="Search Name or Mobile..." onkeyup="filterAdminUsers()" style="max-width: 200px;">
+                                    <button class="btn btn-sm btn-accent fw-bold px-3 text-nowrap" onclick="openUserModal()">+ Add User</button>
                                 </div>
+                            </div>
+                            <div class="table-responsive border rounded">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th><th>Name</th><th>Emp Code</th><th>Mobile</th><th>Role</th>
+                                            <th>Status</th><th>Zones</th><th class="hidden">Failed Auth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminUsersTable"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Admin / Report Review & Edit Modal -->
+            <!-- Bulk CSV Update Modal (By UID) -->
+            <div class="modal fade" id="bulkCsvModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header text-white" style="background-color: var(--primary-color);">
+                            <h5 class="modal-title fw-bold">Bulk Update Master Sheet via CSV (Matched by UID)</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body bg-light p-4">
+                            <div class="alert alert-info small mb-3">
+                                <b>How Bulk Update Works:</b><br>
+                                1. Export the CSV using <b>Export CSV</b> (or use the exact Master CSV format with the <b>UID</b> column).<br>
+                                2. Edit any survey fields in Excel/Sheets without changing the <b>UID</b> column.<br>
+                                3. Upload the updated CSV below to update matching records in the <b>Master</b> sheet in bulk.
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="bulkCsvFile" class="form-label small fw-bold text-muted">Select Updated CSV File (.csv)</label>
+                                <input type="file" id="bulkCsvFile" class="form-control" accept=".csv,text/csv">
+                            </div>
+
+                            <div id="bulkCsvPreviewBox" class="hidden">
+                                <div class="p-3 bg-white border rounded mb-3">
+                                    <div class="fw-bold mb-1" id="bulkCsvSummaryTitle">Parsed Summary</div>
+                                    <div class="small text-muted" id="bulkCsvSummaryDetails"></div>
+                                </div>
+                                <div class="table-responsive border rounded bg-white" style="max-height: 220px;">
+                                    <table class="table table-sm table-bordered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>UID</th><th>Zone</th><th>Substation</th><th>Feeder Name</th><th>Meter No</th><th>Install Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bulkCsvPreviewBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="bulkCsvResultBox" class="alert alert-success mt-3 mb-0 hidden small"></div>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold" onclick="downloadFilteredMasterCsv()">📥 Download Current CSV Template</button>
+                            <div>
+                                <button type="button" class="btn btn-secondary fw-bold me-2" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-accent fw-bold px-4" id="btnExecuteBulkCsv" disabled onclick="executeBulkCsvUpload()">🚀 Upload & Update Master</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Review & Edit Modal -->
             <div class="modal fade" id="adminReviewModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow-lg">
@@ -524,6 +558,7 @@ let currentUser = null;
 let masterDropdownData = []; 
 let fullReportData = []; 
 let activeReviewIdx = null; 
+let parsedBulkCsvRows = [];
 
 let map, marker;
 let currentLat = null, currentLng = null, currentAcc = null;
@@ -540,6 +575,30 @@ function escapeHTML(str) {
     return String(str || '').replace(/[&<>'"]/g, tag => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag] || tag));
+}
+
+function formatDisplayDate(val) {
+    if (!val) return 'N/A';
+    const s = String(val).trim();
+    const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?/);
+    if (dmyMatch) {
+        const day = dmyMatch[1].padStart(2, '0');
+        const month = dmyMatch[2].padStart(2, '0');
+        const year = dmyMatch[3];
+        return `${day}/${month}/${year}`;
+    }
+    const ymdMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (ymdMatch) {
+        const year = ymdMatch[1];
+        const month = ymdMatch[2].padStart(2, '0');
+        const day = ymdMatch[3].padStart(2, '0');
+        return `${day}/${month}/${year}`;
+    }
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    return s;
 }
 
 document.getElementById('togglePassword').addEventListener('click', function() {
@@ -576,6 +635,16 @@ function switchView(viewId) {
     
     if (viewId === 'viewUser' && map) {
         setTimeout(() => map.invalidateSize(), 200);
+    }
+}
+
+function handlePortalNavClick() {
+    switchView('viewAdmin');
+    const r = currentUser ? String(currentUser.role).trim().toLowerCase() : '';
+    if (r === 'admin') {
+        loadAdminUsers();
+    } else if (r === 'report') {
+        loadAdminSubmissions(1);
     }
 }
 
@@ -745,7 +814,6 @@ async function rescueAndSyncStuckForms() {
             let item = queue[i];
             showLoader(`Rescuing form ${i + 1} of ${queue.length}...`);
             
-            // Re-compress all attached images to safe KB sizes
             if (item.meterImageBase64) item.meterImageBase64 = await compressBase64Image(item.meterImageBase64);
             if (item.meterDtImageBase64) item.meterDtImageBase64 = await compressBase64Image(item.meterDtImageBase64);
             if (item.imgFeederPtBase64) item.imgFeederPtBase64 = await compressBase64Image(item.imgFeederPtBase64);
@@ -754,14 +822,11 @@ async function rescueAndSyncStuckForms() {
             if (item.imgDtMeterPingBase64) item.imgDtMeterPingBase64 = await compressBase64Image(item.imgDtMeterPingBase64);
             if (item.imgJointVisitSldBase64) item.imgJointVisitSldBase64 = await compressBase64Image(item.imgJointVisitSldBase64);
             
-            // Save the repaired lightweight item back to IndexedDB
             await saveToQueue(item);
         }
 
         hideLoader();
         showToast("All pending forms successfully rescued and compressed!");
-        
-        // Kick off the auto-sync queue right away
         processSyncQueue(true);
     } catch (err) {
         hideLoader();
@@ -919,7 +984,7 @@ document.getElementById('loginForm').onsubmit = async (e) => {
     }
 };
 
-async function initAdminOrReportFilters() {
+async function initReportFilters() {
     await fetchMasterData();
     setupCascading('adm', true);
     const userZonesRaw = String(currentUser.zones || 'All').trim();
@@ -943,32 +1008,39 @@ async function routeUser(role) {
     
     const r = String(role).trim().toLowerCase();
     
-    if(r === 'admin' || r === 'report') {
-        const isReportOnly = (r === 'report');
+    if (r === 'admin') {
         const navAdminBtn = document.getElementById('navAdmin');
-        navAdminBtn.innerText = isReportOnly ? 'Report Portal' : 'Admin Panel';
+        navAdminBtn.innerText = 'User Management';
         navAdminBtn.classList.remove('hidden'); 
         document.getElementById('navUser').classList.add('hidden'); 
 
-        const titleEl = document.getElementById('adminDashboardTitle');
-        if (titleEl) titleEl.innerText = isReportOnly ? 'Report Portal (Master Editor)' : 'Admin Dashboard';
+        document.getElementById('adminDashboardTitle').innerText = 'Admin Portal - User Management';
+        document.getElementById('adminPortalScopeBadge').innerText = 'User Credentials (DT_Tagging)';
+        document.getElementById('reportHeaderActions').querySelectorAll('button').forEach(b => b.classList.add('hidden'));
 
-        const navItemUsers = document.getElementById('navItemUsers');
-        if (navItemUsers) {
-            if (isReportOnly) navItemUsers.classList.add('hidden');
-            else navItemUsers.classList.remove('hidden');
-        }
+        document.getElementById('pane-submissions').classList.add('hidden');
+        document.getElementById('pane-users').classList.remove('hidden');
 
-        const admDelSec = document.getElementById('admDeleteSection');
-        if (admDelSec) {
-            if (isReportOnly) admDelSec.classList.add('hidden');
-            else admDelSec.classList.remove('hidden');
-        }
+        switchView('viewAdmin');
+        loadAdminUsers();
+    } else if (r === 'report') {
+        const navAdminBtn = document.getElementById('navAdmin');
+        navAdminBtn.innerText = 'Report Portal';
+        navAdminBtn.classList.remove('hidden'); 
+        document.getElementById('navUser').classList.add('hidden'); 
+
+        document.getElementById('adminDashboardTitle').innerText = 'Report Portal (Master Editor)';
+        document.getElementById('adminPortalScopeBadge').innerText = 'Connected: Master Sheet';
+        document.getElementById('reportHeaderActions').querySelectorAll('button').forEach(b => b.classList.remove('hidden'));
+
+        document.getElementById('pane-users').classList.add('hidden');
+        document.getElementById('pane-submissions').classList.remove('hidden');
+        document.getElementById('admDeleteSection').classList.add('hidden');
 
         switchView('viewAdmin');
         showLoader("Loading Filter Master...");
         try {
-            await initAdminOrReportFilters();
+            await initReportFilters();
         } catch(e) {
             console.warn("Filter init warning:", e.message);
         }
@@ -1056,8 +1128,7 @@ function populateDropdown(id, list, addAll=false) {
 }
 
 function setupCascading(prefix, includeAllOption) {
-    const triggers = ['zone', 'circle', 'division', 'subdiv', 'subname'];
-    if (prefix === 'f') triggers.push('feedername'); 
+    const triggers = ['zone', 'circle', 'division', 'subdiv', 'subname', 'feedername'];
 
     populateDropdown(`${prefix}_zone`, getUnique(masterDropdownData, 0), includeAllOption);
     
@@ -1665,16 +1736,24 @@ function resetEntireForm() {
 let adminCurrentPage = 1;
 let adminUsersData = [];
 
+function getActiveReportFilters() {
+    return {
+        zone: document.getElementById('adm_zone')?.value || 'ALL',
+        circle: document.getElementById('adm_circle')?.value || 'ALL',
+        division: document.getElementById('adm_division')?.value || 'ALL',
+        subdiv: document.getElementById('adm_subdiv')?.value || 'ALL',
+        subname: document.getElementById('adm_subname')?.value || 'ALL',
+        feedername: document.getElementById('adm_feedername')?.value || 'ALL',
+        fromDate: document.getElementById('adm_fromDate')?.value || '',
+        toDate: document.getElementById('adm_toDate')?.value || ''
+    };
+}
+
 async function loadAdminSubmissions(page = 1) {
     adminCurrentPage = page;
     showLoader("Loading Master Submissions...");
     try {
-        const filters = {
-            zone: document.getElementById('adm_zone')?.value || 'ALL', circle: document.getElementById('adm_circle')?.value || 'ALL',
-            division: document.getElementById('adm_division')?.value || 'ALL', subdiv: document.getElementById('adm_subdiv')?.value || 'ALL',
-            subname: document.getElementById('adm_subname')?.value || 'ALL',
-            fromDate: document.getElementById('adm_fromDate')?.value || '', toDate: document.getElementById('adm_toDate')?.value || ''
-        };
+        const filters = getActiveReportFilters();
         const res = await apiCall({ action: 'getReportData', page: adminCurrentPage, limit: 50, filters: filters });
         
         fullReportData = res.data || [];
@@ -1688,7 +1767,7 @@ async function loadAdminSubmissions(page = 1) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><button class="btn btn-sm btn-primary fw-bold" onclick="openAdminReviewModal(${idx})">Review / Edit</button></td>
-                    <td>${new Date(row.date).toLocaleDateString()}</td>
+                    <td>${escapeHTML(formatDisplayDate(row.date))}</td>
                     <td><b>${escapeHTML(row.uid)}</b></td>
                     <td>${escapeHTML(row.surveyor)}</td>
                     <td>${escapeHTML(row.zone)}</td>
@@ -1702,8 +1781,6 @@ async function loadAdminSubmissions(page = 1) {
         document.getElementById('admPagingInfo').innerText = `Page ${res.page} (Total: ${res.total})`;
         document.getElementById('btnAdmPrev').disabled = (res.page === 1);
         document.getElementById('btnAdmNext').disabled = (fullReportData.length < 50);
-        
-        if(page === 1) { document.getElementById('admSumTotal').innerText = res.total; }
     } catch(err) { showToast(err.message, true); }
     hideLoader();
 }
@@ -1715,10 +1792,287 @@ function resetAdminFilters() {
         zoneEl.value = 'ALL';
         zoneEl.dispatchEvent(new Event('change'));
     }
-    ['adm_circle', 'adm_division', 'adm_subdiv', 'adm_subname'].forEach(id => { const el = document.getElementById(id); if(el) el.value = 'ALL'; });
+    ['adm_circle', 'adm_division', 'adm_subdiv', 'adm_subname', 'adm_feedername'].forEach(id => { const el = document.getElementById(id); if(el) el.value = 'ALL'; });
     ['adm_fromDate', 'adm_toDate'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
     loadAdminSubmissions(1);
 }
+
+// ----------------------------------------------------
+// REPORT PORTAL: EXPORT & BULK UPDATE CSV BY UID
+// ----------------------------------------------------
+async function downloadFilteredMasterCsv() {
+    showLoader("Exporting Master CSV...");
+    try {
+        const filters = getActiveReportFilters();
+        const res = await apiCall({ action: 'exportReportCsv', filters: filters });
+        const header = "Date,UID,EmpCode,Surveyor,Zone,Circle,Division,Sub Div,Substation,Feeder Name,New Meter QR Code,Meter Type,Capacity,Meter No,Install Status,Latitude,Longitude,Feeder PT Capacity,Feeder MF,DT Name,DTR PM Code,DTR PM Name,DTR Energized,DTR Box CT Ratio,DTR Box MF,DT Box Number,DT Box Status,DT Box Seal Status,DT Box Seal Number,DT Meter Ping Status,Rectification Req,Joint Visit Name,Remark,Meter Img,Meter DT Img,Feeder PT Img,DT Box Mark Img,DT Box Seal Img,DT Meter Ping Img,Joint Visit SLD Img\n";
+        const body = (res && res.csvBody) ? (res.csvBody + '\n') : '';
+        const blob = new Blob(["\uFEFF" + header + body], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const d = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        a.download = `Master_Report_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Exported ${res.count || 0} record(s) to CSV.`);
+    } catch (err) {
+        showToast(err.message, true);
+    }
+    hideLoader();
+}
+
+function openBulkCsvModal() {
+    parsedBulkCsvRows = [];
+    document.getElementById('bulkCsvFile').value = '';
+    document.getElementById('bulkCsvPreviewBox').classList.add('hidden');
+    document.getElementById('bulkCsvResultBox').classList.add('hidden');
+    document.getElementById('btnExecuteBulkCsv').disabled = true;
+    new bootstrap.Modal(document.getElementById('bulkCsvModal')).show();
+}
+
+function parseCsvText(text) {
+    const cleanText = String(text || '').replace(/^\uFEFF/, '');
+    const rows = [];
+    let row = [];
+    let cur = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < cleanText.length; i++) {
+        const ch = cleanText[i];
+        const next = cleanText[i + 1];
+
+        if (inQuotes) {
+            if (ch === '"' && next === '"') {
+                cur += '"';
+                i++;
+            } else if (ch === '"') {
+                inQuotes = false;
+            } else {
+                cur += ch;
+            }
+        } else {
+            if (ch === '"') {
+                inQuotes = true;
+            } else if (ch === ',') {
+                row.push(cur);
+                cur = '';
+            } else if (ch === '\r' && next === '\n') {
+                row.push(cur);
+                rows.push(row);
+                row = [];
+                cur = '';
+                i++;
+            } else if (ch === '\n' || ch === '\r') {
+                row.push(cur);
+                rows.push(row);
+                row = [];
+                cur = '';
+            } else {
+                cur += ch;
+            }
+        }
+    }
+    if (cur.length > 0 || row.length > 0) {
+        row.push(cur);
+        rows.push(row);
+    }
+    return rows.filter(r => r.some(cell => String(cell).trim() !== ''));
+}
+
+document.getElementById('bulkCsvFile').addEventListener('change', function() {
+    const file = this.files[0];
+    parsedBulkCsvRows = [];
+    const previewBox = document.getElementById('bulkCsvPreviewBox');
+    const resultBox = document.getElementById('bulkCsvResultBox');
+    const execBtn = document.getElementById('btnExecuteBulkCsv');
+
+    resultBox.classList.add('hidden');
+    execBtn.disabled = true;
+
+    if (!file) {
+        previewBox.classList.add('hidden');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const matrix = parseCsvText(e.target.result);
+            if (matrix.length < 2) {
+                showToast("CSV file is empty or has no data rows.", true);
+                previewBox.classList.add('hidden');
+                return;
+            }
+
+            const rawHeaders = matrix[0].map(h => String(h).trim().toLowerCase());
+            const findCol = (...aliases) => {
+                for (let a of aliases) {
+                    const idx = rawHeaders.indexOf(a.toLowerCase());
+                    if (idx !== -1) return idx;
+                }
+                return -1;
+            };
+
+            const colMap = {
+                uid: findCol('uid'),
+                zone: findCol('zone'),
+                circle: findCol('circle'),
+                division: findCol('division'),
+                subdiv: findCol('sub div', 'sub division', 'subdiv'),
+                subName: findCol('substation', 'substation name', 'subname'),
+                feederName: findCol('feeder name', 'feeder name master', 'feedername'),
+                qrCode: findCol('new meter qr code', 'qr code', 'qrcode'),
+                meterType: findCol('meter type', 'metertype'),
+                dtrCapacity: findCol('capacity', 'dtr capacity', 'dtr capacity (kva)', 'dtrcapacity'),
+                meterNumber: findCol('meter no', 'meter number', 'new meter number', 'meternumber'),
+                installStatus: findCol('install status', 'installation status', 'installstatus'),
+                latitude: findCol('latitude', 'lat'),
+                longitude: findCol('longitude', 'lng', 'long'),
+                latLong: findCol('latlong', 'latitude, longitude'),
+                feederPtCapacity: findCol('feeder pt capacity', 'feederptcapacity'),
+                feederMf: findCol('feeder mf', 'feedermf'),
+                dtName: findCol('dt name', 'dt name / location name', 'dtname'),
+                dtrPmCode: findCol('dtr pm code', 'dtr pm module code', 'dtrpmcode'),
+                dtrPmName: findCol('dtr pm name', 'dtr pm module name', 'dtrpmname'),
+                dtrEnergized: findCol('dtr energized', 'dtr energized or not', 'dtrenergized'),
+                dtrBoxCtRatio: findCol('dtr box ct ratio', 'dtrboxctratio'),
+                dtrBoxMf: findCol('dtr box mf', 'dtrboxmf'),
+                dtBoxNumber: findCol('dt box number', 'dtboxnumber'),
+                dtBoxStatus: findCol('dt box status', 'dtboxstatus'),
+                dtBoxSealStatus: findCol('dt box seal status', 'dtboxsealstatus'),
+                dtBoxSealNumber: findCol('dt box seal number', 'dtboxsealnumber'),
+                dtMeterPingStatus: findCol('dt meter ping status', 'dtmeterpingstatus'),
+                rectificationReq: findCol('rectification req', 'any rectification required', 'rectificationreq'),
+                jointVisitName: findCol('joint visit name', 'joint visit linman / je name', 'jointvisitname'),
+                remark: findCol('remark', 'any remark')
+            };
+
+            if (colMap.uid === -1) {
+                showToast("Invalid CSV format: 'UID' column header is missing.", true);
+                previewBox.classList.add('hidden');
+                return;
+            }
+
+            const readCell = (rowArr, colIdx) => {
+                if (colIdx === -1 || colIdx >= rowArr.length) return undefined;
+                let v = String(rowArr[colIdx] || '').trim();
+                if (v.startsWith("'")) v = v.substring(1);
+                return v;
+            };
+
+            let missingUidCount = 0;
+            const seenUids = new Set();
+            let duplicateInCsvCount = 0;
+
+            for (let r = 1; r < matrix.length; r++) {
+                const rowArr = matrix[r];
+                const uidVal = readCell(rowArr, colMap.uid);
+                if (!uidVal) {
+                    missingUidCount++;
+                    continue;
+                }
+                if (seenUids.has(uidVal.toUpperCase())) {
+                    duplicateInCsvCount++;
+                }
+                seenUids.add(uidVal.toUpperCase());
+
+                const record = { uid: uidVal };
+                Object.keys(colMap).forEach(key => {
+                    if (key === 'uid' || key === 'latitude' || key === 'longitude') return;
+                    const val = readCell(rowArr, colMap[key]);
+                    if (val !== undefined) record[key] = val;
+                });
+
+                const latVal = readCell(rowArr, colMap.latitude);
+                const lngVal = readCell(rowArr, colMap.longitude);
+                if (latVal !== undefined && lngVal !== undefined && (latVal || lngVal)) {
+                    record.latLong = `${latVal}, ${lngVal}`;
+                }
+
+                parsedBulkCsvRows.push(record);
+            }
+
+            document.getElementById('bulkCsvSummaryTitle').innerText = `Ready to update ${parsedBulkCsvRows.length} record(s) in Master sheet`;
+            let detailParts = [`Total data rows: ${matrix.length - 1}`, `Valid UID rows: ${parsedBulkCsvRows.length}`];
+            if (missingUidCount > 0) detailParts.push(`Skipped (empty UID): ${missingUidCount}`);
+            if (duplicateInCsvCount > 0) detailParts.push(`Warning: ${duplicateInCsvCount} duplicate UID(s) in CSV`);
+            document.getElementById('bulkCsvSummaryDetails').innerText = detailParts.join(' | ');
+
+            const previewBody = document.getElementById('bulkCsvPreviewBody');
+            previewBody.innerHTML = '';
+            parsedBulkCsvRows.slice(0, 8).forEach(item => {
+                previewBody.innerHTML += `<tr>
+                    <td><b>${escapeHTML(item.uid)}</b></td>
+                    <td>${escapeHTML(item.zone || '')}</td>
+                    <td>${escapeHTML(item.subName || '')}</td>
+                    <td>${escapeHTML(item.feederName || '')}</td>
+                    <td>${escapeHTML(item.meterNumber || '')}</td>
+                    <td>${escapeHTML(item.installStatus || '')}</td>
+                </tr>`;
+            });
+
+            previewBox.classList.remove('hidden');
+            execBtn.disabled = (parsedBulkCsvRows.length === 0);
+        } catch (parseErr) {
+            showToast("Failed to read CSV: " + parseErr.message, true);
+        }
+    };
+    reader.readAsText(file);
+});
+
+async function executeBulkCsvUpload() {
+    if (parsedBulkCsvRows.length === 0) return;
+
+    const BATCH_SIZE = 250;
+    const totalRows = parsedBulkCsvRows.length;
+    const totalBatches = Math.ceil(totalRows / BATCH_SIZE);
+
+    let totalUpdated = 0;
+    let allNotFound = [];
+    let allErrors = [];
+
+    const execBtn = document.getElementById('btnExecuteBulkCsv');
+    execBtn.disabled = true;
+
+    try {
+        for (let b = 0; b < totalBatches; b++) {
+            const batchSlice = parsedBulkCsvRows.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE);
+            showLoader(`Updating Master sheet: Batch ${b + 1} of ${totalBatches} (${batchSlice.length} rows)...`);
+            const res = await apiCall({
+                action: 'bulkUpdateMasterByUid',
+                records: batchSlice
+            });
+            totalUpdated += (res.updated || 0);
+            if (res.notFound && res.notFound.length) allNotFound = allNotFound.concat(res.notFound);
+            if (res.errors && res.errors.length) allErrors = allErrors.concat(res.errors);
+        }
+
+        const resultBox = document.getElementById('bulkCsvResultBox');
+        resultBox.classList.remove('hidden', 'alert-success', 'alert-warning');
+        resultBox.classList.add(allNotFound.length > 0 || allErrors.length > 0 ? 'alert-warning' : 'alert-success');
+
+        let summaryHtml = `<b>Bulk Update Finished:</b> Successfully updated <b>${totalUpdated}</b> record(s) in <b>Master</b>.`;
+        if (allNotFound.length > 0) {
+            summaryHtml += `<br><b>UIDs Not Found (${allNotFound.length}):</b> ${escapeHTML(allNotFound.slice(0, 20).join(', '))}${allNotFound.length > 20 ? '...' : ''}`;
+        }
+        if (allErrors.length > 0) {
+            summaryHtml += `<br><b>Row Errors (${allErrors.length}):</b> ${escapeHTML(allErrors.slice(0, 10).join(' | '))}`;
+        }
+        resultBox.innerHTML = summaryHtml;
+
+        showToast(`Bulk update complete: ${totalUpdated} Master record(s) updated.`);
+        loadAdminSubmissions(adminCurrentPage);
+    } catch (err) {
+        showToast(err.message, true);
+        execBtn.disabled = false;
+    }
+    hideLoader();
+}
+// ----------------------------------------------------
 
 function buildEditSelectHtml(id, colIdx, currentVal) {
     const valStr = String(currentVal || '').trim();
@@ -1987,8 +2341,6 @@ async function executeAdminResetPass() {
     } catch(err) { showToast(err.message, true); }
     hideLoader();
 }
-
-async function loadAdminSummary() {}
 
 // Network Listeners to Auto-Trigger Sync Background Loop
 window.addEventListener('online', () => { setTimeout(() => processSyncQueue(false), 2000); });
